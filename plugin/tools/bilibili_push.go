@@ -5,9 +5,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"time"
-	"os"
 
 	_ "github.com/fumiama/sqlite3" // import sql
 	"github.com/jinzhu/gorm"
@@ -67,7 +67,6 @@ type bilibilipush struct {
 	LiveDisable    int64 `gorm:"column:live_disable;default:0" json:"live_disable"`
 	DynamicDisable int64 `gorm:"column:dynamic_disable;default:0" json:"dynamic_disable"`
 }
-
 
 func init() {
 	go bilibiliPushDaily()
@@ -672,4 +671,3 @@ func (bdb *bilibilipushdb) updateAllUp() {
 		upMap[v.BilibiliUID] = v.Name
 	}
 }
-

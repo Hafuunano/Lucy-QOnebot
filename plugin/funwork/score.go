@@ -6,9 +6,6 @@ import (
 	"strconv"
 	"time"
 
-
-	_ "github.com/fumiama/sqlite3" // import sql
-	"github.com/jinzhu/gorm"
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/file"
 	"github.com/FloatTech/zbputils/img"
@@ -16,7 +13,9 @@ import (
 	"github.com/FloatTech/zbputils/img/writer"
 	"github.com/FloatTech/zbputils/web"
 	"github.com/fogleman/gg"
+	_ "github.com/fumiama/sqlite3" // import sql
 	"github.com/golang/freetype"
+	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"github.com/wcharczuk/go-chart/v2"
@@ -32,7 +31,6 @@ const (
 )
 
 var levelArray = [...]int{0, 1, 2, 5, 10, 20, 35, 55, 75, 100, 120, 180, 260, 360, 480, 600}
-
 
 // sdb 得分数据库
 var sdb *scoredb
@@ -57,7 +55,6 @@ type signintable struct {
 	Count     int   `gorm:"column:count;default:0"`
 	UpdatedAt time.Time
 }
-
 
 func init() {
 	cachePath := engine.DataFolder() + "scorecache/"
@@ -298,7 +295,6 @@ func initPic(picFile string) {
 		}
 	}
 
-	
 }
 
 // TableName ...

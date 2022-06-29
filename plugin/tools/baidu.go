@@ -1,7 +1,7 @@
 // Package baidu 百度一下
 package tools
 
-import (		
+import (
 	"net/url"
 
 	zero "github.com/wdvxdr1123/ZeroBot"

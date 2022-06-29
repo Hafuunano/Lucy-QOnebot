@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/web"
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -71,7 +70,6 @@ var (
 
 // 插件主体
 func init() {
-
 	engine.OnRegex(`(av[0-9]+|BV[0-9a-zA-Z]{10}){1}`).SetBlock(true).Limit(limit.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
 			if strings.Contains(ctx.MessageString(), "[CQ:forward") {

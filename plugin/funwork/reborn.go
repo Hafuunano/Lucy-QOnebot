@@ -6,8 +6,8 @@ import (
 	"math/rand"
 
 	"encoding/json"
-	wr "github.com/mroth/weightedrand"
 	"github.com/FloatTech/zbputils/file"
+	wr "github.com/mroth/weightedrand"
 	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 
@@ -33,7 +33,6 @@ type ratego []struct {
 }
 
 func init() {
-
 	go func() {
 		datapath := engine.DataFolder()
 		jsonfile := datapath + "ratego.json"
