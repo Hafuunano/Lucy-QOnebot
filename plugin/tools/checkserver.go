@@ -30,7 +30,7 @@ func init() { // 插件主体
 
 	engine.OnRegex(`^【.*】.*`, zero.SuperUserPermission).SetBlock(false).
 		Handle(func(ctx *zero.Ctx) {
-			m, ok := control.Lookup("aifalse")
+			m, ok := control.Lookup("tools")
 			if ok {
 				msg := ctx.Event.Message
 				zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
