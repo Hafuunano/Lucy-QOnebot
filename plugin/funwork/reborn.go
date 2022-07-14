@@ -6,6 +6,7 @@ import (
 	"math/rand"
 
 	"encoding/json"
+
 	"github.com/FloatTech/zbputils/file"
 	wr "github.com/mroth/weightedrand"
 	"github.com/sirupsen/logrus"
