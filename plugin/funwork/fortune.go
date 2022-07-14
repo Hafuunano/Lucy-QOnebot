@@ -117,18 +117,20 @@ func init() {
 					jrrpbk = "[大吉]\n#好诶~Lucy给你递了张彩票"
 				}
 
-				ctx.SendChain(message.At(user),
+				workme := ctx.SendChain(message.At(user),
 					message.Text(fmt.Sprintf("\n%s\nLucy正在帮你整理~\n", uptime)),
 					message.Text("今日的人品值为", result[user]),
 					message.Text(jrrpbk),
 					message.Text("\n今日一言:\n"),
 					message.Text(helper.BytesToString(yiyan), "\n"),
 					message.Text(reasons[rand.Intn(len(reasons))], position[p], " 的 ", name, "\n"),
-					message.Image(fmt.Sprintf(bed+"MajorArcana/%d.png", i)),
 					message.Text("\n其意义为：\n", info))
+				time.Sleep(time.Second * 20)
+				ctx.DeleteMessage(workme)
 			} else {
 				ctx.SendChain(message.At(user), message.Text(" 今天已经测过了哦~今日的人品值为", result[user], "呢~"))
 			}
+
 			if result[user] >= 90 && result[user] < 100 && egg[si] == 0 {
 				egg[si] = (1)
 
@@ -139,7 +141,9 @@ func init() {
 				}
 				picURL := gjson.Get(string(img), "pic").String()
 				time.Sleep(time.Second * 2)
-				ctx.SendChain(message.At(user), message.Text("\n这是今日奖励哦"), message.Image(picURL))
+				deleteme := ctx.SendChain(message.At(user), message.Text("\n这是今日奖励哦"), message.Text(picURL))
+				time.Sleep(time.Second * 20)
+				ctx.DeleteMessage(deleteme)
 			}
 		})
 }

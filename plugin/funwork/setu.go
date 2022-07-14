@@ -103,7 +103,7 @@ func init() {
 				return
 			}
 			picURL := gjson.Get(string(data), "pic").String()
-			messageID := ctx.SendChain(message.Image(picURL))
+			messageID := ctx.SendChain(message.Text(picURL))
 			time.Sleep(time.Second * 20)
 			ctx.DeleteMessage(messageID)
 		} else {
