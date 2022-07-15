@@ -4,6 +4,7 @@ package funwork
 import (
 	"os"
 	"regexp"
+	"time"
 
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/file"
@@ -24,9 +25,11 @@ func init() {
 			wn := wifes[n].Name()
 			reg := regexp.MustCompile(`[^\.]+`)
 			list := reg.FindAllString(wn, -1)
-			ctx.SendChain(
+			deleteme := ctx.SendChain(
 				message.Text(name, "さんが二次元で結婚するであろうヒロインは、", "\n"),
 				message.Image("file:///"+file.BOTPATH+"/"+cachePath+wn),
 				message.Text("\n【", list[0], "】です！"))
+			time.Sleep(time.Second * 15)
+			ctx.DeleteMessage(deleteme)
 		})
 }

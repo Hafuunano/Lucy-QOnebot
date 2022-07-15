@@ -76,7 +76,9 @@ func init() {
 			if si.Count >= signinMax && siUpdateTimeStr == today {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天你已经签到过了w"))
 				if file.IsExist(drawedFile) {
-					ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
+					workon := ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
+					time.Sleep(time.Second * 15)
+					ctx.DeleteMessage(workon)
 				}
 				return
 			}
@@ -165,7 +167,9 @@ func init() {
 				ctx.SendChain(message.Text("ERROR:", err))
 				return
 			}
-			ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
+			deletethis := ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
+			time.Sleep(time.Second * 20)
+			ctx.DeleteMessage(deletethis)
 		})
 	engine.OnPrefix("获得签到背景", zero.OnlyGroup).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
@@ -181,7 +185,9 @@ func init() {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请先签到！"))
 				return
 			}
-			ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + picFile))
+			deleteme := ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + picFile))
+			time.Sleep(time.Second * 15)
+			ctx.DeleteMessage(deleteme)
 		})
 	engine.OnFullMatch("查看签到排名", zero.OnlyGroup).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
