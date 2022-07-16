@@ -4,13 +4,13 @@ package funwork
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"math/rand"
 	"strconv"
 	"time"
 
 	"github.com/FloatTech/zbputils/ctxext"
-	"github.com/FloatTech/zbputils/file"
 	"github.com/FloatTech/zbputils/web"
 	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -19,12 +19,13 @@ import (
 )
 
 const (
-	bed = "file:///root/Lucy_Project/"
+	bed = "file:///root/Lucy_Project/tarot/"
 )
 
 type card struct {
-	Name string `json:"name"`
-	Info struct {
+	Name     string `json:"name"`
+	Cardtype string `json:"cardtype"`
+	Info     struct {
 		Description        string `json:"description"`
 		ReverseDescription string `json:"reverseDescription"`
 		ImgURL             string `json:"imgUrl"`
@@ -35,9 +36,10 @@ type cardset = map[string]card
 
 var (
 	jrrpbk   string
+	info     string
 	uptime   string
 	cardMap  = make(cardset, 256)
-	reasons  = []string{"今日塔罗牌是: \n"}
+	reasons  = []string{" | "}
 	position = []string{"正位", "逆位"}
 	result   map[int64](int)
 	egg      map[string](int)
@@ -50,8 +52,7 @@ func init() {
 	result = make(map[int64](int))
 	engine.OnFullMatch("今日人品", ctxext.DoOnceOnSuccess(
 		func(ctx *zero.Ctx) bool { // 检查 塔罗牌文件是否存在
-			tarotPath := engine.DataFolder() + "tarots.json"
-			data, err := file.GetLazyData(tarotPath, true)
+			data, err := os.ReadFile(engine.DataFolder() + "tarots.json")
 			if err != nil {
 				ctx.SendChain(message.Text("ERROR:", err))
 				return false
@@ -60,7 +61,6 @@ func init() {
 			if err != nil {
 				panic(err)
 			}
-
 			return true
 		},
 	)).SetBlock(true).
@@ -69,25 +69,28 @@ func init() {
 			if err != nil {
 				return
 			} // 获取一言
-			i := rand.Intn(22)
+
 			p := rand.Intn(2)
+			i := rand.Intn(78)
 			card := cardMap[(strconv.Itoa(i))]
 			name := card.Name
-			var info string
+			cardtype := card.Cardtype
+			cardurl := card.Info.ImgURL
 			if p == 0 {
 				info = card.Info.Description
 			} else {
 				info = card.Info.ReverseDescription
 			} // 塔罗牌生成
 
+			// 写的非常恶心 建议有时间赶紧重构x awa
 			user := ctx.Event.UserID
 			userS := strconv.FormatInt(user, 10)
 			now := time.Now().Format("20060102")
 			var si string = now + userS // 合成
 			rand.Seed(time.Now().UnixNano())
 			today := rand.Intn(100)
-
 			dyn := time.Now().Hour()
+
 			switch {
 			case dyn <= 6 && dyn >= 0:
 				uptime = "凌晨好~还没有睡觉呢 这样不是好孩子哦" // 计算是早上还是晚上
@@ -100,7 +103,7 @@ func init() {
 			case dyn <= 24 && dyn > 18:
 				uptime = "晚上好吖w~今天过的开心嘛ww"
 			}
-
+			// CTRL C + CTRL V
 			if signTF[si] == 0 {
 				signTF[si] = (1)
 				result[user] = (today)
@@ -123,17 +126,17 @@ func init() {
 					message.Text(jrrpbk),
 					message.Text("\n今日一言:\n"),
 					message.Text(helper.BytesToString(yiyan), "\n"),
-					message.Text(reasons[rand.Intn(len(reasons))], position[p], " 的 ", name, "\n"),
+					message.Text("今日塔罗牌是: \n归类于", cardtype, reasons[rand.Intn(len(reasons))], position[p], " 的 ", name, "\n"),
+					message.Image(bed+cardurl),
 					message.Text("\n其意义为：\n", info))
 				time.Sleep(time.Second * 20)
 				ctx.DeleteMessage(workme)
 			} else {
 				ctx.SendChain(message.At(user), message.Text(" 今天已经测过了哦~今日的人品值为", result[user], "呢~"))
 			}
-
+			// special Time !
 			if result[user] >= 90 && result[user] < 100 && egg[si] == 0 {
 				egg[si] = (1)
-
 				img, err := web.RequestDataWith(web.NewDefaultClient(), "http://iw233.fgimax2.fgnwctvip.com/API/Ghs.php?type=json", "GET", Referer, ua)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR:", err))
