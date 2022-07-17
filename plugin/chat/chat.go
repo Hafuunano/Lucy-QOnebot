@@ -185,28 +185,13 @@ func init() { // 插件主体
 				"麻烦看一下说明书惹 群内发送lucy.help即可w",
 			))
 		})
-	engine.OnFullMatchGroup([]string{"邀请", "进群"}, zero.OnlyToMe).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(randtexts(
-				"https://manual-lucy.himoyo.cn/invitelucy",
-			))
-		})
-	engine.OnFullMatchGroup([]string{"使用方法"}, zero.OnlyToMe).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(randtexts(
-				"https://manual-lucy.himoyo.cn",
-				"我会的可多了啦www~~~~自己猜猜哦(*/ω＼*)",
-				"我会什么都是由夹子的开发能力绝对惹.jpg",
-			))
-		})
-
 	engine.OnFullMatch("捏脸", zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(randtexts("大笨蛋！不许捏٩(๑`^´๑)۶", "疼....不许这样！哼！"), randImage("26329371069850.jpg"))
 		})
 	engine.OnFullMatch("摸头", zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(randImage("6126814446620.jpg"), randtexts("咱超可爱的w"))
+			ctx.SendChain(randImage("6126814446620.jpg", "kawaii.jpg"), randtexts("咱超可爱的w"))
 		})
 	engine.OnFullMatch("敲我", zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
@@ -234,11 +219,11 @@ func init() { // 插件主体
 		})
 	engine.OnFullMatchGroup([]string{"呼呼", "抱抱"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(randImage("26329502616465.jpg"))
+			ctx.SendChain(randImage("26329502616465.jpg", "sleep.jpg"))
 		})
 	engine.OnFullMatch("抱住", zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(randImage("22b530369f3c0fdd.jpg", "6126814446620.jpg"))
+			ctx.SendChain(randImage("22b530369f3c0fdd.jpg", "6126814446620.jpg", "wwwss.jpg"))
 		})
 	engine.OnFullMatch("举高高", zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
@@ -252,6 +237,10 @@ func init() { // 插件主体
 	engine.OnFullMatchGroup([]string{"憨憨"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(randtexts("喵? 再这样就不理你了", "不许喊我憨憨！笨蛋！", "才不是！哼唧", "大笨蛋！咱不理你了"))
+		})
+	engine.OnFullMatchGroup([]string{"女友"}, zero.OnlyToMe).SetBlock(true).
+		Handle(func(ctx *zero.Ctx) {
+			ctx.SendChain(randImage("sasda.jpg", "55D0B4A5E335FE55A924E71469F35AC7.png"))
 		})
 }
 func randtexts(text ...string) message.MessageSegment {
