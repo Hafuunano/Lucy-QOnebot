@@ -50,7 +50,8 @@ func init() {
 	signTF = make(map[string](int))
 	egg = make(map[string](int))
 	result = make(map[int64](int))
-	engine.OnFullMatch("今日人品", ctxext.DoOnceOnSuccess(
+
+	getTarot := ctxext.DoOnceOnSuccess(
 		func(ctx *zero.Ctx) bool { // 检查 塔罗牌文件是否存在
 			data, err := os.ReadFile(engine.DataFolder() + "tarots.json")
 			if err != nil {
@@ -63,7 +64,9 @@ func init() {
 			}
 			return true
 		},
-	)).SetBlock(true).
+	)
+
+	engine.OnFullMatch("今日人品", getTarot).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			yiyan, err := web.RequestDataWith(web.NewDefaultClient(), "http://ovooa.com/API/yiyan/api.php", "GET", Referer, ua)
 			if err != nil {
@@ -133,7 +136,7 @@ func init() {
 			} else {
 				ctx.SendChain(message.At(user), message.Text(" 今天已经测过了哦~今日的人品值为", result[user], "呢~"))
 			}
-			// special Time !
+			// special time !
 			if result[user] >= 90 && result[user] < 100 && egg[si] == 0 {
 				egg[si] = (1)
 				img, err := web.RequestDataWith(web.NewDefaultClient(), "http://iw233.fgimax2.fgnwctvip.com/API/Ghs.php?type=json", "GET", Referer, ua)
