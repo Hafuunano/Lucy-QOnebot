@@ -6,4 +6,4 @@ plugins/*.dll
 go-zero*
 nohup.out
 zerobot
-wtf.go
+plugin/funwork/wtf.go
