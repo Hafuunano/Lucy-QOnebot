@@ -28,7 +28,6 @@ func init() {
 		default:
 		}
 	})
-
 }
 
 func randText(text ...string) message.MessageSegment {
