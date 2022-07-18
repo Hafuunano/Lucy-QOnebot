@@ -10,7 +10,7 @@ import (
 var (
 	info = [...]string{
 		"* OneBot + Zerobot + Nonebot2 with ZeroBot-Plugin Project.",
-		"* 基于 ZeroBot-Plugin 1.41 Beta3 修改的 Lucy",
+		"* 基于 ZeroBot-Plugin 1.50 Beta4 修改的 Lucy",
 		"* Made By MoeMagicMango With ❤",
 		"* Project: https://github.com/FloatTech/ZeroBot-Plugin",
 		"* 说明书: https://manual-lucy.himoyo.cn",
@@ -18,7 +18,7 @@ var (
 	}
 	// Banner ...
 	Banner = strings.Join(info[:], "\n")
-	reg    = registry.NewRegReader("eilia.fumiama.top:32664", "fumiama")
+	reg    = registry.NewRegReader("reilia.fumiama.top:32664", "fumiama")
 )
 
 // PrintBanner ...
