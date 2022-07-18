@@ -1,4 +1,4 @@
-// Package music QQ音乐、网易云、酷狗、酷我 点歌
+// Package music 网易云、酷狗、酷我 点歌
 package funwork
 
 import (
@@ -32,10 +32,8 @@ func init() {
 				ctx.SendChain(kuwo(ctx.State["regex_matched"].([]string)[2]))
 			case "酷狗":
 				ctx.SendChain(kugou(ctx.State["regex_matched"].([]string)[2]))
-			case "网易":
+			default:
 				ctx.SendChain(cloud163(ctx.State["regex_matched"].([]string)[2]))
-			default: // 默认 QQ音乐
-				ctx.SendChain(qqmusic(ctx.State["regex_matched"].([]string)[2]))
 			}
 		})
 }
@@ -140,19 +138,6 @@ func cloud163(keyword string) (msg message.MessageSegment) {
 		return
 	}
 	msg = message.Music("163", gjson.ParseBytes(data).Get("result.songs.0.id").Int())
-	return
-}
-
-// qqmusic 返回QQ音乐卡片
-func qqmusic(keyword string) (msg message.MessageSegment) {
-	requestURL := "https://c.y.qq.com/soso/fcgi-bin/client_search_cp?w=" + url.QueryEscape(keyword)
-	data, err := web.RequestDataWith(web.NewDefaultClient(), requestURL, "GET", "", web.RandUA())
-	if err != nil {
-		msg = message.Text("ERROR:", err)
-		return
-	}
-	info := gjson.ParseBytes(data[9 : len(data)-1]).Get("data.song.list.0")
-	msg = message.Music("qq", info.Get("songid").Int())
 	return
 }
 
