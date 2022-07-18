@@ -64,7 +64,7 @@ func init() { // 插件主体
 				msg = append(msg, message.CustomNode(botname, botid, "来自私聊:["+username+"]("+strconv.FormatInt(uid, 10)+")\n以下是留言内容:"))
 			}
 			msg = append(msg, message.CustomNode(username, uid, rawmsg))
-			ctx.SendPrivateMessage(su, msg)
+			ctx.SendPrivateForwardMessage(su, msg)
 		})
 }
 
