@@ -238,7 +238,7 @@ func init() { // 插件主体
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(randtexts("喵? 再这样就不理你了", "不许喊我憨憨！笨蛋！", "才不是！哼唧", "大笨蛋！咱不理你了"))
 		})
-	engine.OnFullMatchGroup([]string{"女友"}, zero.OnlyToMe).SetBlock(true).
+	engine.OnFullMatchGroup([]string{"是笨蛋"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(randImage("sasda.jpg", "55D0B4A5E335FE55A924E71469F35AC7.png"))
 		})
