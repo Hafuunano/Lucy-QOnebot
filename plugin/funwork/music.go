@@ -32,7 +32,7 @@ func init() {
 				ctx.SendChain(kuwo(ctx.State["regex_matched"].([]string)[2]))
 			case "酷狗":
 				ctx.SendChain(kugou(ctx.State["regex_matched"].([]string)[2]))
-			default: 
+			default:
 				ctx.SendChain(cloud163(ctx.State["regex_matched"].([]string)[2]))
 			}
 		})
