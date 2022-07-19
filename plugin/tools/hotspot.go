@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/FloatTech/zbputils/binary"
+	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/web"
 	"github.com/antchfx/htmlquery"
 	"github.com/tidwall/gjson"
@@ -45,5 +46,8 @@ func init() {
 			msg += strconv.Itoa(idx+1) + "：" + strings.TrimPrefix(title, "/") + "\n" + "地址：https://github.com" + title + "\n"
 		}
 		ctx.SendChain(message.Text(msg))
+	})
+	engine.OnFullMatch("今日早报").Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		ctx.Send(message.Image("https://api.03c3.cn/zb/"))
 	})
 }

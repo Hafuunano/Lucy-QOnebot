@@ -12,17 +12,13 @@ import (
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/manager" // 群管
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/tools"   // 工具
 
-	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/arknights"  // arknights 明日方舟工具
-	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/bilibili"   // 查询b站用户信息
-	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/funwork"    // 好玩的整合工具
-	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/guessmusic" // 猜歌
+	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/bilibili" // 查询b站用户信息
+	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/funwork"  // 好玩的整合工具
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/atri" // atri
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/chat" // 回复
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/action" // action For Lucy触发
-
-	_ "github.com/FloatTech/zbputils/job" // 定时指令触发器
 
 	"github.com/FloatTech/zbputils/process"
 	"github.com/sirupsen/logrus"

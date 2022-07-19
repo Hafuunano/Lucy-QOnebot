@@ -143,7 +143,7 @@ func init() {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
 				}
-				picURL := gjson.Get(string(img), "pic").String()
+				picURL := gjson.Get(string(img), "pic.0").String()
 				time.Sleep(time.Second * 2)
 				deleteme := ctx.SendChain(message.At(user), message.Text("\n这是今日奖励哦"), message.Text(picURL))
 				time.Sleep(time.Second * 20)

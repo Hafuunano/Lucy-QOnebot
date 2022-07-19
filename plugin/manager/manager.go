@@ -103,7 +103,7 @@ func init() { // 插件主体
 			ctx.SendChain(message.Text(nickname + " 升为了管理~"))
 		})
 
-	engine.OnFullMatch("打我", zero.OnlyToMe).SetBlock(true).
+	engine.OnFullMatch("打我", zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
 			process.SleepAbout1sTo2s()
 			ctx.SendChain(message.Text("给你一拳~"))
@@ -342,32 +342,6 @@ func init() { // 插件主体
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(message.Text(clock.ListTimers(ctx.Event.GroupID)))
 		})
-
-	engine.OnFullMatch("今日群龙王", zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		list := ctx.CallAction("get_group_honor_info", zero.Params{
-			"group_id": ctx.Event.GroupID,
-			"type":     "talkative",
-		}).Data
-		temp := list.Array()
-		who := temp[(len("current_talkative"))]
-		if who.Get("user_id").Int() == ctx.Event.SelfID {
-			ctx.SendChain(message.Text("今天的龙王是我x"))
-			return
-		}
-		if who.Get("user_id").Int() == ctx.Event.UserID {
-			ctx.SendChain(message.At(ctx.Event.UserID), message.Text("是你哦~"))
-			return
-		}
-		nick := who.Get("nickname").Str
-		avatar := who.Get("avatar").Str
-		ctx.SendChain(message.Image(avatar),
-			message.Text(
-				nick,
-				" ~",
-			),
-		)
-	})
-
 	// 随机点名
 	engine.OnFullMatchGroup([]string{"翻牌"}, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {
