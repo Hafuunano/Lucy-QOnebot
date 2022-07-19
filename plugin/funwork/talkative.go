@@ -32,6 +32,5 @@ func init() {
 		id := gjson.Get(temp, "current_talkative.user_id")
 		name := ctx.CardOrNickName(id.Int())
 		ctx.SendChain(message.Text("今日的龙王是~", name, "哦"))
-
 	})
 }
