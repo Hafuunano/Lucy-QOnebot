@@ -92,7 +92,6 @@ func init() {
 		messageID := ctx.SendChain(message.Text(picURL))
 		time.Sleep(time.Second * 50)
 		ctx.DeleteMessage(messageID)
-
 	})
 	engine.OnFullMatch("涩涩", zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
 		if !limit.Load(ctx.Event.UserID).Acquire() {
@@ -111,6 +110,5 @@ func init() {
 		} else {
 			ctx.Send(message.Text([]string{"看什么看！咱没有涩图 哼!", "只有笨蛋才看涩图", "好孩子是不会看涩图的", "敲~笨蛋 不许色色", "咱觉得你需要通过别的方式放松哦，而不是看涩图"}[rand.Intn(5)]))
 		}
-
 	})
 }

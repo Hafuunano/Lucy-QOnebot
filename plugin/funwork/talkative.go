@@ -20,7 +20,6 @@ func init() {
 		} else {
 			time.Sleep(time.Second * 20)
 			ctx.Send(message.Text("今天咱没有拿到龙王qaq"))
-
 		}
 	})
 	engine.OnFullMatch("今日龙王", zero.OnlyGroup).Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
