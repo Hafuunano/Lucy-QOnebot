@@ -12,7 +12,6 @@ import (
 
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/web"
-	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
@@ -136,7 +135,7 @@ func init() {
 				ctx.SendChain(message.At(user), message.Text(" 今天已经测过了哦~今日的人品值为", result[user], "呢~"))
 			}
 			// special time !
-			if result[user] >= 90 && result[user] < 100 && egg[si] == 0 {
+			/*	if result[user] >= 90 && result[user] < 100 && egg[si] == 0 {
 				egg[si] = (1)
 				img, err := web.RequestDataWith(web.NewDefaultClient(), "http://iw233.fgimax2.fgnwctvip.com/API/Ghs.php?type=json", "GET", Referer, ua)
 				if err != nil {
@@ -148,6 +147,6 @@ func init() {
 				deleteme := ctx.SendChain(message.At(user), message.Text("\n这是今日奖励哦"), message.Text(picURL))
 				time.Sleep(time.Second * 20)
 				ctx.DeleteMessage(deleteme)
-			}
+			} */
 		})
 }

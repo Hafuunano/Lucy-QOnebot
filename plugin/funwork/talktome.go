@@ -11,17 +11,17 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 )
 
+const (
+	ua      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36"
+	Referer = "https://manual-lucy.himoyo.cn"
+)
+
 var (
 	engine = control.Register("funwork", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
 		Help:              "Hi NekoPachi!\n",
 		PrivateDataFolder: "funwork",
 	})
-)
-
-const (
-	ua      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36"
-	Referer = "https://manual-lucy.himoyo.cn"
 )
 
 // WorkON: APIWORK

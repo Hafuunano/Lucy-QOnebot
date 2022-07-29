@@ -12,11 +12,11 @@ import (
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"github.com/wdvxdr1123/ZeroBot/message"
-	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 )
 
 var (
 	limit = rate.NewManager[int64](time.Minute*3, 8)
+	api   = "https://api.lolicon.app/setu/v2"
 )
 
 func init() {
@@ -79,25 +79,27 @@ func init() {
 		ctx.DeleteMessage(messageID)
 	})
 
-	engine.OnFullMatch("随机老婆").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
+	engine.OnFullMatch("我要一份色图", zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
 		if !limit.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
-		data, err := web.RequestDataWith(web.NewDefaultClient(), "http://ovooa.com/API/Lovely/api?type=text", "GET", Referer, ua)
+		data, err := web.GetData(api)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR:", err))
 			return
 		}
-		messageID := ctx.SendChain(message.Image(helper.BytesToString(data)))
-		time.Sleep(time.Second * 20)
+		picURL := gjson.Get(string(data), "data.0.urls.original").String()
+		messageID := ctx.SendChain(message.Text(picURL))
+		time.Sleep(time.Second * 50)
 		ctx.DeleteMessage(messageID)
+
 	})
 	engine.OnFullMatch("涩涩", zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
 		if !limit.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
 		if rand.Intn(4) == 1 {
-			data, err := web.RequestDataWith(web.NewDefaultClient(), "http://iw233.fgimax2.fgnwctvip.com/API/Ghs.php?type=json.0", "GET", Referer, ua)
+			data, err := web.RequestDataWith(web.NewDefaultClient(), "http://iw233.fgimax2.fgnwctvip.com/API/Ghs.php?type=json", "GET", Referer, ua)
 			if err != nil {
 				ctx.SendChain(message.Text("ERROR:", err))
 				return
@@ -109,5 +111,6 @@ func init() {
 		} else {
 			ctx.Send(message.Text([]string{"看什么看！咱没有涩图 哼!", "只有笨蛋才看涩图", "好孩子是不会看涩图的", "敲~笨蛋 不许色色", "咱觉得你需要通过别的方式放松哦，而不是看涩图"}[rand.Intn(5)]))
 		}
+
 	})
 }
