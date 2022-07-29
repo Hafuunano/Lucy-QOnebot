@@ -68,7 +68,6 @@ func init() { // 插件主体
 			msg = append(msg, message.CustomNode(username, uid, rawmsg))
 			ctx.SendPrivateForwardMessage(su, msg)
 		})
-
 }
 
 func cpuPercent() float64 {
