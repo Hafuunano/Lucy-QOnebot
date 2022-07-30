@@ -109,6 +109,7 @@ func init() {
 
 	// end
 }
+
 func randtexts(text ...string) message.MessageSegment {
 	return message.Text(text[rand.Intn(len(text))])
 }
