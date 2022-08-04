@@ -79,31 +79,17 @@ func init() {
 		ctx.DeleteMessage(messageID)
 	})
 
-	engine.OnFullMatch("我要一份色图", zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		if !limit.Load(ctx.Event.UserID).Acquire() {
-			return
-		}
-		data, err := web.GetData(api)
-		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
-			return
-		}
-		picURL := gjson.Get(string(data), "data.0.urls.original").String()
-		messageID := ctx.SendChain(message.Text(picURL))
-		time.Sleep(time.Second * 50)
-		ctx.DeleteMessage(messageID)
-	})
 	engine.OnFullMatch("涩涩", zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
 		if !limit.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
 		if rand.Intn(4) == 1 {
-			data, err := web.RequestDataWith(web.NewDefaultClient(), "http://iw233.fgimax2.fgnwctvip.com/API/Ghs.php?type=json", "GET", Referer, ua)
+			data, err := web.GetData(api)
 			if err != nil {
 				ctx.SendChain(message.Text("ERROR:", err))
 				return
 			}
-			picURL := gjson.Get(string(data), "pic").String()
+			picURL := gjson.Get(string(data), "data.0.urls.original").String()
 			messageID := ctx.SendChain(message.Text(picURL))
 			time.Sleep(time.Second * 20)
 			ctx.DeleteMessage(messageID)
