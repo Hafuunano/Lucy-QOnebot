@@ -10,6 +10,7 @@ import (
 
 var tadanoai int64 = 2896285821
 var snow int64 = 363128
+var master int64 = 1292581422
 
 func init() {
 	engine.OnFullMatchGroup([]string{"今天用什么耳机", "抽耳机"}).SetBlock(true).
@@ -19,6 +20,9 @@ func init() {
 		})
 	engine.OnFullMatch("猪").Limit(ctxext.LimitByUser).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		if ctx.Event.UserID == snow {
+			ctx.Send(message.At(tadanoai))
+		}
+		if ctx.Event.UserID == master {
 			ctx.Send(message.At(tadanoai))
 		}
 	})
@@ -32,6 +36,14 @@ func init() {
 		if ctx.Event.GroupID == 223165617 {
 			ctx.Send(message.Text("🍉🍉"))
 		}
+	})
+	engine.OnKeyword("笨蛋").SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		if ctx.Event.GroupID == 223165617 {
+			ctx.Send(message.At(master))
+		}
+	})
+	engine.OnFullMatch("夹夹子").SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		ctx.Send(message.At(master))
 	})
 }
 func randText(text ...string) message.MessageSegment {

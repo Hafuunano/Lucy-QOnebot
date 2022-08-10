@@ -232,12 +232,12 @@ func init() { // 插件主体
 			default:
 				break
 			}
+			if duration >= 43200 {
+				duration = 43199 // qq禁言最大时长为一个月
+				return
+			}
 			if duration == 114514 {
 				ctx.Send(message.Text("好臭的数字a.a 不许用."))
-				return
-				if duration >= 43200 {
-					duration = 43199 // qq禁言最大时长为一个月
-				}
 			}
 			ctx.SetGroupBan(
 				ctx.Event.GroupID,

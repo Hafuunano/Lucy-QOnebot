@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
@@ -33,5 +34,12 @@ func init() {
 		//	userAge := ctx.Event.Sender.Age
 		// userLevel := gjson.Get(tempUserInfo, "level")
 		ctx.SendChain(message.Text("你查询的人为: ", userName, "\n性别:", userSexInfo, "\n最后一次发送信息时间 :", userLastSendTIme, "\n加入时间:", userJoinTime, "\n是否有不友好记录:", userUnfriendly, "\n头衔:", userHonorTitle))
+	})
+	engine.OnFullMatch("今日龙王", zero.OnlyGroup).Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		list := ctx.GetGroupHonorInfo(ctx.Event.GroupID, "talkative")
+		temp := list.String()
+		id := gjson.Get(temp, "current_talkative.user_id")
+		name := ctx.CardOrNickName(id.Int())
+		ctx.SendChain(message.Text("今日的龙王是~", name, "哦"))
 	})
 }

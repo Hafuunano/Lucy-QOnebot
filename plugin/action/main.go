@@ -106,8 +106,15 @@ func init() {
 			}
 			ctx.SendChain(message.Image("https://gchat.qpic.cn/gchatpic_new/1770747317/1049468946-3068097579-76A49478EFA68B4750B10B96917F7B58/0?term=3"))
 		})
-
 	// end
+	engine.OnFullMatch("都怪Zheic", zero.OnlyGroup).SetBlock(true).
+		Handle(func(ctx *zero.Ctx) {
+			if !limit.Load(ctx.Event.GroupID).Acquire() {
+				return
+			}
+			ctx.SendChain(message.Image("https://gchat.qpic.cn/gchatpic_new/1292581422/812841489-2901631038-0DE3B3F02343B09C591FDFFEE586A353/0?term=3"))
+		})
+
 }
 
 func randtexts(text ...string) message.MessageSegment {

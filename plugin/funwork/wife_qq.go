@@ -119,7 +119,7 @@ func (sql *婚姻登记) 离婚休夫(gid, husband int64) error {
 	gidstr := strconv.FormatInt(gid, 10)
 	husbandstr := strconv.FormatInt(husband, 10)
 	// 先判断用户是否存在
-	err := sql.db.Del(gidstr, "where target = "+husbandstr)
+	err := sql.db.Del(gidstr, "where user = "+husbandstr)
 	return err
 }
 
@@ -131,10 +131,10 @@ func (sql *婚姻登记) 复婚(gid, uid, target int64, username, targetname str
 	tagstr := strconv.FormatInt(target, 10)
 	var info userinfo
 	err := sql.db.Find(gidstr, &info, "where user = "+uidstr)
-	if err == nil {
+	if err != nil {
 		err = sql.db.Find(gidstr, &info, "where user = "+tagstr)
 	}
-	if err == nil {
+	if err != nil {
 		return err
 	}
 	updatetime := time.Now().Format("2006/01/02")
@@ -164,6 +164,9 @@ func (sql *婚姻登记) 花名册(gid int64) (list [][4]string, number int, err
 	var info userinfo
 	list = make([][4]string, 0, number)
 	err = sql.db.FindFor(gidstr, &info, "GROUP BY user", func() error {
+		if info.Target == 0 {
+			return nil
+		}
 		dbinfo := [4]string{
 			info.Username,
 			strconv.FormatInt(info.User, 10),
@@ -173,6 +176,9 @@ func (sql *婚姻登记) 花名册(gid int64) (list [][4]string, number int, err
 		list = append(list, dbinfo)
 		return nil
 	})
+	if len(list) == 0 {
+		number = 0
+	}
 	return
 }
 
@@ -381,21 +387,6 @@ func init() {
 			fiancee, _ := strconv.ParseInt(ctx.State["regex_matched"].([]string)[2], 10, 64)
 			uid := ctx.Event.UserID
 			gid := ctx.Event.GroupID
-			if uid == fiancee { // 如果是自己
-				switch rand.Intn(5) { // 二分之一概率浪费技能
-				case 0:
-					ctx.SendChain(message.Text("笨蛋！娶你自己干什么a"))
-				default:
-					err := 民政局.登记(gid, uid, 0, "", "")
-					if err != nil {
-						ctx.SendChain(message.Text("ERR:", err))
-						return
-					}
-					ctx.SendChain(message.Text("ERR：因为某种原因 好像成功了x"))
-				}
-				return
-			}
-
 			if fiancee == 462637257 {
 				ctx.Send(message.Text("笨蛋！不准娶我 哼唧！"))
 				return
@@ -408,6 +399,20 @@ func init() {
 				ctx.Send(message.Text("笨蛋！不准娶我 哼唧！"))
 				return
 			}
+			if uid == fiancee { // 如果是自己
+				switch rand.Intn(5) { // 5分之一概率浪费技能
+				case 1:
+					err := 民政局.登记(gid, uid, 0, "", "")
+					if err != nil {
+						ctx.SendChain(message.Text("ERR:", err))
+						return
+					}
+					ctx.SendChain(message.Text("ERR：因为某种原因 好像成功了x"))
+				default:
+					ctx.SendChain(message.Text("笨蛋！娶你自己干什么a"))
+				}
+				return
+			}
 			randbook := rand.Intn(2)
 			if ctx.Event.UserID == 2896285821 && fiancee == 363128 {
 				randbook = 1
@@ -415,7 +420,7 @@ func init() {
 			if fiancee == 2896285821 && ctx.Event.UserID == 363128 {
 				randbook = 1
 			}
-			if randbook == 0 { // 二分之一的概率表白成功
+			if randbook == 0 {
 				ctx.SendChain(message.Text(sendtext[1][rand.Intn(len(sendtext[1]))]))
 				return
 			}
@@ -449,6 +454,7 @@ func init() {
 					"(", fiancee, ")哒",
 				),
 			)
+
 		})
 	// NTR技能
 	engine.OnRegex(`^试着骗(\[CQ:at,qq=(\d+)\]\s?|(\d+))做我的老婆`, zero.OnlyGroup, getdb, checkcp).SetBlock(true).Limit(cdcheck, iscding).
@@ -642,14 +648,12 @@ func checkdog(ctx *zero.Ctx) bool {
 	// 获取用户信息
 	uidtarget, uidstatus, err1 := 民政局.查户口(gid, uid)
 	fianceeinfo, fianceestatus, err2 := 民政局.查户口(gid, fiancee)
-	if uidstatus == 2 || fianceestatus == 2 {
+	switch {
+	case uidstatus == 2 || fianceestatus == 2:
 		ctx.SendChain(message.Text("ERR:", err1, "\n", err2))
 		return false
-	}
-	if uidstatus == 3 && fianceestatus == 3 { // 必须是两个单身
+	case uidstatus == 3 && fianceestatus == 3: // 必须是两个单身
 		return true
-	}
-	switch {
 	case uidtarget.Target == fiancee: // 如果本就是一块
 		ctx.SendChain(message.Text("笨蛋~自己要负责a kora(´･ω･`) "))
 		return false
@@ -659,17 +663,14 @@ func checkdog(ctx *zero.Ctx) bool {
 	case uidstatus == 0: // 如果为受
 		ctx.SendChain(message.Text("该是0就是0，当0有什么不好"))
 		return false
-	case uidstatus != 3 && uidtarget.Target == 0: // 如果是单身贵族
-		ctx.SendChain(message.Text("今天的老婆是你自己x"))
+	case fianceestatus != 3 && fianceeinfo.Target == 0:
+		ctx.SendChain(message.Text("今天的老婆是他自己x"))
 		return false
 	case fianceestatus == 1: // 如果如为攻
 		ctx.SendChain(message.Text("笨蛋~ta已经有老婆了w"))
 		return false
 	case fianceestatus == 0: // 如果为受
 		ctx.SendChain(message.Text("这是一个纯爱的世界，拒绝NTR"))
-		return false
-	case fianceestatus != 3 && fianceeinfo.Target == 0:
-		ctx.SendChain(message.Text("今天的老婆是他自己x"))
 		return false
 	}
 	return true
@@ -698,11 +699,8 @@ func checkcp(ctx *zero.Ctx) bool {
 		ctx.SendChain(message.Text("这个人？他存在嘛x"))
 		return false
 	}
-	uid := ctx.Event.UserID
-	if fiancee == uid {
-		return true
-	}
 	// 检查用户是否登记过
+	uid := ctx.Event.UserID
 	userinfo, uidstatus, err := 民政局.查户口(gid, uid)
 	switch {
 	case uidstatus == 2:
@@ -714,6 +712,8 @@ func checkcp(ctx *zero.Ctx) bool {
 	case uidstatus != 3 && userinfo.Target == 0: // 如果是单身贵族
 		ctx.SendChain(message.Text("今天的老婆是他自己x"))
 		return false
+	case fiancee == uid: //自我攻略
+		return true
 	case uidstatus == 1: // 如果如为攻
 		ctx.SendChain(message.Text("哒咩 不给纳小妾！"))
 		return false
