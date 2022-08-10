@@ -294,7 +294,6 @@ func initPic(picFile string) {
 			log.Errorln("[score]", err)
 		}
 	}
-
 }
 
 // TableName ...

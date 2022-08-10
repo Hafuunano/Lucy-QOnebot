@@ -26,7 +26,7 @@ import (
 	"github.com/fogleman/gg"
 )
 
-//nolint: asciicheck
+// nolint: asciicheck
 type 婚姻登记 struct {
 	db   *sql.Sqlite
 	dbmu sync.RWMutex
@@ -454,7 +454,6 @@ func init() {
 					"(", fiancee, ")哒",
 				),
 			)
-
 		})
 	// NTR技能
 	engine.OnRegex(`^试着骗(\[CQ:at,qq=(\d+)\]\s?|(\d+))做我的老婆`, zero.OnlyGroup, getdb, checkcp).SetBlock(true).Limit(cdcheck, iscding).
@@ -712,7 +711,7 @@ func checkcp(ctx *zero.Ctx) bool {
 	case uidstatus != 3 && userinfo.Target == 0: // 如果是单身贵族
 		ctx.SendChain(message.Text("今天的老婆是他自己x"))
 		return false
-	case fiancee == uid: //自我攻略
+	case fiancee == uid: // 自我攻略
 		return true
 	case uidstatus == 1: // 如果如为攻
 		ctx.SendChain(message.Text("哒咩 不给纳小妾！"))

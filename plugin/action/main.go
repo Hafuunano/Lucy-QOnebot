@@ -114,7 +114,6 @@ func init() {
 			}
 			ctx.SendChain(message.Image("https://gchat.qpic.cn/gchatpic_new/1292581422/812841489-2901631038-0DE3B3F02343B09C591FDFFEE586A353/0?term=3"))
 		})
-
 }
 
 func randtexts(text ...string) message.MessageSegment {
