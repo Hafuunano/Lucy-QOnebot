@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/FloatTech/AnimeAPI v1.4.1-0.20220715043235-1158db91e898
+	github.com/FloatTech/floatbox v0.0.0-20220816052111-cbf40c78757a
 	github.com/FloatTech/sqlite v0.3.3
 	github.com/FloatTech/zbpctrl v1.4.1-0.20220715042842-93f081cb0133
 	github.com/FloatTech/zbputils v1.4.1-0.20220715043109-4e1d708dffe9
@@ -17,7 +18,7 @@ require (
 	github.com/jozsefsallai/gophersauce v1.0.1
 	github.com/mroth/weightedrand v0.4.1
 	github.com/shirou/gopsutil/v3 v3.22.3
-	github.com/sirupsen/logrus v1.8.1
+	github.com/sirupsen/logrus v1.9.0
 	github.com/tidwall/gjson v1.14.1
 	github.com/wdvxdr1123/ZeroBot v1.5.2-0.20220715040337-ef4327320c40
 )
@@ -49,7 +50,7 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/image v0.0.0-20220601225756-64ec528b34cd // indirect
 	golang.org/x/net v0.0.0-20220607020251-c690dde0001d // indirect
-	golang.org/x/sys v0.0.0-20220608164250-635b8c9b7f68 // indirect
+	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	modernc.org/libc v1.16.8 // indirect
 	modernc.org/mathutil v1.4.1 // indirect

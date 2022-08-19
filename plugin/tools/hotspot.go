@@ -4,9 +4,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/FloatTech/zbputils/binary"
+	"github.com/FloatTech/floatbox/binary"
+	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/zbputils/ctxext"
-	"github.com/FloatTech/zbputils/web"
 	"github.com/antchfx/htmlquery"
 	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"

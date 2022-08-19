@@ -21,7 +21,7 @@ import (
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/funwork" // 好玩的整合工具
 
-	"github.com/FloatTech/zbputils/process"
+	"github.com/FloatTech/floatbox/process"
 	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/driver"

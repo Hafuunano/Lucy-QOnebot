@@ -7,7 +7,7 @@ import (
 
 	"encoding/json"
 
-	"github.com/FloatTech/zbputils/file"
+	"github.com/FloatTech/floatbox/file"
 	wr "github.com/mroth/weightedrand"
 	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"

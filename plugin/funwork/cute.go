@@ -8,8 +8,8 @@ import (
 	"sort"
 	"time"
 
+	"github.com/FloatTech/floatbox/math"
 	"github.com/FloatTech/zbputils/ctxext"
-	"github.com/FloatTech/zbputils/math"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/FloatTech/zbputils/web"
+	"github.com/FloatTech/floatbox/web"
 
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/tidwall/gjson"

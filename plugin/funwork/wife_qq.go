@@ -10,8 +10,8 @@ import (
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
+	"github.com/FloatTech/floatbox/math"
 	"github.com/FloatTech/zbputils/ctxext"
-	"github.com/FloatTech/zbputils/math"
 
 	// 数据库
 	sql "github.com/FloatTech/sqlite"
@@ -21,8 +21,8 @@ import (
 
 	// 画图
 
+	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/zbputils/img/text"
-	"github.com/FloatTech/zbputils/img/writer"
 	"github.com/fogleman/gg"
 )
 
