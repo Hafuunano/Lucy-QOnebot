@@ -28,7 +28,7 @@ import (
 
 // 已经改成屎山的模样了 人和代码有一个能跑就行
 
-//nolint: asciicheck
+// nolint: asciicheck
 type 婚姻登记 struct {
 	db   *sql.Sqlite
 	dbmu sync.RWMutex
@@ -56,7 +56,6 @@ func checkUserSex(ctx *zero.Ctx, uid int64) (usersex string) {
 	tempUserInfo := getUserInfo.String()
 	userSexInfo := gjson.Get(tempUserInfo, "sex").String()
 	return userSexInfo
-
 }
 
 func (sql *婚姻登记) checkupdate(gid int64) (updatetime string, err error) {
