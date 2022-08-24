@@ -77,7 +77,6 @@ func init() { // 插件主体
 					"早上好！",
 					"......看起来像是傍晚，其实已经早上了吗？",
 					"早上好......欸~~~脸好近呢",
-					"起的很早(＾Ｕ＾)ノ~ＹＯ~ 一定是个勤奋的孩子w",
 					"早安吖~新的一天要继续加油哦w",
 					"早安~祝你的坏心情被Lucy带走~~~(*/ω＼*)",
 				))
@@ -121,17 +120,12 @@ func init() { // 插件主体
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), randText(
 					"zzzz......",
 					"zzzzzzzz......",
-					"zzz...好涩哦..zzz....",
-					"别...不要..zzz..那..zzz..",
-					"嘻嘻..zzz..呐~..zzzz..",
 					"...zzz....哧溜哧溜....",
 				))
 			case now >= 6 && now < 11:
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), randText(
-					"你可猝死算了吧！",
 					"？啊这",
 					"亲，这边建议赶快去睡觉呢~~~",
-					"不可忍不可忍不可忍！！为何这还不猝死！！",
 					"? 你知道现在几点了嘛 \n还不快去睡觉~",
 				))
 			case now >= 11 && now < 15:

@@ -7,11 +7,11 @@ import (
 	"sync"
 	"time"
 
-	zero "github.com/wdvxdr1123/ZeroBot"
-	"github.com/wdvxdr1123/ZeroBot/message"
-
 	"github.com/FloatTech/floatbox/math"
 	"github.com/FloatTech/zbputils/ctxext"
+	"github.com/tidwall/gjson"
+	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/message"
 
 	// 数据库
 	sql "github.com/FloatTech/sqlite"
@@ -25,6 +25,8 @@ import (
 	"github.com/FloatTech/zbputils/img/text"
 	"github.com/fogleman/gg"
 )
+
+// 已经改成屎山的模样了 人和代码有一个能跑就行
 
 // nolint: asciicheck
 type 婚姻登记 struct {
@@ -46,6 +48,14 @@ type userinfo struct {
 type updateinfo struct {
 	GID        int64
 	Updatetime string // 登记时间
+
+}
+
+func checkUserSex(ctx *zero.Ctx, uid int64) (usersex string) {
+	getUserInfo := ctx.GetGroupMemberInfo(ctx.Event.GroupID, uid, false)
+	tempUserInfo := getUserInfo.String()
+	userSexInfo := gjson.Get(tempUserInfo, "sex").String()
+	return userSexInfo
 
 }
 
@@ -256,7 +266,7 @@ var (
 	sendtext = [...][]string{
 		{ // 表白成功
 			"是个勇敢的孩子(*/ω＼*) 今天的运气都降临在你的身边~\n\n",
-			"(´･ω･`)对方答应了你 并表示愿意当今天的CP\n\n",
+			"QWQ貌似成功了哦~~运气buff显灵~\n\n",
 		},
 		{ // 表白失败
 			"今天的运气有一点背哦~明天再试试叭",
@@ -264,15 +274,15 @@ var (
 			"今天失败了惹. 摸摸头~咱明天还有机会",
 		},
 		{ // ntr成功
-			"因为你的个人魅力~~今天他就是你的了w\n\n",
+			"欸~成功了哦_(:з」∠)_w\n\n",
 		},
 		{ // 离婚失败
 			"为什么要分手呢?这样做可不好哦x",
-			"啊咧....现在是离婚冷静期 明天再说哦.",
+			"太坏了啦！不许！",
 		},
 		{ // 离婚成功
 			"好哦 现在你已经是一条单身狗了",
-			"或许?成功了?",
+			"或许?成功了?OxO",
 		},
 	}
 )
@@ -388,15 +398,15 @@ func init() {
 			uid := ctx.Event.UserID
 			gid := ctx.Event.GroupID
 			if fiancee == 462637257 {
-				ctx.Send(message.Text("笨蛋！不准娶我 哼唧！"))
+				ctx.Send(message.Text("笨蛋！不准娶我~"))
 				return
 			}
 			if fiancee == 1292581422 {
-				ctx.Send(message.Text("夹子主人是我的 不许娶！"))
+				ctx.Send(message.Text("这是夹子~貌似设定上不许特意去娶x"))
 				return
 			}
 			if fiancee == 3260947298 {
-				ctx.Send(message.Text("笨蛋！不准娶我 哼唧！"))
+				ctx.Send(message.Text("笨蛋！不准娶我~"))
 				return
 			}
 			if uid == fiancee { // 如果是自己
@@ -407,13 +417,13 @@ func init() {
 						ctx.SendChain(message.Text("ERR:", err))
 						return
 					}
-					ctx.SendChain(message.Text("ERR：因为某种原因 好像成功了x"))
+					ctx.SendChain(message.Text("TYPE ERR：因为某种原因 好像成功了x"))
 				default:
 					ctx.SendChain(message.Text("笨蛋！娶你自己干什么a"))
 				}
 				return
 			}
-			randbook := rand.Intn(2)
+			/* randbook := rand.Intn(2)
 			if ctx.Event.UserID == 2896285821 && fiancee == 363128 {
 				randbook = 1
 			}
@@ -424,6 +434,8 @@ func init() {
 				ctx.SendChain(message.Text(sendtext[1][rand.Intn(len(sendtext[1]))]))
 				return
 			}
+			*/
+
 			// 去民政局登记
 			var choicetext string
 			switch choice {
@@ -433,14 +445,14 @@ func init() {
 					ctx.SendChain(message.Text("ERR:", err))
 					return
 				}
-				choicetext = "\n今天你的群老婆是"
+				choicetext = "\n今天你的受是"
 			default:
 				err := 民政局.登记(gid, fiancee, uid, ctx.CardOrNickName(fiancee), ctx.CardOrNickName(uid))
 				if err != nil {
 					ctx.SendChain(message.Text("ERR:", err))
 					return
 				}
-				choicetext = "\n今天你的群老公是"
+				choicetext = "\n今天你的攻是"
 			}
 			// 请大家吃席
 			ctx.SendChain(
@@ -463,6 +475,11 @@ func init() {
 			uid := ctx.Event.UserID
 			if fiancee == uid {
 				ctx.SendChain(message.Text("要骗别人哦~为什么要骗自己呢x"))
+				return
+			}
+			TargetSEX := checkUserSex(ctx, fiancee)
+			if TargetSEX == "male" {
+				ctx.Send(message.Text("怪哦~男孩子干嘛要娶欸 太坏了"))
 				return
 			}
 			if rand.Intn(10)/4 != 0 { // 十分之三的概率NTR成功
@@ -497,7 +514,7 @@ func init() {
 				}
 				choicetext = "老婆"
 			default:
-				ctx.SendChain(message.Text("发生了某种不可预料的错误OxO."))
+				ctx.SendChain(message.Text("貌似发生了某种不可预料的错误OxO."))
 				return
 			}
 			// 输出结果
@@ -533,7 +550,7 @@ func init() {
 			canvas.SetRGB(1, 1, 1) // 白色
 			canvas.Clear()
 			/***********设置字体颜色为天蓝色***********/
-			canvas.SetRGB(87, 250, 255)
+			canvas.SetRGB(135, 206, 250)
 			/***********设置字体大小,并获取字体高度用来定位***********/
 			if err = canvas.LoadFontFace(text.BoldFontFile, fontSize*2); err != nil {
 				ctx.SendChain(message.Text("ERROR:", err))
@@ -574,7 +591,7 @@ func init() {
 					ctx.SendChain(message.Text("ERR:", err))
 					return
 				}
-				ctx.SendChain(message.Text("今天你还没有结婚哦"))
+				ctx.SendChain(message.Text("很奇怪a~不存在对象~这样发送的意义是什么呢"))
 				return
 			}
 
@@ -588,7 +605,7 @@ func init() {
 				ctx.SendChain(message.Text("ERR:", err))
 				return
 			case 1:
-				if rand.Intn(10) != 1 { // 十分之一的概率成功
+				if rand.Intn(8) != 1 { // 十分之一的概率成功
 					ctx.SendChain(message.Text(sendtext[3][rand.Intn(len(sendtext[3]))]))
 					return
 				}
@@ -599,7 +616,7 @@ func init() {
 				}
 				ctx.SendChain(message.Text(sendtext[4][0]))
 			case 0:
-				if rand.Intn(10) != 0 { // 十分之一的概率成功
+				if rand.Intn(8) != 0 { // 十分之一的概率成功
 					ctx.SendChain(message.Text(sendtext[3][rand.Intn(len(sendtext[3]))]))
 					return
 				}
@@ -619,7 +636,7 @@ func cdcheck(ctx *zero.Ctx) *rate.Limiter {
 	return skillCD.Load(limitID)
 }
 func iscding(ctx *zero.Ctx) {
-	ctx.SendChain(message.Text("今天的能力已经用掉了 下次再试试哦"))
+	ctx.SendChain(message.Text("还在cd哦~请12小时后再来"))
 }
 
 // 注入判断 是否为单身
@@ -663,10 +680,10 @@ func checkdog(ctx *zero.Ctx) bool {
 		ctx.SendChain(message.Text("该是0就是0，当0有什么不好"))
 		return false
 	case fianceestatus != 3 && fianceeinfo.Target == 0:
-		ctx.SendChain(message.Text("今天的老婆是他自己x"))
+		ctx.SendChain(message.Text("今天的受是他自己x"))
 		return false
 	case fianceestatus == 1: // 如果如为攻
-		ctx.SendChain(message.Text("笨蛋~ta已经有老婆了w"))
+		ctx.SendChain(message.Text("笨蛋~ta已经有受了w"))
 		return false
 	case fianceestatus == 0: // 如果为受
 		ctx.SendChain(message.Text("这是一个纯爱的世界，拒绝NTR"))
@@ -709,7 +726,7 @@ func checkcp(ctx *zero.Ctx) bool {
 		ctx.SendChain(message.Text("笨蛋~这不是你老婆了嘛w"))
 		return false
 	case uidstatus != 3 && userinfo.Target == 0: // 如果是单身贵族
-		ctx.SendChain(message.Text("今天的老婆是他自己x"))
+		ctx.SendChain(message.Text("今天的受是他自己x"))
 		return false
 	case fiancee == uid: // 自我攻略
 		return true
@@ -729,11 +746,11 @@ func checkcp(ctx *zero.Ctx) bool {
 		ctx.SendChain(message.Text("哼~果然是个笨蛋 他还是一人呢"))
 		return false
 	case fianceeinfo.Target == 0:
-		ctx.SendChain(message.Text("今天的老婆是他自己x"))
+		ctx.SendChain(message.Text("今天的受是他自己x"))
 		return false
 	}
 	return true
 }
 func iscding2(ctx *zero.Ctx) {
-	ctx.SendChain(message.Text("哒咩 不可以这样做哦x(cdcheck.wrong)"))
+	ctx.SendChain(message.Text("哒咩 不可以这样做哦x~cd状态,12小时后再来试试吧x"))
 }

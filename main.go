@@ -43,7 +43,6 @@ func init() {
 	flag.Parse()
 
 	if *h {
-		kanban.PrintBanner()
 		fmt.Println("Usage:")
 		flag.PrintDefaults()
 		os.Exit(0)

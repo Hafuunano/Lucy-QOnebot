@@ -1,4 +1,4 @@
-// Package myfortune 简单的测人品
+// Package myfortune 简单的测人品 仿照的是鱼子酱的www
 package funwork
 
 import (
@@ -37,6 +37,7 @@ var (
 	jrrpbk   string
 	info     string
 	uptime   string
+	vme50    string
 	cardMap  = make(cardset, 256)
 	reasons  = []string{" | "}
 	position = []string{"正位", "逆位"}
@@ -92,12 +93,13 @@ func init() {
 			rand.Seed(time.Now().UnixNano())
 			today := rand.Intn(100)
 			dyn := time.Now().Hour()
+			weeks := time.Now().Weekday()
 
 			switch {
 			case dyn <= 6 && dyn >= 0:
-				uptime = "凌晨好~还没有睡觉呢 这样不是好孩子哦" // 计算是早上还是晚上
+				uptime = "凌晨好~还没有睡觉呢~再不睡觉的话咱把你敲晕~" // 计算是早上还是晚上
 			case dyn <= 11 && dyn > 6:
-				uptime = "上午好~呼呼~(*/ω＼*) "
+				uptime = "上午好~~是个笨蛋(bushi)~"
 			case dyn <= 14 && dyn > 11:
 				uptime = "中午好~吃饭了嘛w 如果没有快去吃饭哦w"
 			case dyn <= 18 && dyn > 14:
@@ -121,7 +123,9 @@ func init() {
 				case result[user] == 100:
 					jrrpbk = "[大吉]\n#好诶~Lucy给你递了张彩票"
 				}
-
+				if weeks.String() == "Thursday" {
+					vme50 = "今天是疯狂星期四 v我50好嘛 www"
+				}
 				ctx.SendChain(message.At(user),
 					message.Text(fmt.Sprintf("\n%s\nLucy正在帮你整理~\n", uptime)),
 					message.Text("今日的人品值为", result[user]),
@@ -131,6 +135,7 @@ func init() {
 					message.Text("今日塔罗牌是: \n归类于", cardtype, reasons[rand.Intn(len(reasons))], position[p], " 的 ", name, "\n"),
 					message.Image(bed+cardurl),
 					message.Text("\n其意义为：\n", info))
+				message.Text(vme50)
 			} else {
 				ctx.SendChain(message.At(user), message.Text(" 今天已经测过了哦~今日的人品值为", result[user], "呢~"))
 			}
