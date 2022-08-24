@@ -33,7 +33,6 @@ func init() {
 	})
 	engine.OnFullMatch("海豚").SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		ctx.Send(message.At(haitun))
-
 	})
 	engine.OnFullMatch("瓜瓜狼").SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		if ctx.Event.GroupID == 223165617 {
