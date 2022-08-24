@@ -93,7 +93,7 @@ func init() {
 			rand.Seed(time.Now().UnixNano())
 			today := rand.Intn(100)
 			dyn := time.Now().Hour()
-			weeks := time.Now().Weekday()
+			weeks := time.Now()
 
 			switch {
 			case dyn <= 6 && dyn >= 0:
@@ -123,7 +123,7 @@ func init() {
 				case result[user] == 100:
 					jrrpbk = "[大吉]\n#好诶~Lucy给你递了张彩票"
 				}
-				if weeks.String() == "Thursday" {
+				if weeks.Weekday().String() == "Thursday" {
 					vme50 = "今天是疯狂星期四 v我50好嘛 www"
 				}
 				ctx.SendChain(message.At(user),
