@@ -549,15 +549,15 @@ func init() {
 			canvas.SetRGB(1, 1, 1) // 白色
 			canvas.Clear()
 			/***********设置字体颜色为天蓝色***********/
-			canvas.SetRGB(135, 206, 250)
+			canvas.SetRGB255(135, 206, 250)
 			/***********设置字体大小,并获取字体高度用来定位***********/
 			if err = canvas.LoadFontFace(text.BoldFontFile, fontSize*2); err != nil {
 				ctx.SendChain(message.Text("ERROR:", err))
 				return
 			}
-			sl, h := canvas.MeasureString("群老婆列表")
+			sl, h := canvas.MeasureString("互动列表")
 			/***********绘制标题***********/
-			canvas.DrawString("群老婆列表", (1500-sl)/2, 160-h) // 放置在中间位置
+			canvas.DrawString("互动列表", (1500-sl)/2, 160-h) // 放置在中间位置
 			canvas.DrawString("————————————————————", 0, 250-h)
 			/***********设置字体大小,并获取字体高度用来定位***********/
 			if err = canvas.LoadFontFace(text.BoldFontFile, fontSize); err != nil {
