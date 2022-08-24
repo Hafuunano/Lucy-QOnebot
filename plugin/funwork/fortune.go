@@ -134,7 +134,7 @@ func init() {
 					message.Text(helper.BytesToString(yiyan), "\n"),
 					message.Text("今日塔罗牌是: \n归类于", cardtype, reasons[rand.Intn(len(reasons))], position[p], " 的 ", name, "\n"),
 					message.Image(bed+cardurl),
-					message.Text("\n其意义为：\n", info))
+					message.Text("\n其意义为：\n", info, "\n"))
 				message.Text(vme50)
 			} else {
 				ctx.SendChain(message.At(user), message.Text(" 今天已经测过了哦~今日的人品值为", result[user], "呢~"))
