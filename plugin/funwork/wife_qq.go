@@ -408,6 +408,11 @@ func init() {
 				ctx.Send(message.Text("笨蛋！不准娶我~"))
 				return
 			}
+			TargetSEX := checkUserSex(ctx, fiancee)
+			if TargetSEX == "male" {
+				ctx.Send(message.Text("怪哦~男孩子干嘛要娶欸 太坏了"))
+				return
+			}
 			if uid == fiancee { // 如果是自己
 				switch rand.Intn(5) { // 5分之一概率浪费技能
 				case 1:
