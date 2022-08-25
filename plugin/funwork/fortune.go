@@ -72,7 +72,6 @@ func init() {
 			if err != nil {
 				return
 			} // 获取一言
-
 			p := rand.Intn(2)
 			i := rand.Intn(78)
 			card := cardMap[(strconv.Itoa(i))]
@@ -93,8 +92,7 @@ func init() {
 			rand.Seed(time.Now().UnixNano())
 			today := rand.Intn(100)
 			dyn := time.Now().Hour()
-			weeks := time.Now()
-
+			weeks := time.Now().Weekday()
 			switch {
 			case dyn <= 6 && dyn >= 0:
 				uptime = "凌晨好~还没有睡觉呢~再不睡觉的话咱把你敲晕~" // 计算是早上还是晚上
@@ -123,8 +121,10 @@ func init() {
 				case result[user] == 100:
 					jrrpbk = "[大吉]\n#好诶~Lucy给你递了张彩票"
 				}
-				if weeks.Weekday().String() == "Thursday" {
+				if weeks.String() == "Thursday" {
 					vme50 = "今天是疯狂星期四 v我50好嘛 www"
+				} else {
+					vme50 = ""
 				}
 				ctx.SendChain(message.At(user),
 					message.Text(fmt.Sprintf("\n%s\nLucy正在帮你整理~\n", uptime)),
