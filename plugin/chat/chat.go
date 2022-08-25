@@ -70,7 +70,7 @@ func init() { // 插件主体
 			var relief extension.CommandModel
 			err := ctx.Parse(&relief)
 			if err != nil {
-				ctx.Send(message.Text("发生了一些不可预料的问题 请稍后再试"))
+				ctx.Send(message.Text("发生了一些不可预料的问题,ERR: ", err))
 			}
 			if relief.Args == "" {
 				ctx.Send(message.Text("好哦~那~咱该叫你什么呢ww"))
@@ -78,7 +78,7 @@ func init() { // 插件主体
 				recv, cancel := nextstep.Repeat()
 				for i := range recv {
 					msg := i.MessageString()
-					if StringInArray(msg, []string{"Lucy", "笨蛋", "老公"}) {
+					if StringInArray(msg, []string{"Lucy", "笨蛋", "老公", "猪"}) {
 						ctx.Send(message.Text("这些名字可不好哦(敲)"))
 					} else {
 						if msg != "" {
@@ -92,7 +92,7 @@ func init() { // 插件主体
 			userID := strconv.FormatInt(ctx.Event.UserID, 10)
 			err = StoreUserNickname(userID, relief.Args)
 			if err != nil {
-				ctx.Send(message.Text("发生了一些不可预料的问题 请稍后再试"))
+				ctx.Send(message.Text("发生了一些不可预料的问题 请稍后再试,ERR: ", err))
 			}
 			ctx.Send(message.Text("好哦~", relief.Args, "ちゃん~~~"))
 		})
@@ -146,7 +146,7 @@ func init() { // 插件主体
 			case poke.Load(ctx.Event.GroupID).AcquireN(3):
 				// 5分钟共8块命令牌 一次消耗3块命令牌
 				time.Sleep(time.Second * 1)
-				ctx.SendChain(message.Text([]string{"请不要戳" + nickname + " >_<", "再戳也不会理你的哦！", "别以为人家会搭理你哦！",
+				ctx.SendChain(message.Text([]string{"请不要戳" + nickname + " >_<", "再戳也不会理你的哦！", "别以为人家会搭理哦！",
 					"呜…别戳了…", "别戳了！", "喵~", "有笨蛋在戳我，我不说是谁", "达咩呦，达咩达咩", "好怪..你不要过来啊啊啊啊啊", "别戳啦！"}[rand.Intn(10)]))
 			case poke.Load(ctx.Event.GroupID).Acquire():
 				// 5分钟共8块命令牌 一次消耗1块命令牌
@@ -224,15 +224,6 @@ func init() { // 插件主体
 			}
 		})
 	// 针对于自己的添加w 我很懒不要打我a.a
-	engine.OnKeywordGroup([]string{"主人"}, zero.OnlyToMe).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(randtexts(
-				"夹子酱",
-				"ww~你猜嘛www",
-				"大笨蛋~是夹子惹ww是(≧∇≦)ﾉ",
-				"架子~Σ( ° △ °|||)︴说错辣!",
-			))
-		})
 	engine.OnKeywordGroup([]string{"会什么"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(randtexts(
@@ -269,7 +260,7 @@ func init() { // 插件主体
 		})
 	engine.OnFullMatch("摸摸", zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(randtexts("啾啾~", "呼呼~", "摸摸你~"), randImage("22b530369f3c0fdd.jpg"))
+			ctx.SendChain(randtexts("啾啾~", "呼呼~", "摸摸~"), randImage("22b530369f3c0fdd.jpg"))
 		})
 	engine.OnFullMatchGroup([]string{"呼呼", "抱抱"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
@@ -282,15 +273,11 @@ func init() { // 插件主体
 	engine.OnFullMatch("举高高", zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			process.SleepAbout1sTo2s()
-			ctx.SendChain(message.Text("不准举！你举得动吗！？"), randImage("dcf07a381f30e9240bf68c845b086e061c95f72a.jpg"))
+			ctx.SendChain(message.Text("哼！才不让举高高呢"), randImage("dcf07a381f30e9240bf68c845b086e061c95f72a.jpg"))
 		})
 	engine.OnKeywordGroup([]string{"MoYoez", "MoeMagicMango"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(randtexts("这些都是主人的名字~", "这些是架子(划掉)使用的名字w"))
-		})
-	engine.OnFullMatchGroup([]string{"憨憨"}, zero.OnlyToMe).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(randtexts("喵? 再这样就不理你了", "不许喊我憨憨！笨蛋！", "才不是！哼唧", "大笨蛋！咱不理你了"))
 		})
 	engine.OnFullMatchGroup([]string{"是笨蛋"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
