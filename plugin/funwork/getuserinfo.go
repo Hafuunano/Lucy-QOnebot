@@ -48,7 +48,7 @@ func init() {
 
 	// https://github.com/Kittengarten/KittenCore
 
-	engine.OnFullMatch("抓取本群精华消息").Handle(func(ctx *zero.Ctx) {
+	engine.OnFullMatch("抓取本群精华消息").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		essenceList := ctx.GetThisGroupEssenceMessageList()
 		essenceCount := len(essenceList.Array())
 		if essenceCount == 0 {
@@ -67,7 +67,9 @@ func init() {
 			report := make(message.Message, len(ms.Elements))
 			report = append(report, reportText)
 			report = append(report, ms.Elements...)
-			ctx.Send(report)
+			deleteme := ctx.Send(report)
+			time.Sleep(time.Second * 40)
+			ctx.DeleteMessage(deleteme)
 		}
 	})
 }
