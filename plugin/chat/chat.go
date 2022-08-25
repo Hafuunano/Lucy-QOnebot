@@ -3,13 +3,14 @@ package chat
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"math/rand"
+	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
-
-	"fmt"
-	"net/url"
 
 	"github.com/FloatTech/zbputils/ctxext"
 
@@ -17,6 +18,7 @@ import (
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/extension"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
@@ -27,15 +29,13 @@ const (
 	jpapi = "https://moegoe.azurewebsites.net/api/speak?text=%s&id=%d"
 )
 
-var speakers = map[string]uint{
-	"宁宁": 0, "爱瑠": 1, "芳乃": 2, "茉子": 3, "丛雨": 4, "小春": 5, "七海": 6,
-	"Sua": 0, "Mimiru": 1, "Arin": 2, "Yeonhwa": 3, "Yuhwa": 4, "Seonbae": 5,
-}
-
 var (
-	poke  = rate.NewManager[int64](time.Minute*5, 8)  // 戳一戳
-	limit = rate.NewManager[int64](time.Minute*3, 28) // 回复限制
-
+	poke     = rate.NewManager[int64](time.Minute*5, 8)  // 戳一戳
+	limit    = rate.NewManager[int64](time.Minute*3, 28) // 回复限制
+	speakers = map[string]uint{
+		"宁宁": 0, "爱瑠": 1, "芳乃": 2, "茉子": 3, "丛雨": 4, "小春": 5, "七海": 6,
+		"Sua": 0, "Mimiru": 1, "Arin": 2, "Yeonhwa": 3, "Yuhwa": 4, "Seonbae": 5,
+	}
 	img    = "file:///root/Lucy_Project/memes/"
 	engine = control.Register("chat", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault: false,
@@ -59,14 +59,43 @@ func init() { // 插件主体
 			chatList = append(chatList, k)
 		}
 
-		// 基于源酱的MoeGoe 只保留自己需要那一部分
+		// 基于源酱的MoeGoe 只保留自己需要那一部分 (AzureAPI)
 		engine.OnRegex("^让(宁宁|爱瑠|芳乃|茉子|丛雨|小春|七海)说([A-Za-z\\s\\d\u3005\u3040-\u30ff\u4e00-\u9fff\uff11-\uff19\uff21-\uff3a\uff41-\uff5a\uff66-\uff9d\\pP]+)$").Limit(ctxext.LimitByGroup).SetBlock(true).
 			Handle(func(ctx *zero.Ctx) {
 				text := ctx.State["regex_matched"].([]string)[2]
 				id := speakers[ctx.State["regex_matched"].([]string)[1]]
 				ctx.SendChain(message.Record(fmt.Sprintf(jpapi, url.QueryEscape(text), id)))
 			})
-
+		engine.OnFullMatch("叫我", zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+			var relief extension.CommandModel
+			err := ctx.Parse(&relief)
+			if err != nil {
+				ctx.Send(message.Text("发生了一些不可预料的问题 请稍后再试"))
+			}
+			if relief.Args == "" {
+				ctx.Send(message.Text("好哦~那~咱该叫你什么呢ww"))
+				nextstep := ctx.FutureEvent("message", ctx.CheckSession())
+				recv, cancel := nextstep.Repeat()
+				for i := range recv {
+					msg := i.MessageString()
+					if StringInArray(msg, []string{"Lucy", "笨蛋", "老公"}) {
+						ctx.Send(message.Text("这些名字可不好哦(敲)"))
+					} else {
+						if msg != "" {
+							relief.Args = msg
+							cancel()
+							continue
+						}
+					}
+				}
+			}
+			userID := strconv.FormatInt(ctx.Event.UserID, 10)
+			err = StoreUserNickname(userID, relief.Args)
+			if err != nil {
+				ctx.Send(message.Text("发生了一些不可预料的问题 请稍后再试"))
+			}
+			ctx.Send(message.Text("好哦~", relief.Args, "ちゃん~~~"))
+		})
 		engine.OnFullMatchGroup(chatList, zero.OnlyToMe).SetBlock(true).Handle(
 			func(ctx *zero.Ctx) {
 				switch {
@@ -74,7 +103,10 @@ func init() { // 插件主体
 					key := ctx.MessageString()
 					val := *kimomap[key]
 					text := val[rand.Intn(len(val))]
-					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(text)) // 来自于 https://github.com/Kyomotoi/AnimeThesaurus 的回复 经过二次修改
+					userID := strconv.FormatInt(ctx.Event.UserID, 10)
+					userNickName := loadUserNickname(userID)
+					result := strings.Replace(text, "你", userNickName, -1)
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(result)) // 来自于 https://github.com/Kyomotoi/AnimeThesaurus 的回复 经过二次修改
 				case limit.Load(ctx.Event.UserID).Acquire():
 					ctx.Send(message.Text("咱不想说话~好累qwq"))
 					return
@@ -195,20 +227,10 @@ func init() { // 插件主体
 	engine.OnKeywordGroup([]string{"主人"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(randtexts(
-
 				"夹子酱",
 				"ww~你猜嘛www",
 				"大笨蛋~是夹子惹ww是(≧∇≦)ﾉ",
 				"架子~Σ( ° △ °|||)︴说错辣!",
-			))
-		})
-
-	engine.OnKeywordGroup([]string{"名字"}, zero.OnlyToMe).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(randtexts(
-				"~呼呼，你猜一下w",
-				"咱也不知道.jpg",
-				"或许你可以去问一下夹子酱嗷w",
 			))
 		})
 	engine.OnKeywordGroup([]string{"会什么"}, zero.OnlyToMe).SetBlock(true).
@@ -281,4 +303,55 @@ func randtexts(text ...string) message.MessageSegment {
 
 func randImage(file ...string) message.MessageSegment {
 	return message.Image(img + file[rand.Intn(len(file))])
+}
+
+// 参考了GO-ATRI计划 https://github.com/Kyomotoi/go-ATRI
+func StringInArray(aim string, list []string) bool {
+	for _, i := range list {
+		if i == aim {
+			return true
+		}
+	}
+	return false
+}
+
+func StoreUserNickname(userID string, nickname string) error {
+	var userNicknameData map[string]interface{}
+	filePath := engine.DataFolder() + "users.json"
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			_ = ioutil.WriteFile(filePath, []byte("{}"), 0777)
+		} else {
+
+			return err
+		}
+	}
+	err = json.Unmarshal(data, &userNicknameData)
+	if err != nil {
+		return err
+	}
+	userNicknameData[userID] = nickname
+	newData, err := json.Marshal(userNicknameData)
+	_ = ioutil.WriteFile(filePath, newData, 0777)
+	return nil
+}
+
+func loadUserNickname(userID string) string {
+	var d map[string]string
+	filePath := engine.DataFolder() + "users.json"
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return "你"
+	}
+	// If can't find object, will return null string.
+	err = json.Unmarshal(data, &d)
+	if err != nil {
+		return "你"
+	}
+	result := d[userID]
+	if result == "" {
+		result = "你"
+	}
+	return result
 }

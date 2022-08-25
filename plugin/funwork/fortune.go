@@ -105,6 +105,11 @@ func init() {
 			case dyn <= 24 && dyn > 18:
 				uptime = "晚上好吖w~今天过的开心嘛ww"
 			}
+			if weeks.String() == "Thursday" {
+				vme50 = "今天是疯狂星期四 v我50好嘛 www"
+			} else {
+				vme50 = ""
+			}
 			// CTRL C + CTRL V
 			if signTF[si] == 0 {
 				signTF[si] = (1)
@@ -120,11 +125,6 @@ func init() {
 					jrrpbk = "[吉]\n#Lucy摸了摸你的脸"
 				case result[user] == 100:
 					jrrpbk = "[大吉]\n#好诶~Lucy给你递了张彩票"
-				}
-				if weeks.String() == "Thursday" {
-					vme50 = "今天是疯狂星期四 v我50好嘛 www"
-				} else {
-					vme50 = ""
 				}
 				ctx.SendChain(message.At(user),
 					message.Text(fmt.Sprintf("\n%s\nLucy正在帮你整理~\n", uptime)),
