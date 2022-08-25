@@ -427,18 +427,19 @@ func init() {
 				}
 				return
 			}
-			/* randbook := rand.Intn(2)
-			if ctx.Event.UserID == 2896285821 && fiancee == 363128 {
-				randbook = 1
-			}
-			if fiancee == 2896285821 && ctx.Event.UserID == 363128 {
-				randbook = 1
-			}
+			/*
+				if ctx.Event.UserID == 2896285821 && fiancee == 363128 {
+					randbook = 1
+				}
+				if fiancee == 2896285821 && ctx.Event.UserID == 363128 {
+					randbook = 1
+				}
+			*/
+			randbook := rand.Intn(2)
 			if randbook == 0 {
 				ctx.SendChain(message.Text(sendtext[1][rand.Intn(len(sendtext[1]))]))
 				return
 			}
-			*/
 
 			// 去民政局登记
 			var choicetext string
