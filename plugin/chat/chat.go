@@ -310,7 +310,6 @@ func StoreUserNickname(userID string, nickname string) error {
 		if os.IsNotExist(err) {
 			_ = ioutil.WriteFile(filePath, []byte("{}"), 0777)
 		} else {
-
 			return err
 		}
 	}
