@@ -46,9 +46,9 @@ func init() {
 		ctx.SendChain(message.Text("今日的龙王是~", name, "哦"))
 	})
 
-	// https://github.com/Kittengarten/KittenCore
+	// https://github.com/Kittengarten/KittenCore 抄的
 
-	engine.OnFullMatch("抓取本群精华消息").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnFullMatch("随机本群精华消息").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		essenceList := ctx.GetThisGroupEssenceMessageList()
 		essenceCount := len(essenceList.Array())
 		if essenceCount == 0 {
@@ -63,7 +63,7 @@ func init() {
 			)
 			ctx.GetGroupMessageHistory(ctx.Event.GroupID, msID.Int())
 			ms := ctx.GetMessage(message.NewMessageIDFromInteger(msID.Int()))
-			reportText := message.Text(fmt.Sprintf("(精华消息)\n%s（%d）:\n", GetTitle(*ctx, ID.Int())+nickname.String(), ID.Int()))
+			reportText := message.Text(fmt.Sprintf("!~Lucy抓取到了这一条~\n(精华消息)\n%s（%d）:\n", GetTitle(*ctx, ID.Int())+nickname.String(), ID.Int()))
 			report := make(message.Message, len(ms.Elements))
 			report = append(report, reportText)
 			report = append(report, ms.Elements...)

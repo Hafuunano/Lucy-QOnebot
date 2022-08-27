@@ -320,26 +320,30 @@ func init() {
 				ctx.SendChain(message.At(uid), message.Text("\n今天你没有老婆哦"))
 				return
 			case status == 1: // 娶过别人
+				titleTarget := GetTitle(*ctx, targetinfo.Target)
+				cardTarget := ctx.CardOrNickName(targetinfo.Target)
 				ctx.SendChain(
 					message.At(uid),
 					message.Text("\n今天你已经娶过了，群老婆是"),
 					message.Image("http://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(targetinfo.Target, 10)+"&s=640").Add("cache", 0),
 					message.Text(
 						"\n",
-						"[", targetinfo.Targetname, "]",
+						"[", titleTarget, "]", " [", cardTarget, "]",
 						"(", targetinfo.Target, ")哒",
 					),
 				)
 				return
 			case status == 0: // 嫁给别人
+				titleTarget := GetTitle(*ctx, targetinfo.Target)
+				cardTarget := ctx.CardOrNickName(targetinfo.Target)
 				ctx.SendChain(
 					message.At(uid),
 					message.Text("\n今天你被娶了，群老公是"),
 					message.Image("http://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(targetinfo.User, 10)+"&s=640").Add("cache", 0),
 					message.Text(
 						"\n",
-						"[", targetinfo.Username, "]",
-						"(", targetinfo.User, ")哒",
+						"[", titleTarget, "]", " [", cardTarget, "]",
+						"(", targetinfo.Target, ")哒",
 					),
 				)
 				return
@@ -427,15 +431,13 @@ func init() {
 				}
 				return
 			}
-			/*
-				if ctx.Event.UserID == 2896285821 && fiancee == 363128 {
-					randbook = 1
-				}
-				if fiancee == 2896285821 && ctx.Event.UserID == 363128 {
-					randbook = 1
-				}
-			*/
 			randbook := rand.Intn(2)
+			if ctx.Event.UserID == 2896285821 && fiancee == 363128 {
+				randbook = 1
+			}
+			if fiancee == 2896285821 && ctx.Event.UserID == 363128 {
+				randbook = 1
+			}
 			if randbook == 0 {
 				ctx.SendChain(message.Text(sendtext[1][rand.Intn(len(sendtext[1]))]))
 				return

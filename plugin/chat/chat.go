@@ -69,16 +69,13 @@ func init() { // 插件主体
 		engine.OnFullMatch("叫我", zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 			var relief extension.CommandModel
 			err := ctx.Parse(&relief)
-			if err != nil {
-				ctx.Send(message.Text("发生了一些不可预料的问题,ERR: ", err))
-			}
 			if relief.Args == "" {
 				ctx.Send(message.Text("好哦~那~咱该叫你什么呢ww"))
 				nextstep := ctx.FutureEvent("message", ctx.CheckSession())
 				recv, cancel := nextstep.Repeat()
 				for i := range recv {
 					msg := i.MessageString()
-					if StringInArray(msg, []string{"Lucy", "笨蛋", "老公", "猪"}) {
+					if StringInArray(msg, []string{"Lucy", "笨蛋", "老公", "猪", "夹子", "主人"}) {
 						ctx.Send(message.Text("这些名字可不好哦(敲)"))
 					} else {
 						if msg != "" {
@@ -94,7 +91,7 @@ func init() { // 插件主体
 			if err != nil {
 				ctx.Send(message.Text("发生了一些不可预料的问题 请稍后再试,ERR: ", err))
 			}
-			ctx.Send(message.Text("好哦~", relief.Args, "ちゃん~~~"))
+			ctx.Send(message.Text("好哦~", relief.Args, "\nちゃん~~~"))
 		})
 		engine.OnFullMatchGroup(chatList, zero.OnlyToMe).SetBlock(true).Handle(
 			func(ctx *zero.Ctx) {
@@ -151,7 +148,8 @@ func init() { // 插件主体
 			case poke.Load(ctx.Event.GroupID).Acquire():
 				// 5分钟共8块命令牌 一次消耗1块命令牌
 				time.Sleep(time.Second * 1)
-				ctx.SendChain(message.Text("喂(#`O′) 戳", nickname, "干嘛！"))
+				happyFew := fmt.Sprintf("（好感 - %d）", rand.Intn(100)+1)
+				ctx.SendChain(message.Text("喂(#`O′) 戳", nickname, "干嘛！", happyFew))
 				process.SleepAbout1sTo2s()
 				ctx.Send(message.Poke(ctx.Event.UserID))
 			default:
