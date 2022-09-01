@@ -78,6 +78,32 @@ func init() {
 		time.Sleep(time.Second * 20)
 		ctx.DeleteMessage(messageID)
 	})
+	engine.OnFullMatch("来份猫猫表情包").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+		if !limit.Load(ctx.Event.UserID).Acquire() {
+			return
+		}
+		data, err := web.GetData("https://img.moehu.org/pic.php?id=miao&return=json")
+		if err != nil {
+			ctx.SendChain(message.Text("ERR:", err))
+			return
+		}
+		picURL := gjson.Get(string(data), "acgurl").String()
+		ctx.Send(message.Image(picURL))
+
+	})
+	engine.OnFullMatch("来份兽耳酱表情包").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+		if !limit.Load(ctx.Event.UserID).Acquire() {
+			return
+		}
+		data, err := web.GetData("https://img.moehu.org/pic.php?id=kemomimi&return=json")
+		if err != nil {
+			ctx.SendChain(message.Text("ERR:", err))
+			return
+		}
+		picURL := gjson.Get(string(data), "acgurl").String()
+		ctx.Send(message.Image(picURL))
+
+	})
 
 	engine.OnFullMatch("涩涩", zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
 		if !limit.Load(ctx.Event.UserID).Acquire() {

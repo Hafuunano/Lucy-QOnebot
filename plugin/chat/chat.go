@@ -328,7 +328,6 @@ func loadUserNickname(userID string) string {
 	if err != nil {
 		return "你"
 	}
-	// If can't find object, will return null string.
 	err = json.Unmarshal(data, &d)
 	if err != nil {
 		return "你"
