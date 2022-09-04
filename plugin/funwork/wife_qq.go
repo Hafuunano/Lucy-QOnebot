@@ -328,7 +328,7 @@ func init() {
 					message.Image("http://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(targetinfo.Target, 10)+"&s=640").Add("cache", 0),
 					message.Text(
 						"\n",
-						"[", titleTarget, "]", " [", cardTarget, "]",
+						titleTarget, " [", cardTarget, "]",
 						"(", targetinfo.Target, ")哒",
 					),
 				)
@@ -342,7 +342,7 @@ func init() {
 					message.Image("http://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(targetinfo.User, 10)+"&s=640").Add("cache", 0),
 					message.Text(
 						"\n",
-						"[", titleTarget, "]", " [", cardTarget, "]",
+						titleTarget, " [", cardTarget, "]",
 						"(", targetinfo.Target, ")哒",
 					),
 				)
