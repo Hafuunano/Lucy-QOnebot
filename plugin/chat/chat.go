@@ -103,14 +103,17 @@ func init() { // 插件主体
 					userID := strconv.FormatInt(ctx.Event.UserID, 10)
 					userNickName := loadUserNickname(userID)
 					result := strings.Replace(text, "你", userNickName, -1)
+					process.SleepAbout1sTo2s()
 					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(result)) // 来自于 https://github.com/Kyomotoi/AnimeThesaurus 的回复 经过二次修改
 				case limit.Load(ctx.Event.UserID).Acquire():
+					process.SleepAbout1sTo2s()
 					ctx.Send(message.Text("咱不想说话~好累qwq"))
 					return
 				default:
 				}
 				lucky := rand.Intn(6)
 				if lucky == 0 && ctx.MessageString() == "笨蛋" {
+					process.SleepAbout1sTo2s()
 					ctx.Send(message.Record("file:///root/Lucy_Project/records/baka.ogg"))
 				}
 			})
