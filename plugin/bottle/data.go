@@ -42,6 +42,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	_ = CreateChannel(seaSide)
 	engine.OnFullMatch("pick", zero.OnlyToMe).Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		be, err := fetchBottle(seaSide)
 		if err != nil {
@@ -108,4 +109,10 @@ func fetchBottle(db *sql.Sqlite) (*sea, error) {
 	defer seaLocker.RLock()
 	be := new(sea)
 	return be, db.Find("global", "be", "where content LIKE '%ID%'"+" ORDER BY RANDOM() limit 1")
+}
+
+func CreateChannel(db *sql.Sqlite) error {
+	seaLocker.Lock()
+	defer seaLocker.Unlock()
+	return db.Create("global", &sea{})
 }
