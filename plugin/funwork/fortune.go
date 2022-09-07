@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sync"
 
 	"math/rand"
 	"strconv"
@@ -69,6 +70,8 @@ func init() {
 
 	engine.OnFullMatch("今日人品", getTarot).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
+			var mutex sync.RWMutex // 添加读写锁以保证稳定性
+			mutex.Lock()
 			yiyan, err := web.RequestDataWith(web.NewDefaultClient(), "http://ovooa.com/API/yiyan/api.php", "GET", Referer, ua)
 			if err != nil {
 				return
@@ -139,6 +142,7 @@ func init() {
 			} else {
 				ctx.SendChain(message.At(user), message.Text(" 今天已经测过了哦~今日的人品值为", result[user], "呢~"))
 			}
+			mutex.Unlock()
 			// special time !
 			if result[user] >= 90 && result[user] < 100 && egg[si] == 0 {
 				egg[si] = (1)

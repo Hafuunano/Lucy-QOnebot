@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/FloatTech/ZeroBot-Plugin/kanban"           // 在最前打印 banner
+	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/bottle"  // 漂流瓶魔改版
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/manager" // 群管
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/tools"   // 工具
 

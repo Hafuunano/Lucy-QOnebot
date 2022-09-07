@@ -320,7 +320,7 @@ func init() {
 				ctx.SendChain(message.At(uid), message.Text("\n今天你没有老婆哦"))
 				return
 			case status == 1: // 娶过别人
-				titleTarget := GetTitle(*ctx, targetinfo.Target)
+				titleTarget := GetHonorTitle(*ctx, targetinfo.Target)
 				cardTarget := ctx.CardOrNickName(targetinfo.Target)
 				ctx.SendChain(
 					message.At(uid),
@@ -334,7 +334,7 @@ func init() {
 				)
 				return
 			case status == 0: // 嫁给别人
-				titleTarget := GetTitle(*ctx, targetinfo.Target)
+				titleTarget := GetHonorTitle(*ctx, targetinfo.Target)
 				cardTarget := ctx.CardOrNickName(targetinfo.Target)
 				ctx.SendChain(
 					message.At(uid),
@@ -635,6 +635,10 @@ func init() {
 				ctx.SendChain(message.Text(sendtext[4][1]))
 			}
 		})
+}
+
+func GetTitle(ctx zero.Ctx, i int64) {
+	panic("unimplemented")
 }
 
 // 以群号和昵称为限制
