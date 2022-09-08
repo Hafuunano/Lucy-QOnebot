@@ -41,6 +41,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+
 	_ = CreateChannel(seaSide)
 	engine.OnFullMatch("pick", zero.OnlyToMe, zero.OnlyGroup).Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		be, err := fetchBottle(seaSide)
@@ -55,13 +56,9 @@ func init() {
 		ctx.SendGroupForwardMessage(ctx.Event.GroupID, msg)
 	})
 
-	engine.OnRegex(`throw.*?(.*)`, zero.OnlyToMe).Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`throw.*?(.*)`, zero.OnlyToMe, zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		senderFormatTime := time.Unix(ctx.Event.Time, 0).Format("2006-01-02 15:04:05")
 		rawSenderMessage := ctx.State["regex_matched"].([]string)[1]
-		if rawSenderMessage == "" {
-			ctx.SendChain(message.Text("请问~需要投递什么呢~记得要一起发哦w"))
-			return
-		}
 		rawMessageCallBack := message.UnescapeCQCodeText(rawSenderMessage)
 		// check current needs and prepare to throw bottle.
 		err = globalbottle(
@@ -98,7 +95,7 @@ func (be *sea) destory(db *sql.Sqlite) error {
 
 func fetchBottle(db *sql.Sqlite) (*sea, error) {
 	seaLocker.RLock()
-	defer seaLocker.RLock()
+	defer seaLocker.Unlock()
 	be := new(sea)
 	return be, db.Pick("global", be)
 }
