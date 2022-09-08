@@ -13,7 +13,6 @@ import (
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/ctxext"
 	zero "github.com/wdvxdr1123/ZeroBot"
-	"github.com/wdvxdr1123/ZeroBot/extension"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
@@ -23,13 +22,13 @@ type sea struct {
 	Name string `db:"Name"` //  his or her name at that time:P
 	Msg  string `db:"msg"`  // What he or she sent to Lucy?
 	Grp  int64  `db:"grp"`  // which group sends this msg?
-	Time int64  `db:"time"` // we need to know the current time,master>
+	Time string `db:"time"` // we need to know the current time,master>
 }
 
 var seaSide = &sql.Sqlite{}
 var seaLocker sync.RWMutex
 
-// We need a container to receive what we need :(
+// We need a container to inject what we need :(
 
 func init() {
 	engine := control.Register("bottle", &ctrl.Options[*zero.Ctx]{
@@ -43,41 +42,34 @@ func init() {
 		panic(err)
 	}
 	_ = CreateChannel(seaSide)
-	engine.OnFullMatch("pick", zero.OnlyToMe).Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnFullMatch("pick", zero.OnlyToMe, zero.OnlyGroup).Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		be, err := fetchBottle(seaSide)
 		if err != nil {
 			ctx.SendChain(message.Text("ERR:", err))
 		}
-		SenderTime := time.Unix(be.Time, 0).Format("2006-01-01 12:33:36")
-		ctx.SendChain(message.Text("~Lucy试着帮你捞出来了这个~\nID: ", be.ID, "\n投递人: ", be.Name, "(", be.QQ, ")", "\n群号: ", be.Grp, "\n时间: ", SenderTime, "\n内容: \n", be.Msg))
+		IDStr := strconv.Itoa(int(be.ID))
+		QQStr := strconv.Itoa(int(be.QQ))
+		GrpStr := strconv.Itoa(int(be.Grp))
+		msg := make(message.Message, 0, 10)
+		msg = append(msg, message.CustomNode("Lucy", ctx.Event.SelfID, "~Lucy试着帮你捞出来了这个~\nID:"+IDStr+"\n投递人: "+be.Name+"("+QQStr+")"+"\n群号: "+GrpStr+"\n时间: "+be.Time+"\n内容: \n"+be.Msg))
+		ctx.SendGroupForwardMessage(ctx.Event.GroupID, msg)
 	})
-	engine.OnFullMatch("throw", zero.OnlyToMe).Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		var relief extension.CommandModel
-		err := ctx.Parse(&relief)
-		if err != nil {
+
+	engine.OnRegex(`throw.*?(.*)`, zero.OnlyToMe).Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		senderFormatTime := time.Unix(ctx.Event.Time, 0).Format("2006-01-02 15:04:05")
+		rawSenderMessage := ctx.State["regex_matched"].([]string)[1]
+		if rawSenderMessage == "" {
+			ctx.SendChain(message.Text("请问~需要投递什么呢~记得要一起发哦w"))
+			return
 		}
-		if relief.Args == "" {
-			ctx.Send(message.Text("~需要咱帮你丢什么呢w"))
-			nextstep := ctx.FutureEvent("message", ctx.CheckSession())
-			recv, cancel := nextstep.Repeat()
-			for i := range recv {
-				msg := i.MessageString()
-				{
-					if msg != "" {
-						relief.Args = msg
-						cancel()
-						continue
-					}
-				}
-			}
-		}
-		// check current needs and Prepare to throw bottle.
+		rawMessageCallBack := message.UnescapeCQCodeText(rawSenderMessage)
+		// check current needs and prepare to throw bottle.
 		err = globalbottle(
 			ctx.Event.UserID,
 			ctx.Event.GroupID,
-			ctx.Event.Time,
+			senderFormatTime,
 			ctx.CardOrNickName(ctx.Event.UserID),
-			relief.Args,
+			rawMessageCallBack,
 		).throw(seaSide)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR: ", err))
@@ -87,8 +79,8 @@ func init() {
 	})
 }
 
-func globalbottle(qq, grp, time int64, name, msg string) *sea { // Check as if the User is available?
-	id := int64(crc64.Checksum(binary.StringToBytes(fmt.Sprintf("%d_%d_%d_%s_%s", grp, time, qq, name, msg)), crc64.MakeTable(crc64.ISO)))
+func globalbottle(qq, grp int64, time, name, msg string) *sea { // Check as if the User is available and collect information to store.
+	id := int64(crc64.Checksum(binary.StringToBytes(fmt.Sprintf("%d_%d_%s_%s_%s", grp, qq, time, name, msg)), crc64.MakeTable(crc64.ISO)))
 	return &sea{ID: id, Grp: grp, Time: time, QQ: qq, Name: name, Msg: msg}
 }
 
@@ -108,7 +100,7 @@ func fetchBottle(db *sql.Sqlite) (*sea, error) {
 	seaLocker.RLock()
 	defer seaLocker.RLock()
 	be := new(sea)
-	return be, db.Find("global", "be", "where content LIKE '%ID%'"+" ORDER BY RANDOM() limit 1")
+	return be, db.Pick("global", be)
 }
 
 func CreateChannel(db *sql.Sqlite) error {

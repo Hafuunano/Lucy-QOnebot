@@ -162,8 +162,8 @@ func init() { // 插件主体
 	// 戳我
 	engine.OnFullMatchGroup([]string{"戳我", "戳戳"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			TrueOrNot := rand.Intn(100)
-			if TrueOrNot >= 50 {
+			trueOrNot := rand.Intn(100)
+			if trueOrNot >= 50 {
 				process.SleepAbout1sTo2s()
 				ctx.SendChain(message.At(ctx.Event.UserID), message.Text("好哦w"))
 				process.SleepAbout1sTo2s()
