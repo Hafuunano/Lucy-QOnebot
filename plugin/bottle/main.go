@@ -20,7 +20,7 @@ type sea struct {
 	ID   int64  `db:"id"`   // ID qq_grp_name_msg 的 crc64 hashCheck.
 	QQ   int64  `db:"qq"`   // Get current user(Who sends this)
 	Name string `db:"Name"` //  his or her name at that time:P
-	Msg  string `db:"msg"`  // What he or she sent to Lucy?
+	Msg  string `db:"msg"`  // What he or she sent to bot?
 	Grp  int64  `db:"grp"`  // which group sends this msg?
 	Time string `db:"time"` // we need to know the current time,master>
 }
@@ -51,8 +51,9 @@ func init() {
 		IDStr := strconv.Itoa(int(be.ID))
 		QQStr := strconv.Itoa(int(be.QQ))
 		GrpStr := strconv.Itoa(int(be.Grp))
+		botName := zero.BotConfig.NickName[0]
 		msg := make(message.Message, 0, 10)
-		msg = append(msg, message.CustomNode("Lucy", ctx.Event.SelfID, "~Lucy试着帮你捞出来了这个~\nID:"+IDStr+"\n投递人: "+be.Name+"("+QQStr+")"+"\n群号: "+GrpStr+"\n时间: "+be.Time+"\n内容: \n"+be.Msg))
+		msg = append(msg, message.CustomNode(botName, ctx.Event.SelfID, botName+"试着帮你捞出来了这个~\nID:"+IDStr+"\n投递人: "+be.Name+"("+QQStr+")"+"\n群号: "+GrpStr+"\n时间: "+be.Time+"\n内容: \n"+be.Msg))
 		ctx.SendGroupForwardMessage(ctx.Event.GroupID, msg)
 	})
 
@@ -94,7 +95,7 @@ func (be *sea) destory(db *sql.Sqlite) error {
 }
 
 func fetchBottle(db *sql.Sqlite) (*sea, error) {
-	seaLocker.RLock()
+	seaLocker.Lock()
 	defer seaLocker.Unlock()
 	be := new(sea)
 	return be, db.Pick("global", be)
