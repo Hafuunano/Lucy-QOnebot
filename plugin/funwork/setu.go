@@ -99,5 +99,4 @@ func init() {
 		picURL := gjson.Get(string(data), "acgurl").String()
 		ctx.Send(message.Image(picURL))
 	})
-
 }
