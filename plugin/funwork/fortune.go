@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/FloatTech/floatbox/web"
+	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -46,6 +47,7 @@ var (
 	result   map[int64](int)
 	egg      map[string](int)
 	signTF   map[string](int)
+	Lookup   string
 )
 
 func init() {
@@ -144,18 +146,25 @@ func init() {
 			}
 			mutex.Unlock()
 			// special time !
-			if result[user] >= 90 && result[user] < 100 && egg[si] == 0 {
-				egg[si] = (1)
-				img, err := web.GetData("https://api.lolicon.app/setu/v2?r18=1&num=1")
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
-					return
+			m, ok := control.Lookup("nsfw")
+			if ok {
+				if m.IsEnabledIn(ctx.Event.GroupID) {
+					if result[user] >= 90 && result[user] < 100 && egg[si] == 0 {
+						egg[si] = (1)
+						img, err := web.GetData("https://api.lolicon.app/setu/v2?r18=1&num=1")
+						if err != nil {
+							ctx.SendChain(message.Text("ERROR:", err))
+							return
+						}
+						picURL := gjson.Get(string(img), "data.0.urls.original").String()
+						time.Sleep(time.Second * 3)
+
+						deleteme := ctx.SendChain(message.At(user), message.Text("\n这是今日奖励哦"), message.Text(picURL))
+						time.Sleep(time.Second * 20)
+						ctx.DeleteMessage(deleteme)
+					}
 				}
-				picURL := gjson.Get(string(img), "data.0.urls.original").String()
-				time.Sleep(time.Second * 3)
-				deleteme := ctx.SendChain(message.At(user), message.Text("\n这是今日奖励哦"), message.Text(picURL))
-				time.Sleep(time.Second * 20)
-				ctx.DeleteMessage(deleteme)
 			}
 		})
+
 }
