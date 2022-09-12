@@ -9,19 +9,16 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/FloatTech/floatbox/process"
 	ctrl "github.com/FloatTech/zbpctrl"
+	"github.com/FloatTech/zbputils/control"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
-
-	"github.com/FloatTech/floatbox/process"
-	"github.com/FloatTech/zbputils/control"
 )
 
 const (
-	// 服务名
 	servicename = "atri"
-	// ATRI 表情的 codechina 镜像
-	res = "https://gitcode.net/u011570312/zbpdata/-/raw/main/Atri/"
+	Lucyimg     = "file:///root/Lucy_Project/memes/"
 )
 
 func init() { // 插件主体
@@ -187,17 +184,6 @@ func init() { // 插件主体
 			))
 		})
 }
-func randText(text ...string) message.MessageSegment {
-	return message.Text(text[rand.Intn(len(text))])
-}
-
-func randImage(file ...string) message.MessageSegment {
-	return message.Image(res + file[rand.Intn(len(file))])
-}
-
-func randRecord(file ...string) message.MessageSegment {
-	return message.Record(res + file[rand.Intn(len(file))])
-}
 
 // atriSleep 凌晨0点到6点，ATRI 在睡觉，不回应任何请求
 func atriSleep(ctx *zero.Ctx) bool {
@@ -205,4 +191,12 @@ func atriSleep(ctx *zero.Ctx) bool {
 		return false
 	}
 	return true
+}
+
+func randText(text ...string) message.MessageSegment {
+	return message.Text(text[rand.Intn(len(text))])
+}
+
+func randMemes(file ...string) message.MessageSegment {
+	return message.Image(Lucyimg + file[rand.Intn(len(file))])
 }

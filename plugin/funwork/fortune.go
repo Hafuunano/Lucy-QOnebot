@@ -11,9 +11,9 @@ import (
 	"strconv"
 	"time"
 
+	fcext "github.com/FloatTech/floatbox/ctxext"
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/zbputils/control"
-	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -55,7 +55,7 @@ func init() {
 	egg = make(map[string](int))
 	result = make(map[int64](int))
 
-	getTarot := ctxext.DoOnceOnSuccess(
+	getTarot := fcext.DoOnceOnSuccess(
 		func(ctx *zero.Ctx) bool { // 检查 塔罗牌文件是否存在
 			data, err := os.ReadFile(engine.DataFolder() + "tarots.json")
 			if err != nil {
@@ -74,10 +74,12 @@ func init() {
 		Handle(func(ctx *zero.Ctx) {
 			var mutex sync.RWMutex // 添加读写锁以保证稳定性
 			mutex.Lock()
+
 			yiyan, err := web.RequestDataWith(web.NewDefaultClient(), "http://ovooa.com/API/yiyan/api.php", "GET", Referer, ua)
 			if err != nil {
 				return
 			} // 获取一言
+
 			p := rand.Intn(2)
 			i := rand.Intn(78)
 			card := cardMap[(strconv.Itoa(i))]
@@ -88,15 +90,14 @@ func init() {
 				info = card.Info.Description
 			} else {
 				info = card.Info.ReverseDescription
-			} // 塔罗牌生成
+			} // 塔罗牌生成 (随机的)
 
 			// 写的非常恶心 建议有时间赶紧重构x awa
 			user := ctx.Event.UserID
 			userS := strconv.FormatInt(user, 10)
 			now := time.Now().Format("20060102")
+			randEveryone := fcext.RandSenderPerDayN(ctx.Event.UserID, 100)
 			var si string = now + userS // 合成
-			rand.Seed(time.Now().UnixNano())
-			today := rand.Intn(100)
 			dyn := time.Now().Hour()
 			weeks := time.Now().Weekday()
 			switch {
@@ -116,10 +117,12 @@ func init() {
 			} else {
 				vme50 = ""
 			}
+
 			// CTRL C + CTRL V
+
 			if signTF[si] == 0 {
 				signTF[si] = (1)
-				result[user] = (today)
+				result[user] = (randEveryone)
 				switch {
 				case result[user] <= 20:
 					jrrpbk = "[小凶]\n#Lucy抱了抱你~"
@@ -132,6 +135,7 @@ func init() {
 				case result[user] == 100:
 					jrrpbk = "[大吉]\n#好诶~Lucy给你递了张彩票"
 				}
+
 				ctx.SendChain(message.At(user),
 					message.Text(fmt.Sprintf("\n%s\nLucy正在帮你整理~\n", uptime)),
 					message.Text("今日的人品值为", result[user]),
@@ -144,6 +148,7 @@ func init() {
 			} else {
 				ctx.SendChain(message.At(user), message.Text(" 今天已经测过了哦~今日的人品值为", result[user], "呢~"))
 			}
+
 			mutex.Unlock()
 			// special time !
 			m, ok := control.Lookup("nsfw")

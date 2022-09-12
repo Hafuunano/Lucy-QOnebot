@@ -2,12 +2,10 @@ package tools // 参考了 Cha0sIDL 的 zbp hotspot热点
 
 import (
 	"strconv"
-	"strings"
 
 	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/zbputils/ctxext"
-	"github.com/antchfx/htmlquery"
 	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -33,20 +31,6 @@ func init() {
 		ctx.SendChain(message.Text(rsp))
 	})
 
-	engine.OnFullMatch("github热搜", zero.OnlyToMe).SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		msg := "GitHub实时热榜:\n"
-		doc, err := htmlquery.LoadURL("https://github.com/trending")
-		if err != nil {
-			panic("htmlQuery error")
-		}
-		article := htmlquery.Find(doc, "//*[@id=\"js-pjax-container\"]/div[3]/div/div[2]/article[@*]")
-		for idx, a := range article {
-			titlePath := htmlquery.FindOne(a, "/h1/a")
-			title := htmlquery.SelectAttr(titlePath, "href")
-			msg += strconv.Itoa(idx+1) + "：" + strings.TrimPrefix(title, "/") + "\n" + "地址：https://github.com" + title + "\n"
-		}
-		ctx.SendChain(message.Text(msg))
-	})
 	engine.OnFullMatch("今日早报").Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		ctx.Send(message.Image("https://api.03c3.cn/zb/"))
 	})

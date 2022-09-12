@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	fcext "github.com/FloatTech/floatbox/ctxext"
 	"github.com/FloatTech/floatbox/math"
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/tidwall/gjson"
@@ -16,11 +17,8 @@ import (
 	// 数据库
 	sql "github.com/FloatTech/sqlite"
 	// 定时器
-
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
-
 	// 画图
-
 	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/zbputils/img/text"
 	"github.com/fogleman/gg"
@@ -287,7 +285,7 @@ var (
 )
 
 func init() {
-	getdb := ctxext.DoOnceOnSuccess(func(ctx *zero.Ctx) bool {
+	getdb := fcext.DoOnceOnSuccess(func(ctx *zero.Ctx) bool {
 		民政局.db.DBPath = engine.DataFolder() + "groupfun_wife.db"
 		err := 民政局.db.Open(time.Hour * 24)
 		if err != nil {
@@ -486,7 +484,7 @@ func init() {
 			}
 			TargetSEX := checkUserSex(ctx, fiancee)
 			if TargetSEX == "male" {
-				ctx.Send(message.Text("怪哦~男孩子干嘛要娶欸 太坏了"))
+				ctx.Send(message.Text("怪哦~男孩子干嘛要娶欸 太坏了~"))
 				return
 			}
 			if rand.Intn(10)/4 != 0 { // 十分之三的概率NTR成功

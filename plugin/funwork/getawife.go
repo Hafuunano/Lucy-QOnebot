@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"time"
 
+	fcext "github.com/FloatTech/floatbox/ctxext"
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/zbputils/ctxext"
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -21,7 +22,7 @@ func init() {
 				ctx.SendChain(message.Text("ERROR: ", err))
 			}
 			name := ctx.CardOrNickName(ctx.Event.UserID)
-			n := ctxext.RandSenderPerDayN(ctx.Event.UserID, len(wifes))
+			n := fcext.RandSenderPerDayN(ctx.Event.UserID, len(wifes))
 			wn := wifes[n].Name()
 			reg := regexp.MustCompile(`[^\.]+`)
 			list := reg.FindAllString(wn, -1)
