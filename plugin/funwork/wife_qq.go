@@ -32,6 +32,13 @@ type 婚姻登记 struct {
 	dbmu sync.RWMutex
 }
 
+var datapath = engine.DataFolder() + "ModifyPics/"
+
+type context struct {
+	usrdir      string
+	headimgsdir []string
+}
+
 // 结婚证信息
 type userinfo struct {
 	User       int64  // 用户身份证

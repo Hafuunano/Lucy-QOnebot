@@ -73,7 +73,7 @@ func init() {
 			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
-		ctx.Send(message.ReplyWithMessage(ctx.Event.MessageID, message.Text("已经帮你丢出去了哦~,内容是\n", rawMessageCallBack)))
+		ctx.Send(message.ReplyWithMessage(ctx.Event.MessageID, message.Text("已经帮你丢出去了哦~")))
 	})
 }
 

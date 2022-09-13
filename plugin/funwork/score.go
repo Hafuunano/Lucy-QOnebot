@@ -280,12 +280,12 @@ func getLevel(count int) int {
 
 func initPic(picFile string) {
 	if file.IsNotExist(picFile) {
-		data, err := web.RequestDataWith(web.NewDefaultClient(), backgroundURL, "GET", Referer, ua)
+		data, err := web.GetData(backgroundURL)
 		if err != nil {
 			log.Errorln("[score]", err)
 		}
 		picURL := gjson.Get(string(data), "pic.0").String()
-		data, err = web.RequestDataWith(web.NewDefaultClient(), picURL, "GET", "", ua)
+		data, err = web.GetData(picURL)
 		if err != nil {
 			log.Errorln("[score]", err)
 		}
