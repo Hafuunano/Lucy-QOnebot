@@ -66,6 +66,7 @@ func init() { // 插件主体
 				id := speakers[ctx.State["regex_matched"].([]string)[1]]
 				ctx.SendChain(message.Record(fmt.Sprintf(jpapi, url.QueryEscape(text), id)))
 			})
+
 		engine.OnFullMatch("叫我", zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 			var relief extension.CommandModel
 			err := ctx.Parse(&relief)

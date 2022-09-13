@@ -159,26 +159,8 @@ func init() { // 插件主体
 						}
 					}
 				} else {
-					ctx.SendChain(message.Text("请私聊发送 设置 saucenao api key [apikey] 以启用 saucenao 搜图, key 请前往 https://saucenao.com/user.php?page=search-api 获取"))
+					return
 				}
 			}
-		})
-	engine.OnRegex(`^设置\s?saucenao\s?api\s?key\s?([0-9a-f]{40})$`, zero.SuperUserPermission, zero.OnlyPrivate).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			var err error
-			saucenaocli, err = gophersauce.NewClient(&gophersauce.Settings{
-				MaxResults: 1,
-				APIKey:     ctx.State["regex_matched"].([]string)[1],
-			})
-			if err != nil {
-				ctx.SendChain(message.Text("ERROR:", err))
-				return
-			}
-			err = os.WriteFile(apikeyfile, binary.StringToBytes(saucenaocli.APIKey), 0644)
-			if err != nil {
-				ctx.SendChain(message.Text("ERROR:", err))
-				return
-			}
-			ctx.SendChain(message.Text("成功!"))
 		})
 }

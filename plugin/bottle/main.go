@@ -33,7 +33,7 @@ var seaLocker sync.RWMutex
 func init() {
 	engine := control.Register("bottle", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
-		Help:              "基于driftbottle的魔改版漂流瓶\n",
+		Help:              "基于driftbottle的魔改版漂流瓶\n说明书: https://manual-lucy.himoyo.cn",
 		PrivateDataFolder: "bottle",
 	})
 	seaSide.DBPath = engine.DataFolder() + "sea.db"
@@ -73,7 +73,7 @@ func init() {
 			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
-		ctx.Send(message.ReplyWithMessage(ctx.Event.MessageID, message.Text("已经帮你丢出去了哦~")))
+		ctx.Send(message.ReplyWithMessage(ctx.Event.MessageID, message.Text("已经帮你丢出去了哦~,内容是\n", rawMessageCallBack)))
 	})
 }
 

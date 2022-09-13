@@ -14,7 +14,7 @@ import (
 )
 
 // debug
-var fail = "获取精华消息失败喵！"
+var fail = "获取精华消息失败喵~可能是这条信息在数据库中无法查询~"
 var limitinfo = rate.NewManager[int64](time.Minute*5, 1)
 
 func init() {

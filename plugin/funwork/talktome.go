@@ -19,7 +19,7 @@ const (
 var (
 	engine = control.Register("funwork", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
-		Help:              "Hi NekoPachi!\n",
+		Help:              "Hi NekoPachi!\n说明书: https://manual-lucy.himoyo.cn",
 		PrivateDataFolder: "funwork",
 	})
 )
