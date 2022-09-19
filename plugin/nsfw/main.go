@@ -22,7 +22,7 @@ const (
 
 var (
 	engine = control.Register("nsfw", &ctrl.Options[*zero.Ctx]{
-		DisableOnDefault:  false,
+		DisableOnDefault:  true,
 		Help:              "Hi NekoPachi!\n",
 		PrivateDataFolder: "nsfw",
 	})
