@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/rand"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -25,17 +24,9 @@ import (
 
 type kimo = map[string]*[]string
 
-const (
-	jpapi = "https://moegoe.azurewebsites.net/api/speak?text=%s&id=%d"
-)
-
 var (
-	poke     = rate.NewManager[int64](time.Minute*5, 8)  // 戳一戳
-	limit    = rate.NewManager[int64](time.Minute*3, 28) // 回复限制
-	speakers = map[string]uint{
-		"宁宁": 0, "爱瑠": 1, "芳乃": 2, "茉子": 3, "丛雨": 4, "小春": 5, "七海": 6,
-		"Sua": 0, "Mimiru": 1, "Arin": 2, "Yeonhwa": 3, "Yuhwa": 4, "Seonbae": 5,
-	}
+	poke   = rate.NewManager[int64](time.Minute*5, 8)  // 戳一戳
+	limit  = rate.NewManager[int64](time.Minute*3, 28) // 回复限制
 	img    = "file:///root/Lucy_Project/memes/"
 	engine = control.Register("chat", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault: false,
@@ -58,15 +49,6 @@ func init() { // 插件主体
 		for k := range kimomap {
 			chatList = append(chatList, k)
 		}
-
-		// 基于源酱的MoeGoe 只保留自己需要那一部分 (AzureAPI)
-		engine.OnRegex("^让(宁宁|爱瑠|芳乃|茉子|丛雨|小春|七海)说([A-Za-z\\s\\d\u3005\u3040-\u30ff\u4e00-\u9fff\uff11-\uff19\uff21-\uff3a\uff41-\uff5a\uff66-\uff9d\\pP]+)$").Limit(ctxext.LimitByGroup).SetBlock(true).
-			Handle(func(ctx *zero.Ctx) {
-				text := ctx.State["regex_matched"].([]string)[2]
-				id := speakers[ctx.State["regex_matched"].([]string)[1]]
-				ctx.SendChain(message.Record(fmt.Sprintf(jpapi, url.QueryEscape(text), id)))
-			})
-
 		engine.OnFullMatch("叫我", zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 			var relief extension.CommandModel
 			err := ctx.Parse(&relief)
@@ -112,11 +94,6 @@ func init() { // 插件主体
 					return
 				default:
 				}
-				lucky := rand.Intn(6)
-				if lucky == 0 && ctx.MessageString() == "笨蛋" {
-					process.SleepAbout1sTo2s()
-					ctx.Send(message.Record("file:///root/Lucy_Project/records/baka.ogg"))
-				}
 			})
 	}()
 	// 被喊名字
@@ -131,10 +108,6 @@ func init() { // 插件主体
 					"哼！" + nickname + "不想理你~",
 				}[rand.Intn(3)],
 			))
-			lucky := rand.Intn(6)
-			if lucky == 1 {
-				ctx.Send(message.Record("file:///root/Lucy_Project/records/hi.ogg"))
-			}
 			process.SleepAbout1sTo2s()
 			ctx.Send(message.Poke(ctx.Event.UserID))
 		})

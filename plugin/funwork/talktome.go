@@ -6,6 +6,7 @@ import (
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/ctxext"
+	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
@@ -26,13 +27,19 @@ var (
 
 // WorkON: APIWORK
 func init() {
-	engine.OnFullMatch("一言", zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		data, err := web.RequestDataWith(web.NewDefaultClient(), "https://ovooa.com/API/yiyan/api.php", "GET", Referer, ua)
+	engine.OnFullMatch("一言").Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		info, err := web.GetData("https://v1.hitokoto.cn/")
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.Send(message.Text("ERROR:", err))
 			return
 		}
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(helper.BytesToString(data)))
+		hitokoto := gjson.Get(helper.BytesToString(info), "hitokoto").String()
+		hitokotoFrom := gjson.Get(helper.BytesToString(info), "from").String()
+		hitokotoFromName := gjson.Get(helper.BytesToString(info), "from_who").String()
+		if hitokotoFromName == "null" {
+			hitokotoFromName = "未知"
+		}
+		ctx.SendChain(message.Text("!~Lucy帮你找到了这个www\n一言: ", hitokoto, "\n出处: ", hitokotoFrom, "\n作者: ", hitokotoFromName))
 	})
 
 	engine.OnFullMatch("动漫一言").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {

@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	backgroundURL = "https://dev.iw233.cn/api.php?sort=pc&type=json"
+	backgroundURL = "https://img.moehu.org/pic.php?id=pc&return=json"
 	signinMax     = 1
 	// SCOREMAX 分数上限定为600
 	SCOREMAX = 600
@@ -284,7 +284,7 @@ func initPic(picFile string) {
 		if err != nil {
 			log.Errorln("[score]", err)
 		}
-		picURL := gjson.Get(string(data), "pic.0").String()
+		picURL := gjson.Get(string(data), "acgurl").String()
 		data, err = web.GetData(picURL)
 		if err != nil {
 			log.Errorln("[score]", err)
