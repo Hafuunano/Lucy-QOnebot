@@ -316,7 +316,7 @@ func init() {
 				ctx.SendChain(message.At(uid), message.Text("\n今天你没有老婆哦"))
 				return
 			case status == 1: // 娶过别人
-				titleTarget := GetHonorTitle(*ctx, targetinfo.Target)
+				titleTarget := getUserHonorTitle(*ctx, targetinfo.Target)
 				cardTarget := ctx.CardOrNickName(targetinfo.Target)
 				ctx.SendChain(
 					message.At(uid),
@@ -324,13 +324,13 @@ func init() {
 					message.Image("http://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(targetinfo.Target, 10)+"&s=640").Add("cache", 0),
 					message.Text(
 						"\n",
-						titleTarget, " [", cardTarget, "]",
+						"(", titleTarget, ")", " [", cardTarget, "]",
 						"(", targetinfo.Target, ")哒",
 					),
 				)
 				return
 			case status == 0: // 嫁给别人
-				titleTarget := GetHonorTitle(*ctx, targetinfo.Target)
+				titleTarget := getUserHonorTitle(*ctx, targetinfo.Target)
 				cardTarget := ctx.CardOrNickName(targetinfo.Target)
 				ctx.SendChain(
 					message.At(uid),
@@ -338,7 +338,7 @@ func init() {
 					message.Image("http://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(targetinfo.User, 10)+"&s=640").Add("cache", 0),
 					message.Text(
 						"\n",
-						titleTarget, " [", cardTarget, "]",
+						"(", titleTarget, ")", " [", cardTarget, "]",
 						"(", targetinfo.Target, ")哒",
 					),
 				)

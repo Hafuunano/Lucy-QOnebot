@@ -1,7 +1,6 @@
 package funwork
 
 import (
-	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -56,13 +55,14 @@ func init() {
 			IDx := rand.Intn(essenceCount)
 			essenceMessage := essenceList.Array()[IDx]
 			var (
-				ID       = gjson.Get(essenceMessage.Raw, "sender_id")
+				ID       = gjson.Get(essenceMessage.Raw, "sender_id").Int()
 				nickname = gjson.Get(essenceMessage.Raw, "sender_nick")
 				msID     = gjson.Get(essenceMessage.Raw, "message_id")
 			)
 			ctx.GetGroupMessageHistory(ctx.Event.GroupID, msID.Int())
 			ms := ctx.GetMessage(message.NewMessageIDFromInteger(msID.Int()))
-			reportText := message.Text(fmt.Sprintf("!~Lucy抓取到了这一条~\n(精华消息)\n%s（%d）:\n", GetHonorTitle(*ctx, ID.Int())+nickname.String(), ID.Int()))
+			honorTitle := getUserHonorTitle(*ctx, ID)
+			reportText := message.Text("Lucy帮你抓到了这一条消息~\n[", honorTitle, "]", "(", nickname, ")")
 			report := make(message.Message, len(ms.Elements))
 			report = append(report, reportText)
 			report = append(report, ms.Elements...)
@@ -73,15 +73,12 @@ func init() {
 	})
 }
 
-// GetTitle 从 uid 获取【头衔】
-func GetHonorTitle(ctx zero.Ctx, uid int64) (title string) {
+func getUserHonorTitle(ctx zero.Ctx, uid int64) (title string) {
 	gmi := ctx.GetGroupMemberInfo(ctx.Event.GroupID, uid, true)
 	if titleStr := gjson.Get(gmi.Raw, "title").Str; titleStr == "" {
 		title = titleStr
 	} else {
-		title = fmt.Sprintf("[%s]", gjson.Get(gmi.Raw, "title").Str)
+		title = gjson.Get(gmi.Raw, "title").Str
 	}
 	return
 }
-
-// Unmaintainable code 早点删了
