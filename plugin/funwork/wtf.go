@@ -179,8 +179,8 @@ func init() {
 				return
 			}
 			// TODO: 可注入
-			delete := ctx.Send(text)
+			deleteMessage := ctx.Send(text)
 			time.Sleep(time.Second * 30)
-			ctx.DeleteMessage(delete)
+			ctx.DeleteMessage(deleteMessage)
 		})
 }

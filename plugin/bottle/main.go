@@ -95,7 +95,8 @@ func fetchBottle(db *sql.Sqlite) (*sea, error) {
 	return be, db.Pick("global", be)
 }
 
-func CreateChannel(db *sql.Sqlite) error { // 初始化
+// 初始化包
+func CreateChannel(db *sql.Sqlite) error {
 	seaLocker.Lock()
 	defer seaLocker.Unlock()
 	return db.Create("global", &sea{})

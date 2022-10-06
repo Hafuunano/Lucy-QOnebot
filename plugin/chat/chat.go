@@ -17,7 +17,6 @@ import (
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	zero "github.com/wdvxdr1123/ZeroBot"
-	"github.com/wdvxdr1123/ZeroBot/extension"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
@@ -49,11 +48,10 @@ func init() { // 插件主体
 		for k := range kimomap {
 			chatList = append(chatList, k)
 		}
-		engine.OnFullMatch("叫我", zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
-			var relief extension.CommandModel
-			err := ctx.Parse(&relief)
-			if relief.Args == "" {
-				ctx.Send(message.Text("好哦~那~咱该叫你什么呢ww"))
+		engine.OnRegex(`叫我.*?(.*)`, zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+			texts := ctx.State["regex_matched"].([]string)[1]
+			if texts == "" {
+				ctx.Send(message.Text("好哦~ 那~咱该叫你什么呢ww"))
 				nextstep := ctx.FutureEvent("message", ctx.CheckSession())
 				recv, cancel := nextstep.Repeat()
 				for i := range recv {
@@ -63,18 +61,18 @@ func init() { // 插件主体
 						return
 					}
 					if msg != "" {
-						relief.Args = msg
+						texts = msg
 						cancel()
 						continue
 					}
 				}
 			}
 			userID := strconv.FormatInt(ctx.Event.UserID, 10)
-			err = StoreUserNickname(userID, relief.Args)
+			err = StoreUserNickname(userID, texts)
 			if err != nil {
 				ctx.Send(message.Text("发生了一些不可预料的问题 请稍后再试,ERR: ", err))
 			}
-			ctx.Send(message.Text("好哦~", relief.Args, "\nちゃん~~~"))
+			ctx.Send(message.Text("好哦~", texts, "\nちゃん~~~"))
 		})
 		engine.OnFullMatchGroup(chatList, zero.OnlyToMe).SetBlock(true).Handle(
 			func(ctx *zero.Ctx) {
@@ -294,6 +292,9 @@ func StoreUserNickname(userID string, nickname string) error {
 	}
 	userNicknameData[userID] = nickname
 	newData, err := json.Marshal(userNicknameData)
+	if err != nil {
+		return err
+	}
 	_ = ioutil.WriteFile(filePath, newData, 0777)
 	return nil
 }

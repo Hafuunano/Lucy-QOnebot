@@ -1,4 +1,4 @@
-package kanban // package kanban
+package kanban // package kanban 初始化
 
 import (
 	"strings"
