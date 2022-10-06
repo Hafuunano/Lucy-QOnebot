@@ -196,7 +196,3 @@ func atriSleep(ctx *zero.Ctx) bool {
 func randText(text ...string) message.MessageSegment {
 	return message.Text(text[rand.Intn(len(text))])
 }
-
-func randMemes(file ...string) message.MessageSegment {
-	return message.Image(Lucyimg + file[rand.Intn(len(file))])
-}

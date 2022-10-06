@@ -61,12 +61,11 @@ func init() { // 插件主体
 					if StringInArray(msg, []string{"Lucy", "笨蛋", "老公", "猪", "夹子", "主人"}) {
 						ctx.Send(message.Text("这些名字可不好哦(敲)"))
 						return
-					} else {
-						if msg != "" {
-							relief.Args = msg
-							cancel()
-							continue
-						}
+					}
+					if msg != "" {
+						relief.Args = msg
+						cancel()
+						continue
 					}
 				}
 			}
@@ -86,7 +85,7 @@ func init() { // 插件主体
 					text := val[rand.Intn(len(val))]
 					userID := strconv.FormatInt(ctx.Event.UserID, 10)
 					userNickName := loadUserNickname(userID)
-					result := strings.Replace(text, "你", userNickName, -1)
+					result := strings.ReplaceAll(text, "你", userNickName)
 					process.SleepAbout1sTo2s()
 					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(result)) // 来自于 https://github.com/Kyomotoi/AnimeThesaurus 的回复 经过二次修改
 				case limit.Load(ctx.Event.UserID).Acquire():

@@ -11,8 +11,7 @@ import (
 )
 
 const (
-	servicename = "epidemic"
-	txurl       = "https://api.inews.qq.com/newsqa/v1/query/inner/publish/modules/list?modules=statisGradeCityDetail,diseaseh5Shelf"
+	txurl = "https://api.inews.qq.com/newsqa/v1/query/inner/publish/modules/list?modules=statisGradeCityDetail,diseaseh5Shelf"
 )
 
 // result 疫情查询结果

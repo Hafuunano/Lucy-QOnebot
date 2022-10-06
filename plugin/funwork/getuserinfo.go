@@ -53,7 +53,7 @@ func init() {
 		if essenceCount == 0 {
 			ctx.Send(fail)
 		} else {
-			IDx := rand.Intn(int(essenceCount))
+			IDx := rand.Intn(essenceCount)
 			essenceMessage := essenceList.Array()[IDx]
 			var (
 				ID       = gjson.Get(essenceMessage.Raw, "sender_id")
