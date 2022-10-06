@@ -15,11 +15,12 @@ import (
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/tools"   // 工具
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/atri" // atri
-	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/chat" // 回复
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/action" // action For Lucy触发
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/funwork" // 好玩的整合工具
+
+	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/chat" // 回复
 
 	"github.com/FloatTech/floatbox/process"
 	"github.com/sirupsen/logrus"

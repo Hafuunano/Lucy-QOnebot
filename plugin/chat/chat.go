@@ -50,18 +50,17 @@ func init() { // 插件主体
 		}
 		engine.OnRegex(`叫我.*?(.*)`, zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 			texts := ctx.State["regex_matched"].([]string)[1]
+			if StringInArray(texts, []string{"Lucy", "笨蛋", "老公", "猪", "夹子", "主人"}) {
+				ctx.Send(message.Text("这些名字可不好哦(敲)"))
+				return
+			}
 			if texts == "" {
 				ctx.Send(message.Text("好哦~ 那~咱该叫你什么呢ww"))
 				nextstep := ctx.FutureEvent("message", ctx.CheckSession())
 				recv, cancel := nextstep.Repeat()
 				for i := range recv {
-					msg := i.MessageString()
-					if StringInArray(msg, []string{"Lucy", "笨蛋", "老公", "猪", "夹子", "主人"}) {
-						ctx.Send(message.Text("这些名字可不好哦(敲)"))
-						return
-					}
-					if msg != "" {
-						texts = msg
+					texts := i.MessageString()
+					if texts != "" {
 						cancel()
 						continue
 					}
@@ -72,7 +71,7 @@ func init() { // 插件主体
 			if err != nil {
 				ctx.Send(message.Text("发生了一些不可预料的问题 请稍后再试,ERR: ", err))
 			}
-			ctx.Send(message.Text("好哦~", texts, "\nちゃん~~~"))
+			ctx.Send(message.Text("好哦~ ", texts, " ちゃん~~~"))
 		})
 		engine.OnFullMatchGroup(chatList, zero.OnlyToMe).SetBlock(true).Handle(
 			func(ctx *zero.Ctx) {
