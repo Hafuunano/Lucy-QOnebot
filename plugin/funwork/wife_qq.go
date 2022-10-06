@@ -26,7 +26,7 @@ import (
 
 // 已经改成屎山的模样了 人和代码有一个能跑就行
 
-// nolint: asciicheck
+//nolint: asciicheck
 type 婚姻登记 struct {
 	db   *sql.Sqlite
 	dbmu sync.RWMutex
