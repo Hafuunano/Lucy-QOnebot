@@ -60,6 +60,7 @@ func init() { // 插件主体
 					msg := i.MessageString()
 					if StringInArray(msg, []string{"Lucy", "笨蛋", "老公", "猪", "夹子", "主人"}) {
 						ctx.Send(message.Text("这些名字可不好哦(敲)"))
+						return
 					} else {
 						if msg != "" {
 							relief.Args = msg
