@@ -24,11 +24,6 @@ import (
 	"github.com/fogleman/gg"
 )
 
-<<<<<<< HEAD
-=======
-// 已经改成屎山的模样了 人和代码有一个能跑就行
-
->>>>>>> 2780622c21a9b306ba431068d002accd74c9376b
 // nolint: asciicheck
 type 婚姻登记 struct {
 	db   *sql.Sqlite
