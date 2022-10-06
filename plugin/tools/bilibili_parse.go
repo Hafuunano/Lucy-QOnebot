@@ -154,6 +154,7 @@ func getrealurl(url string) (realurl string, err error) {
 		return
 	}
 	realurl = data.Request.URL.String()
+	defer data.Body.Close()
 	return
 }
 

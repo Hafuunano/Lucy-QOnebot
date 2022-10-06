@@ -156,6 +156,7 @@ func init() { // 插件主体
 							if s > 80.0 {
 								continue
 							}
+							defer resp.Body.Close()
 						}
 					}
 				} else {

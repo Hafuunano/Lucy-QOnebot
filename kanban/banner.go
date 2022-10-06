@@ -1,4 +1,4 @@
-package kanban
+package kanban // package kanban
 
 import (
 	"strings"

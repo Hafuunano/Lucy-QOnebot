@@ -88,12 +88,6 @@ func (be *sea) throw(db *sql.Sqlite) error {
 	return db.Insert("global", be)
 }
 
-func (be *sea) destory(db *sql.Sqlite) error {
-	seaLocker.Lock()
-	defer seaLocker.Unlock()
-	return db.Del("global", "WHERE id="+strconv.FormatInt(be.ID, 10))
-}
-
 func fetchBottle(db *sql.Sqlite) (*sea, error) {
 	seaLocker.Lock()
 	defer seaLocker.Unlock()
@@ -101,7 +95,7 @@ func fetchBottle(db *sql.Sqlite) (*sea, error) {
 	return be, db.Pick("global", be)
 }
 
-func CreateChannel(db *sql.Sqlite) error {
+func CreateChannel(db *sql.Sqlite) error { // 初始化
 	seaLocker.Lock()
 	defer seaLocker.Unlock()
 	return db.Create("global", &sea{})

@@ -1,4 +1,4 @@
-package action
+package action // action for Lucy
 
 import (
 	"math/rand"
@@ -16,7 +16,7 @@ import (
 
 var (
 	limit   = rate.NewManager[int64](time.Minute*10, 15)
-	Lucyimg = "file:///root/Lucy_Project/memes/"
+	Lucyimg = "file:///root/Lucy_Project/memes/" // lucy的meme表情包地址
 )
 
 func init() {
