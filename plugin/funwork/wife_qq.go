@@ -330,8 +330,8 @@ func init() {
 				)
 				return
 			case status == 0: // 嫁给别人
-				titleTarget := getUserHonorTitle(*ctx, targetinfo.Target)
-				cardTarget := ctx.CardOrNickName(targetinfo.Target)
+				titleTarget := getUserHonorTitle(*ctx, targetinfo.User)
+				cardTarget := ctx.CardOrNickName(targetinfo.User)
 				ctx.SendChain(
 					message.At(uid),
 					message.Text("\n今天你被娶了，群老公是"),
@@ -339,7 +339,7 @@ func init() {
 					message.Text(
 						"\n",
 						"(", titleTarget, ")", " [", cardTarget, "]",
-						"(", targetinfo.Target, ")哒",
+						"(", targetinfo.User, ")哒",
 					),
 				)
 				return
