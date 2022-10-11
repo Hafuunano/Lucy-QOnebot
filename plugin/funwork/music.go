@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/FloatTech/floatbox/web"
-
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -131,11 +130,11 @@ func kugou(keyword string) message.MessageSegment {
 
 // cloud163 返回网易云音乐卡片
 func cloud163(keyword string) (msg message.MessageSegment) {
-	requestURL := "https://autumnfish.cn/search?keywords=" + url.QueryEscape(keyword)
+	requestURL := "http://music.163.com/api/search/get/web?type=1&limit=1&s=" + url.QueryEscape(keyword)
 	data, err := web.GetData(requestURL)
+	var webStatusCode *http.Response
 	if err != nil {
-		msg = message.Text("ERROR:", err)
-		return
+		fmt.Print("ERR:", webStatusCode.StatusCode)
 	}
 	msg = message.Music("163", gjson.ParseBytes(data).Get("result.songs.0.id").Int())
 	return

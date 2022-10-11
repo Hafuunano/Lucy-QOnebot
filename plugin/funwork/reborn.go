@@ -3,11 +3,11 @@ package funwork
 
 import (
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 
 	"encoding/json"
 
-	"github.com/FloatTech/floatbox/file"
 	wr "github.com/mroth/weightedrand"
 	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -68,7 +68,7 @@ func init() {
 
 // load 加载rate数据
 func load(area *ratego, jsonfile string) error {
-	data, err := file.GetLazyData(jsonfile, true)
+	data, err := ioutil.ReadFile(jsonfile)
 	if err != nil {
 		return err
 	}

@@ -1,7 +1,8 @@
-package funwork
+package score
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"strconv"
 	"time"
@@ -9,6 +10,8 @@ import (
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/floatbox/web"
+	ctrl "github.com/FloatTech/zbpctrl"
+	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/img"
 	"github.com/FloatTech/zbputils/img/text"
@@ -30,10 +33,15 @@ const (
 	SCOREMAX = 600
 )
 
-var levelArray = [...]int{0, 1, 2, 5, 10, 20, 35, 55, 75, 100, 120, 180, 260, 360, 480, 600}
-
-// sdb 得分数据库
-var sdb *scoredb
+var (
+	levelArray = [...]int{0, 1, 2, 5, 10, 20, 35, 55, 75, 100, 120, 180, 260, 360, 480, 600}
+	sdb        *scoredb
+	engine     = control.Register("score", &ctrl.Options[*zero.Ctx]{
+		DisableOnDefault:  false,
+		Help:              "Hi NekoPachi!\n说明书: https://manual-lucy.himoyo.cn",
+		PrivateDataFolder: "score",
+	})
+)
 
 // scoredb 分数数据库
 type scoredb gorm.DB
@@ -42,6 +50,7 @@ type scoredb gorm.DB
 type scoretable struct {
 	UID   int64 `gorm:"column:uid;primary_key"`
 	Score int   `gorm:"column:score;default:0"`
+	Coins int   `gorm:"column:coins;default:0"`
 }
 
 // TableName ...
@@ -53,6 +62,7 @@ func (scoretable) TableName() string {
 type signintable struct {
 	UID       int64 `gorm:"column:uid;primary_key"`
 	Count     int   `gorm:"column:count;default:0"`
+	Coins     int   `gorm:"column:coins;default:0"`
 	UpdatedAt time.Time
 }
 
@@ -69,29 +79,26 @@ func init() {
 			today := now.Format("20060102")
 			si := sdb.GetSignInByUID(uid)
 			drawedFile := cachePath + strconv.FormatInt(uid, 10) + today + "signin.png"
-
 			picFile := cachePath + strconv.FormatInt(uid, 10) + today + ".png"
 			initPic(picFile)
 			siUpdateTimeStr := si.UpdatedAt.Format("20060102")
 			if si.Count >= signinMax && siUpdateTimeStr == today {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天你已经签到过了w"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("酱~ 你今天已经抢到过了哦w"))
 				if file.IsExist(drawedFile) {
 					ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
 				}
 				return
 			}
-
 			back, err := gg.LoadImage(picFile)
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR:", err, "\n获取图片出错 请重试"))
+				ctx.SendChain(message.Text("ERROR:", err, "\nLoading Pic ERROR"))
 				return
 			}
 			if siUpdateTimeStr != today {
-				_ = sdb.InsertOrUpdateSignInCountByUID(uid, 0)
+				_ = sdb.InsertOrUpdateSignInCountByUID(uid, 0, 0)
 			}
-
-			_ = sdb.InsertOrUpdateSignInCountByUID(uid, si.Count+1)
-
+			coinsGet := rand.Intn(100)
+			_ = sdb.InsertOrUpdateSignInCountByUID(uid, si.Count+1, si.Coins+coinsGet)
 			// 避免图片过大，最大 1280*720
 			back = img.Limit(back, 1280, 720)
 
@@ -99,9 +106,8 @@ func init() {
 			canvas.SetRGB(1, 1, 1)
 			canvas.Clear()
 			canvas.DrawImage(back, 0, 0)
-
 			monthWord := now.Format("01/02")
-			hourWord := getHourWord(now)
+			hourWord, handleMsg := getHourWord(now)
 			_, err = file.GetLazyData(text.BoldFontFile, false)
 			if err != nil {
 				ctx.SendChain(message.Text("ERROR:", err))
@@ -128,13 +134,9 @@ func init() {
 			canvas.DrawString(nickName+fmt.Sprintf(" 签到天数+%d", add), float64(back.Bounds().Size().X)*0.1, float64(back.Bounds().Size().Y)*1.3)
 			score := sdb.GetScoreByUID(uid).Score
 			score += add
-			if score > SCOREMAX {
-				score = SCOREMAX
-				ctx.SendChain(message.At(uid), message.Text("你获得的小熊饼干已经达到上限"))
-			}
-			_ = sdb.InsertOrUpdateScoreByUID(uid, score)
+			_ = sdb.InsertOrUpdateScoreByUID(uid, score, coinsGet)
 			level := getLevel(score)
-			canvas.DrawString("当前签到天数:"+strconv.FormatInt(int64(score), 10), float64(back.Bounds().Size().X)*0.1, float64(back.Bounds().Size().Y)*1.4)
+			canvas.DrawString("当前签到天数:"+strconv.FormatInt(int64(score), 10)+"  |  柠檬片 + "+strconv.FormatInt(int64(coinsGet), 10)+" 片", float64(back.Bounds().Size().X)*0.1, float64(back.Bounds().Size().Y)*1.4)
 			canvas.DrawString("LEVEL:"+strconv.FormatInt(int64(level), 10), float64(back.Bounds().Size().X)*0.1, float64(back.Bounds().Size().Y)*1.5)
 			canvas.DrawRectangle(float64(back.Bounds().Size().X)*0.1, float64(back.Bounds().Size().Y)*1.55, float64(back.Bounds().Size().X)*0.6, float64(back.Bounds().Size().Y)*0.1)
 			canvas.SetRGB255(150, 150, 150)
@@ -166,6 +168,8 @@ func init() {
 				return
 			}
 			ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
+			time.Sleep(time.Second * 5)
+			ctx.SendChain(message.At(ctx.Event.UserID), message.Text("\n"), message.Text(handleMsg))
 		})
 	engine.OnPrefix("获得签到背景", zero.OnlyGroup).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
@@ -178,10 +182,11 @@ func init() {
 			}
 			picFile := cachePath + uidStr + time.Now().Format("20060102") + ".png"
 			if file.IsNotExist(picFile) {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请先签到！"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天你还没有签到哦w"))
 				return
 			}
 			ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + picFile))
+			os.Remove(picFile)
 		})
 	engine.OnFullMatch("查看签到排名", zero.OnlyGroup).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
@@ -248,23 +253,35 @@ func init() {
 			}
 			ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
 		})
+
+	engine.OnFullMatch("柠檬片总数", zero.OnlyGroup).Handle(func(ctx *zero.Ctx) {
+		uid := ctx.Event.UserID
+		si := sdb.GetSignInByUID(uid)
+		ctx.SendChain(message.Text("您的柠檬片数量一共是: ", si.Coins))
+	})
 }
 
-func getHourWord(t time.Time) string {
+func getHourWord(t time.Time) (sign string, reply string) {
 	switch {
-	case 6 <= t.Hour() && t.Hour() < 12:
-		return "早上好"
+	case 5 <= t.Hour() && t.Hour() < 12:
+		sign = "早上好"
+		reply = "今天又是新的一天呢ww"
 	case 12 <= t.Hour() && t.Hour() < 14:
-		return "中午好"
+		sign = "中午好"
+		reply = "吃饭了嘛w 如果没有快去吃饭哦w"
 	case 14 <= t.Hour() && t.Hour() < 19:
-		return "下午好"
+		sign = "下午好"
+		reply = "记得多去补点水哦~ 适当的时候可以出去转转ww"
 	case 19 <= t.Hour() && t.Hour() < 24:
-		return "晚上好"
-	case 0 <= t.Hour() && t.Hour() < 6:
-		return "凌晨好"
+		sign = "晚上好"
+		reply = "今天过的开心嘛ww"
+	case 0 <= t.Hour() && t.Hour() < 5:
+		sign = "凌晨好"
+		reply = "快去睡觉哦w 不然Lucy会生气的x"
 	default:
-		return ""
+		sign = ""
 	}
+	return
 }
 
 func getLevel(count int) int {
@@ -333,12 +350,13 @@ func (sdb *scoredb) GetScoreByUID(uid int64) (s scoretable) {
 	return s
 }
 
-// InsertOrUpdateScoreByUID 插入或更新分数
-func (sdb *scoredb) InsertOrUpdateScoreByUID(uid int64, score int) (err error) {
+// InsertOrUpdateScoreByUID 插入或更新打卡累计 + 签到分数(随机化)
+func (sdb *scoredb) InsertOrUpdateScoreByUID(uid int64, score int, coins int) (err error) {
 	db := (*gorm.DB)(sdb)
 	s := scoretable{
 		UID:   uid,
 		Score: score,
+		Coins: coins,
 	}
 	if err = db.Debug().Model(&scoretable{}).First(&s, "uid = ? ", uid).Error; err != nil {
 		// error handling...
@@ -362,11 +380,12 @@ func (sdb *scoredb) GetSignInByUID(uid int64) (si signintable) {
 }
 
 // InsertOrUpdateSignInCountByUID 插入或更新签到次数
-func (sdb *scoredb) InsertOrUpdateSignInCountByUID(uid int64, count int) (err error) {
+func (sdb *scoredb) InsertOrUpdateSignInCountByUID(uid int64, count int, coins int) (err error) {
 	db := (*gorm.DB)(sdb)
 	si := signintable{
 		UID:   uid,
 		Count: count,
+		Coins: coins,
 	}
 	if err = db.Debug().Model(&signintable{}).First(&si, "uid = ? ", uid).Error; err != nil {
 		// error handling...
@@ -377,6 +396,7 @@ func (sdb *scoredb) InsertOrUpdateSignInCountByUID(uid int64, count int) (err er
 		err = db.Debug().Model(&signintable{}).Where("uid = ? ", uid).Update(
 			map[string]interface{}{
 				"count": count,
+				"Coins": coins,
 			}).Error
 	}
 	return

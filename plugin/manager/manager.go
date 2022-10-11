@@ -15,7 +15,6 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 
 	"github.com/FloatTech/floatbox/math"
-	"github.com/FloatTech/floatbox/process"
 	sql "github.com/FloatTech/sqlite"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/ctxext"
@@ -105,26 +104,26 @@ func init() { // 插件主体
 
 	engine.OnFullMatch("打我", zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
-			process.SleepAbout1sTo2s()
+			time.Sleep(time.Second * 2)
 			ctx.SendChain(message.Text("给你一拳~"))
-			process.SleepAbout1sTo2s()
+			time.Sleep(time.Second * 1)
 			ctx.SetGroupBan(
 				ctx.Event.GroupID,
 				ctx.Event.UserID,
 				1*60)
-			process.SleepAbout1sTo2s()
+			time.Sleep(time.Second * 1)
 			ctx.SendChain(message.Text("两拳~"))
 			ctx.SetGroupBan(
 				ctx.Event.GroupID,
 				ctx.Event.UserID,
 				4*60)
-			process.SleepAbout1sTo2s()
+			time.Sleep(time.Second * 1)
 			ctx.SendChain(message.Text("三拳~"))
 			ctx.SetGroupBan(
 				ctx.Event.GroupID,
 				ctx.Event.UserID,
 				8*60)
-			process.SleepAbout1sTo2s()
+			time.Sleep(time.Second * 1)
 			ctx.SendChain(message.Text("够了嘛 bakaꐦ≖ ≖"))
 		})
 
@@ -513,6 +512,26 @@ func init() { // 插件主体
 				return
 			}
 			ctx.SendChain(message.Text("找不到服务!"))
+		})
+
+	engine.OnFullMatch("优质睡眠", zero.OnlyToMe, zero.OnlyGroup).SetBlock(true).
+		Handle(func(ctx *zero.Ctx) {
+			dyn := time.Now().Hour()
+			if dyn < 23 && dyn >= 4 {
+				ctx.SendChain(message.Text("还没有到时间哦~ 请11点后再来w"))
+				return
+			}
+			if zero.AdminPermission(ctx) {
+				ctx.Send(message.Text("怪哦 咱可不能禁言诶("))
+			} else {
+				ctx.SetGroupBan(
+					ctx.Event.GroupID,
+					ctx.Event.UserID,
+					8*3600,
+				)
+				ctx.SendChain(message.Text("一键提供优质睡眠服务~"))
+			}
+
 		})
 }
 

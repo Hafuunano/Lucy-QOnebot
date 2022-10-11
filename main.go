@@ -20,6 +20,8 @@ import (
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/funwork" // 好玩的整合工具
 
+	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/score" // 签到
+
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/chat" // 回复
 
 	"github.com/FloatTech/floatbox/process"

@@ -21,9 +21,8 @@ const (
 
 var (
 	engine = control.Register("nsfw", &ctrl.Options[*zero.Ctx]{
-		DisableOnDefault:  true,
-		Help:              "Hi NekoPachi!\n",
-		PrivateDataFolder: "nsfw",
+		DisableOnDefault: true,
+		Help:             "Hi NekoPachi!\n",
 	})
 
 	limit = rate.NewManager[int64](time.Minute*3, 8)
@@ -34,7 +33,7 @@ func init() {
 		if !limit.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
-		if rand.Intn(4) == 1 {
+		if rand.Intn(8) == 1 {
 			data, err := web.GetData(api)
 			if err != nil {
 				ctx.SendChain(message.Text("ERROR:", err))
