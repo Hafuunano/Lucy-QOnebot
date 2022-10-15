@@ -532,7 +532,6 @@ func init() { // 插件主体
 				)
 				ctx.SendChain(message.Text("一键提供优质睡眠服务~"))
 			}
-
 		})
 }
 
