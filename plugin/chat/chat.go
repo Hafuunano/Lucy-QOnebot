@@ -4,18 +4,17 @@ package chat
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/FloatTech/zbputils/ctxext"
-
+	name "github.com/FloatTech/ZeroBot-Plugin/dependence/name"
 	"github.com/FloatTech/floatbox/process"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
+	"github.com/FloatTech/zbputils/ctxext"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -50,7 +49,7 @@ func init() { // 插件主体
 		}
 		engine.OnRegex(`叫我.*?(.*)`, zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 			texts := ctx.State["regex_matched"].([]string)[1]
-			if StringInArray(texts, []string{"Lucy", "笨蛋", "老公", "猪", "夹子", "主人"}) {
+			if name.StringInArray(texts, []string{"Lucy", "笨蛋", "老公", "猪", "夹子", "主人"}) {
 				ctx.Send(message.Text("这些名字可不好哦(敲)"))
 				return
 			}
@@ -63,11 +62,13 @@ func init() { // 插件主体
 					if texts != "" {
 						cancel()
 						continue
+					} else {
+						return
 					}
 				}
 			}
 			userID := strconv.FormatInt(ctx.Event.UserID, 10)
-			err = StoreUserNickname(userID, texts)
+			err = name.StoreUserNickname(userID, texts)
 			if err != nil {
 				ctx.Send(message.Text("发生了一些不可预料的问题 请稍后再试,ERR: ", err))
 			}
@@ -81,7 +82,7 @@ func init() { // 插件主体
 					val := *kimomap[key]
 					text := val[rand.Intn(len(val))]
 					userID := strconv.FormatInt(ctx.Event.UserID, 10)
-					userNickName := loadUserNickname(userID)
+					userNickName := name.LoadUserNickname(userID)
 					result := strings.ReplaceAll(text, "你", userNickName)
 					process.SleepAbout1sTo2s()
 					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(result)) // 来自于 https://github.com/Kyomotoi/AnimeThesaurus 的回复 经过二次修改
@@ -262,56 +263,4 @@ func randText(text ...string) message.MessageSegment {
 
 func randImage(file ...string) message.MessageSegment {
 	return message.Image(img + file[rand.Intn(len(file))])
-}
-
-// 参考了GO-ATRI计划 https://github.com/Kyomotoi/go-ATRI
-func StringInArray(aim string, list []string) bool {
-	for _, i := range list {
-		if i == aim {
-			return true
-		}
-	}
-	return false
-}
-
-func StoreUserNickname(userID string, nickname string) error {
-	var userNicknameData map[string]interface{}
-	filePath := engine.DataFolder() + "users.json"
-	data, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			_ = ioutil.WriteFile(filePath, []byte("{}"), 0777)
-		} else {
-			return err
-		}
-	}
-	err = json.Unmarshal(data, &userNicknameData)
-	if err != nil {
-		return err
-	}
-	userNicknameData[userID] = nickname
-	newData, err := json.Marshal(userNicknameData)
-	if err != nil {
-		return err
-	}
-	_ = ioutil.WriteFile(filePath, newData, 0777)
-	return nil
-}
-
-func loadUserNickname(userID string) string {
-	var d map[string]string
-	filePath := engine.DataFolder() + "users.json"
-	data, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return "你"
-	}
-	err = json.Unmarshal(data, &d)
-	if err != nil {
-		return "你"
-	}
-	result := d[userID]
-	if result == "" {
-		result = "你"
-	}
-	return result
 }

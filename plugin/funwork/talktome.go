@@ -2,7 +2,13 @@
 package funwork
 
 import (
+	"math/rand"
+	"os"
+	"strconv"
+	"time"
+
 	"github.com/FloatTech/floatbox/web"
+	sql "github.com/FloatTech/sqlite"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/ctxext"
@@ -12,12 +18,18 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 )
 
+type tiangou struct {
+	ID   uint32 `db:"id"`
+	Text string `db:"text"`
+}
+
 const (
 	ua      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36"
 	Referer = "https://manual-lucy.himoyo.cn"
 )
 
 var (
+	db     = &sql.Sqlite{}
 	engine = control.Register("funwork", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
 		Help:              "Hi NekoPachi!\n说明书: https://manual-lucy.himoyo.cn",
@@ -43,7 +55,7 @@ func init() {
 	})
 
 	engine.OnFullMatch("动漫一言").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		data, err := web.RequestDataWith(web.NewDefaultClient(), "http://ovooa.com/API/dmyiyan/api.php", "GET", Referer, ua)
+		data, err := web.RequestDataWith(web.NewDefaultClient(), "https://v1.hitokoto.cn/?c=a&c=b&encode=text", "GET", Referer, ua)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR:", err))
 			return
@@ -53,7 +65,7 @@ func init() {
 
 	engine.OnFullMatch("来份网易云热评").SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {
-			data, err := web.RequestDataWith(web.NewDefaultClient(), "https://ovooa.com/API/wyrp/api.php?type=text", "GET", Referer, ua)
+			data, err := web.RequestDataWith(web.NewDefaultClient(), "https://v1.hitokoto.cn/?c=j&encode=text", "GET", Referer, ua)
 			if err != nil {
 				ctx.SendChain(message.Text("ERROR:", err))
 				return
@@ -61,28 +73,51 @@ func init() {
 			ctx.SendChain(message.Text(helper.BytesToString(data)))
 		})
 	engine.OnFullMatch("舔狗日记").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		data, err := web.RequestDataWith(web.NewDefaultClient(), "https://ovooa.com/API/tgrj/api.php", "GET", Referer, ua)
+		db.DBPath = engine.DataFolder() + "tiangou.db"
+		_, err := engine.GetLazyData("tiangou.db", true)
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(helper.BytesToString(data)))
+		err = db.Open(time.Hour * 24)
+		if err != nil {
+			ctx.SendChain(message.Text("ERROR: ", err))
+			return
+		}
+		err = db.Create("tiangou", &tiangou{})
+		if err != nil {
+			ctx.SendChain(message.Text("ERROR: ", err))
+			return
+		}
+		var t tiangou
+		err = db.Pick("tiangou", &t)
+		if err != nil {
+			ctx.SendChain(message.Text("ERROR: ", err))
+			return
+		}
+		ctx.SendChain(message.Text(t.Text))
 	})
 
-	engine.OnFullMatch("哄我").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		data, err := web.RequestDataWith(web.NewDefaultClient(), "https://ovooa.com/API/wryl/api.php", "GET", Referer, ua)
-		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
-			return
-		}
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(helper.BytesToString(data)))
-	})
 	engine.OnFullMatch("答案之书").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		data, err := web.RequestDataWith(web.NewDefaultClient(), "http://ovooa.com/API/daan/api?type=text", "GET", Referer, ua)
+		data, err := os.ReadFile(engine.DataFolder() + "answers.json")
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
 			return
 		}
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(helper.BytesToString(data)))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("好的,可以和咱说下是什么问题呢"))
+		nextstep := ctx.FutureEvent("message", ctx.CheckSession())
+		recv, cancel := nextstep.Repeat()
+		for i := range recv {
+			texts := i.MessageString()
+			if texts != "" {
+				cancel()
+				continue
+			} else {
+				return
+			}
+		}
+		answerListInt := rand.Intn(268)
+		answerListStr := strconv.Itoa(answerListInt)
+		answer := gjson.Get(helper.BytesToString(data), answerListStr+".answer")
+		ctx.SendChain(message.Text(answer))
 	})
 }

@@ -74,12 +74,12 @@ func init() {
 		Handle(func(ctx *zero.Ctx) {
 			var mutex sync.RWMutex // 添加读写锁以保证稳定性
 			mutex.Lock()
-
-			yiyan, err := web.RequestDataWith(web.NewDefaultClient(), "http://ovooa.com/API/yiyan/api.php", "GET", Referer, ua)
+			yiyanRaw, err := web.RequestDataWith(web.NewDefaultClient(), "https://v1.hitokoto.cn/", "GET", Referer, ua)
 			if err != nil {
 				return
-			} // 获取一言
-
+			}
+			// 获取一言
+			yiyan := gjson.Get(helper.BytesToString(yiyanRaw), "hitokoto")
 			p := rand.Intn(2)
 			i := rand.Intn(78)
 			card := cardMap[(strconv.Itoa(i))]
@@ -141,7 +141,7 @@ func init() {
 					message.Text("今日的人品值为", result[user]),
 					message.Text(jrrpbk),
 					message.Text("\n今日一言:\n"),
-					message.Text(helper.BytesToString(yiyan), "\n"),
+					message.Text(yiyan, "\n"),
 					message.Text("今日塔罗牌是: \n归类于", cardtype, reasons[rand.Intn(len(reasons))], position[p], " 的 ", name, "\n"),
 					message.Image(bed+cardurl),
 					message.Text("\n其意义为：\n", info, "\n", vme50))
@@ -163,7 +163,6 @@ func init() {
 						}
 						picURL := gjson.Get(string(img), "data.0.urls.original").String()
 						time.Sleep(time.Second * 3)
-
 						deleteme := ctx.SendChain(message.At(user), message.Text("\n这是今日奖励哦"), message.Text(picURL))
 						time.Sleep(time.Second * 20)
 						ctx.DeleteMessage(deleteme)
