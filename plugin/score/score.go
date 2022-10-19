@@ -195,7 +195,6 @@ func init() {
 				return
 			}
 			ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + picFile))
-
 		})
 
 		// 借鉴了其他bot的功能 编写而成

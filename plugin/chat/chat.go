@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	name "github.com/FloatTech/ZeroBot-Plugin/dependence/name"
 	"github.com/FloatTech/floatbox/process"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
@@ -18,6 +17,8 @@ import (
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"github.com/wdvxdr1123/ZeroBot/message"
+
+	name "github.com/FloatTech/ZeroBot-Plugin/dependence/name"
 )
 
 type kimo = map[string]*[]string
