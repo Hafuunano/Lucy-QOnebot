@@ -44,7 +44,7 @@ func init() {
 			time.Sleep(time.Second * 20)
 			ctx.DeleteMessage(messageID)
 		} else {
-			ctx.Send(message.Text([]string{"看什么看！咱没有涩图 哼!", "只有笨蛋才看涩图", "好孩子是不会看涩图的", "敲~笨蛋 不许色色", "咱觉得你需要通过别的方式放松哦，而不是看涩图"}[rand.Intn(5)]))
+			ctx.Send(message.Text([]string{"看什么看！咱没有涩图 哼!", "只有笨蛋才看涩图", "好孩子是不会看涩图的", "敲~笨蛋 不许色色", "为什么要看涩图呢?"}[rand.Intn(5)]))
 		}
 	})
 }

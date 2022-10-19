@@ -7,6 +7,8 @@ package atri
 
 import (
 	"math/rand"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/FloatTech/floatbox/process"
@@ -30,7 +32,6 @@ func init() { // 插件主体
 			"- 没事 | 没关系 | 大丈夫 | 还好 | 不要紧 | 没出大问题 | 没伤到哪\n- 好吗 | 是吗 | 行不行 | 能不能 | 可不可以\n- 啊这\n- 我好了\n- ？ | ? | ¿\n" +
 			"- 离谱\n- 答应我",
 	})
-
 	zero.OnFullMatch("Lucy醒醒", zero.AdminPermission).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			c, ok := control.Lookup(servicename)
@@ -56,7 +57,7 @@ func init() { // 插件主体
 			process.SleepAbout1sTo2s()
 			switch {
 			case now < 6: // 凌晨
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), randText(
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), RandWithReplaceName(ctx,
 					"zzzz......",
 					"zzzzzzzz......",
 					"zzz...好涩哦..zzz....",
@@ -65,7 +66,7 @@ func init() { // 插件主体
 					"...zzz....哧溜哧溜....",
 				))
 			case now >= 6 && now < 9:
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), randText(
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), RandWithReplaceName(ctx,
 					"啊......早上好...(哈欠)",
 					"唔......吧唧...早上...哈啊啊~~~\n早上好......",
 					"早上好......",
@@ -78,7 +79,7 @@ func init() { // 插件主体
 					"早安~祝你的坏心情被Lucy带走~~~(*/ω＼*)",
 				))
 			case now >= 9 && now < 18:
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), randText(
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), RandWithReplaceName(ctx,
 					"哼！这个点还早啥，昨晚干啥去了！？",
 					"熬夜了对吧熬夜了对吧熬夜了对吧？？？！",
 					"是不是熬夜是不是熬夜是不是熬夜？！",
@@ -86,7 +87,7 @@ func init() { // 插件主体
 					"哼！ 这个点起床 一定是熬夜了！(｀･∪･´)",
 				))
 			case now >= 18 && now < 24:
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), randText(
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), RandWithReplaceName(ctx,
 					"早个啥？哼唧！Lucy都准备洗洗睡了！",
 					"不是...你看看几点了，哼！",
 					"晚上好哇",
@@ -100,7 +101,7 @@ func init() { // 插件主体
 			now := time.Now().Hour()
 			if now > 11 && now < 15 { // 中午
 				process.SleepAbout1sTo2s()
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), randText(
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), RandWithReplaceName(ctx,
 					"午安w",
 					"午觉要好好睡哦，Lucy会陪伴在你身旁的w",
 					"嗯哼哼~睡吧，就像平常一样安眠吧~o(≧▽≦)o",
@@ -114,32 +115,32 @@ func init() { // 插件主体
 			process.SleepAbout1sTo2s()
 			switch {
 			case now < 6: // 凌晨
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), randText(
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), RandWithReplaceName(ctx,
 					"zzzz......",
 					"zzzzzzzz......",
 					"...zzz....哧溜哧溜....",
 				))
 			case now >= 6 && now < 11:
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), randText(
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), RandWithReplaceName(ctx,
 					"？啊这",
 					"亲，这边建议赶快去睡觉呢~~~",
 					"? 你知道现在几点了嘛 \n还不快去睡觉~",
 				))
 			case now >= 11 && now < 15:
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), randText(
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), RandWithReplaceName(ctx,
 					"午安w",
 					"午觉要好好睡哦，Lucy会陪伴在你身旁的w",
 					"嗯哼哼~睡吧，就像平常一样安眠吧~o(≧▽≦)o",
 					"睡你午觉去！哼唧！！",
 				))
 			case now >= 15 && now < 19:
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), randText(
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), RandWithReplaceName(ctx,
 					"难不成？？晚上不想睡觉？？现在休息",
 					"就......挺离谱的...现在睡觉",
 					"现在还是白天哦，睡觉还太早了",
 				))
 			case now >= 19 && now < 24:
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), randText(
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), RandWithReplaceName(ctx,
 					"嗯哼哼~睡吧，就像平常一样安眠吧~o(≧▽≦)o",
 					"......(打瞌睡)",
 					"呼...呼...已经睡着了哦~...呼......",
@@ -150,7 +151,7 @@ func init() { // 插件主体
 	engine.OnKeywordGroup([]string{"高性能", "太棒了", "すごい", "sugoi", "斯国一", "よかった"}, atriSleep, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			process.SleepAbout1sTo2s()
-			ctx.SendChain(randText(
+			ctx.SendChain(RandWithReplaceName(ctx,
 				"当然，Lucy是高性能的嘛~！",
 				"小事一桩，Lucy是高性能的嘛",
 				"怎么样？还是Lucy比较高性能吧？",
@@ -172,7 +173,7 @@ func init() { // 插件主体
 	engine.OnKeywordGroup([]string{"没事", "没关系", "大丈夫", "还好", "不要紧", "没出大问题", "没伤到哪"}, atriSleep, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			process.SleepAbout1sTo2s()
-			ctx.SendChain(randText(
+			ctx.SendChain(RandWithReplaceName(ctx,
 				"当然，Lucy是高性能的嘛~！",
 				"没事没事，因为Lucy是高性能的嘛！嗯哼！",
 				"没事的，因为Lucy是高性能的呢！",
@@ -193,6 +194,10 @@ func atriSleep(ctx *zero.Ctx) bool {
 	return true
 }
 
-func randText(text ...string) message.MessageSegment {
-	return message.Text(text[rand.Intn(len(text))])
+func RandWithReplaceName(ctx *zero.Ctx, text ...string) message.MessageSegment {
+	getNum := rand.Intn(len(text))
+	nameStr := strconv.FormatInt(ctx.Event.UserID, 10)
+	needToReplace := text[getNum]
+	output := strings.ReplaceAll(needToReplace, "你", nameStr)
+	return message.Text(output)
 }

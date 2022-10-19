@@ -34,7 +34,7 @@ func init() {
 			process.SleepAbout1sTo2s()
 			switch rand.Intn(5) {
 			case 0:
-				ctx.SendChain(randText("?", "？", "嗯？", "(。´・ω・)ん?", "ん？"))
+				ctx.SendChain(RandText("?", "？", "嗯？", "(。´・ω・)ん?", "ん？"))
 			case 1, 2:
 				ctx.SendChain(randImage("cats.jpg", "322E8EBA2B08815460119BE93342E33B.png", "111.jpg"))
 			}
@@ -48,7 +48,7 @@ func init() {
 			switch rand.Intn(2) {
 			case 0:
 
-				ctx.SendChain(randText("（一种植物）", "ん？"))
+				ctx.SendChain(RandText("（一种植物）", "ん？"))
 			case 1, 2:
 				ctx.SendChain(randImage("5cee2a0f5dc32a114b1a9d3f60314e5e.jpg", "R-C.jpeg", "hikari.jpg"))
 			}
@@ -60,7 +60,7 @@ func init() {
 			}
 			switch rand.Intn(3) {
 			case 0:
-				ctx.SendChain(randText("?", "？", "ん？"))
+				ctx.SendChain(RandText("?", "？", "ん？"))
 			case 1, 2:
 				ctx.SendChain(randImage("-33ee3a0711f11810.jpg", "111.jpg"))
 			}
@@ -84,7 +84,7 @@ func init() {
 		Handle(func(ctx *zero.Ctx) {
 			switch rand.Intn(2) {
 			case 0:
-				ctx.SendChain(randText("喵喵~", "喵w~"))
+				ctx.SendChain(RandText("喵喵~", "喵w~"))
 			case 1:
 				ctx.SendChain(randImage("6152277811454.jpg", "meow.jpg", "ww.jpg"))
 			}
@@ -94,7 +94,7 @@ func init() {
 			if !limit.Load(ctx.Event.GroupID).Acquire() {
 				return
 			}
-			ctx.SendChain(randText("抓到一只鸽子OwO", "是鸽子 炖了~", "咕咕咕", "不许咕咕咕"))
+			ctx.SendChain(RandText("抓到一只鸽子OwO", "是鸽子 炖了~", "咕咕咕", "不许咕咕咕"))
 		})
 		// 114514
 	engine.OnRegex(`^我要(.*)份涩图`, zero.OnlyGroup).SetBlock(true).
@@ -114,7 +114,7 @@ func init() {
 		})
 }
 
-func randText(text ...string) message.MessageSegment {
+func RandText(text ...string) message.MessageSegment {
 	return message.Text(text[rand.Intn(len(text))])
 }
 

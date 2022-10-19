@@ -50,7 +50,7 @@ func init() {
 		Handle(func(ctx *zero.Ctx) {
 			city := ctx.State["args"].(string)
 			if city == "" {
-				ctx.SendChain(message.Text("你还没有输入城市名字呢！"))
+				ctx.SendChain(message.Text("还没有输入城市名字哦"))
 				return
 			}
 			data, time, err := queryEpidemic(city)

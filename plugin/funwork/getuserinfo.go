@@ -2,7 +2,6 @@ package funwork
 
 import (
 	"math/rand"
-	"strconv"
 	"time"
 
 	"github.com/FloatTech/zbputils/ctxext"
@@ -17,7 +16,7 @@ var fail = "获取精华消息失败喵~可能是这条信息在数据库中无�
 var limitinfo = rate.NewManager[int64](time.Minute*5, 1)
 
 func init() {
-	engine.OnRegex(`^查找信息(\d+)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	/* engine.OnRegex(`^查找信息(\d+)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		if !limitinfo.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
@@ -37,6 +36,7 @@ func init() {
 		// userLevel := gjson.Get(tempUserInfo, "level")
 		ctx.SendChain(message.Text("你查询的人为: ", userName, "\n性别:", userSexInfo, "\n最后一次发送信息时间 :", userLastSendTIme, "\n加入时间:", userJoinTime, "\n是否有不友好记录:", userUnfriendly, "\n头衔:", userHonorTitle))
 	})
+	*/
 	engine.OnFullMatch("今日龙王", zero.OnlyGroup).Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		list := ctx.GetGroupHonorInfo(ctx.Event.GroupID, "talkative")
 		temp := list.String()

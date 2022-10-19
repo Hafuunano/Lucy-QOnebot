@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"github.com/FloatTech/floatbox/binary"
 	sql "github.com/FloatTech/sqlite"
@@ -58,9 +59,14 @@ func init() {
 	})
 
 	engine.OnRegex(`throw.*?(.*)`, zero.OnlyToMe, zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		senderFormatTime := time.Unix(ctx.Event.Time, 0).Format("2006-01-02 15:04:05")
 		rawSenderMessage := ctx.State["regex_matched"].([]string)[1]
 		rawMessageCallBack := message.UnescapeCQCodeText(rawSenderMessage)
+		keyWordsNum := utf8.RuneCountInString(rawMessageCallBack)
+		if keyWordsNum < 10 {
+			ctx.SendChain(message.Text("需要投递的内容过少("))
+			return
+		}
+		senderFormatTime := time.Unix(ctx.Event.Time, 0).Format("2006-01-02 15:04:05")
 		// check current needs and prepare to throw bottle.
 		err = globalbottle(
 			ctx.Event.UserID,

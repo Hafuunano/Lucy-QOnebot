@@ -51,7 +51,7 @@ func init() {
 		if hitokotoFromName == "null" {
 			hitokotoFromName = "未知"
 		}
-		ctx.SendChain(message.Text("!~Lucy帮你找到了这个www\n一言: ", hitokoto, "\n出处: ", hitokotoFrom, "\n作者: ", hitokotoFromName))
+		ctx.SendChain(message.Text("!~Lucy找到了这个www\n一言: ", hitokoto, "\n出处: ", hitokotoFrom, "\n作者: ", hitokotoFromName))
 	})
 
 	engine.OnFullMatch("动漫一言").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {

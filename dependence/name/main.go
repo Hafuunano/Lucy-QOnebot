@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-// 参考了GO-ATRI计划 https://github.com/Kyomotoi/go-ATRI
+// 检查列表是否有关键词 https://github.com/Kyomotoi/go-ATRI
 func StringInArray(aim string, list []string) bool {
 	for _, i := range list {
 		if i == aim {

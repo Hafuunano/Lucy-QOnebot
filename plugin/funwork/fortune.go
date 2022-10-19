@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"sync"
-
-	"math/rand"
 	"strconv"
+	"strings"
+	"sync"
 	"time"
 
+	"math/rand"
+
+	tools "github.com/FloatTech/ZeroBot-Plugin/dependence/name"
 	fcext "github.com/FloatTech/floatbox/ctxext"
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/zbputils/control"
@@ -135,11 +137,13 @@ func init() {
 				case result[user] == 100:
 					jrrpbk = "[大吉]\n#好诶~Lucy给你递了张彩票"
 				}
-
+				// Format handle process.
+				outputUserName := tools.LoadUserNickname(userS)
+				replaceUserFormatJrrp := strings.ReplaceAll(jrrpbk, "你", outputUserName)
 				ctx.SendChain(message.At(user),
-					message.Text(fmt.Sprintf("\n%s\nLucy正在帮你整理~\n", uptime)),
+					message.Text(fmt.Sprintf("\n%s\nLucy正在帮%s整理哦~\n", uptime, outputUserName)),
 					message.Text("今日的人品值为", result[user]),
-					message.Text(jrrpbk),
+					message.Text(replaceUserFormatJrrp),
 					message.Text("\n今日一言:\n"),
 					message.Text(yiyan, "\n"),
 					message.Text("今日塔罗牌是: \n归类于", cardtype, reasons[rand.Intn(len(reasons))], position[p], " 的 ", name, "\n"),
