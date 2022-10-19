@@ -227,7 +227,7 @@ func init() {
 			ctx.SendChain(message.Reply(uid), message.Text("本次参与的柠檬片不够哦~请多多打卡w"))
 			return
 		}
-		all := rand.Intn(38) // 一共37种可能性
+		all := rand.Intn(39) // 一共37种可能性
 		referpg := pgs[(strconv.Itoa(all))]
 		getName := referpg.Name
 		getCoinsStr := referpg.Coins
@@ -253,6 +253,10 @@ func init() {
 			return
 		}
 		TargetInt, _ := strconv.ParseInt(ctx.State["regex_matched"].([]string)[2], 10, 64)
+		if TargetInt == ctx.Event.UserID {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("哈? 干嘛骗自己的?坏蛋哦"))
+			return
+		}
 		uid := ctx.Event.UserID
 		siEventUser := sdb.GetSignInByUID(uid)        // 获取主用户目前状况信息
 		SiTargetUser := sdb.GetSignInByUID(TargetInt) // 获得被抢用户目前情况信息
@@ -278,6 +282,6 @@ func init() {
 		_ = sdb.InsertOrUpdateSignInCountByUID(siEventUser.UID, 0, siEventUser.Coins+modifyCoins)
 		time.Sleep(time.Second * 2)
 		_ = sdb.InsertOrUpdateSignInCountByUID(SiTargetUser.UID, 0, SiTargetUser.Coins-modifyCoins)
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("试着去拿走 ", eventTargetName, " 的柠檬片时,被成功了.\n所以 ", eventTargetName, " 得到了 ", modifyCoins, " 个柠檬片\n\n同时 ", eventUserName, " 失去了 ", modifyCoins, " 个柠檬片"))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("试着去拿走 ", eventTargetName, " 的柠檬片时,成功了.\n所以 ", eventUserName, " 得到了 ", modifyCoins, " 个柠檬片\n\n同时 ", eventTargetName, " 失去了 ", modifyCoins, " 个柠檬片"))
 	})
 }
