@@ -223,13 +223,13 @@ func init() { // 插件主体
 			duration := math.Str2Int64(ctx.State["regex_matched"].([]string)[2])
 			switch ctx.State["regex_matched"].([]string)[3] {
 			case "分钟", "min", "mins", "m":
-				break
+				duration *= 1
 			case "小时", "hour", "hours", "h":
 				duration *= 60
 			case "天", "day", "days", "d":
 				duration *= 60 * 24
 			default:
-				break
+				duration *= 0
 			}
 			if duration == 114514 {
 				ctx.Send(message.Text("好臭的数字a.a 不许用."))

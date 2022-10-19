@@ -25,7 +25,6 @@ import (
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/chat" // 回复
 
 	"github.com/FloatTech/floatbox/process"
-	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/driver"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -34,8 +33,6 @@ import (
 
 func init() {
 	sus := make([]int64, 0, 16)
-	d := flag.Bool("d", false, "Enable debug level log and higher.")
-	w := flag.Bool("w", false, "Enable warning level log and higher.")
 	h := flag.Bool("h", false, "Display this help.")
 	token := flag.String("t", "", "Set AccessToken of WSClient.")
 	url := flag.String("u", "ws://127.0.0.1:6700", "Set Url of WSClient.")
@@ -49,13 +46,6 @@ func init() {
 		fmt.Println("Usage:")
 		flag.PrintDefaults()
 		os.Exit(0)
-	} else {
-		if *d && !*w {
-			logrus.SetLevel(logrus.DebugLevel)
-		}
-		if *w {
-			logrus.SetLevel(logrus.WarnLevel)
-		}
 	}
 
 	for _, s := range flag.Args() {
