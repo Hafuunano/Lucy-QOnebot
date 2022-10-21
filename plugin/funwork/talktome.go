@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/FloatTech/floatbox/web"
 	sql "github.com/FloatTech/sqlite"
@@ -73,29 +72,8 @@ func init() {
 			ctx.SendChain(message.Text(helper.BytesToString(data)))
 		})
 	engine.OnFullMatch("舔狗日记").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		db.DBPath = engine.DataFolder() + "tiangou.db"
-		_, err := engine.GetLazyData("tiangou.db", true)
-		if err != nil {
-			ctx.SendChain(message.Text("ERROR: ", err))
-			return
-		}
-		err = db.Open(time.Hour * 24)
-		if err != nil {
-			ctx.SendChain(message.Text("ERROR: ", err))
-			return
-		}
-		err = db.Create("tiangou", &tiangou{})
-		if err != nil {
-			ctx.SendChain(message.Text("ERROR: ", err))
-			return
-		}
-		var t tiangou
-		err = db.Pick("tiangou", &t)
-		if err != nil {
-			ctx.SendChain(message.Text("ERROR: ", err))
-			return
-		}
-		ctx.SendChain(message.Text(t.Text))
+		index, _ := web.GetData("https://ovooa.com/API/tgrj/api.php")
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(helper.BytesToString(index)))
 	})
 
 	engine.OnFullMatch("答案之书").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {

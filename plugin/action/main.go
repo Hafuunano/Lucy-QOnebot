@@ -47,7 +47,6 @@ func init() {
 			}
 			switch rand.Intn(2) {
 			case 0:
-
 				ctx.SendChain(RandText("（一种植物）", "ん？"))
 			case 1, 2:
 				ctx.SendChain(randImage("5cee2a0f5dc32a114b1a9d3f60314e5e.jpg", "R-C.jpeg", "hikari.jpg"))

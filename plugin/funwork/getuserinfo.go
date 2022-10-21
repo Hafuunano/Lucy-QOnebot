@@ -62,7 +62,7 @@ func init() {
 			ctx.GetGroupMessageHistory(ctx.Event.GroupID, msID.Int())
 			ms := ctx.GetMessage(message.NewMessageIDFromInteger(msID.Int()))
 			honorTitle := getUserHonorTitle(*ctx, ID)
-			reportText := message.Text("Lucy帮你抓到了这一条消息~\n[", honorTitle, "]", "(", nickname, ")")
+			reportText := message.Text("Lucy抓到了这一条消息~\n[", honorTitle, "]", "(", nickname, ")")
 			report := make(message.Message, len(ms.Elements))
 			report = append(report, reportText)
 			report = append(report, ms.Elements...)

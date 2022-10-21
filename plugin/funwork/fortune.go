@@ -12,6 +12,7 @@ import (
 
 	"math/rand"
 
+	tools "github.com/FloatTech/ZeroBot-Plugin/dependence/name"
 	fcext "github.com/FloatTech/floatbox/ctxext"
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/zbputils/control"
@@ -19,8 +20,6 @@ import (
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
-
-	tools "github.com/FloatTech/ZeroBot-Plugin/dependence/name"
 )
 
 const (
@@ -103,6 +102,7 @@ func init() {
 			var si string = now + userS // 合成
 			dyn := time.Now().Hour()
 			weeks := time.Now().Weekday()
+			outputUserName := tools.LoadUserNickname(userS)
 			switch {
 			case dyn <= 6 && dyn >= 0:
 				uptime = "凌晨好~还没有睡觉呢~再不睡觉的话咱把你敲晕~" // 计算是早上还是晚上
@@ -120,9 +120,8 @@ func init() {
 			} else {
 				vme50 = ""
 			}
-
+			uptime = strings.ReplaceAll(uptime, "你", outputUserName)
 			// CTRL C + CTRL V
-
 			if signTF[si] == 0 {
 				signTF[si] = (1)
 				result[user] = (randEveryone)
@@ -138,13 +137,12 @@ func init() {
 				case result[user] == 100:
 					jrrpbk = "[大吉]\n#好诶~Lucy给你递了张彩票"
 				}
+				jrrpbk = strings.ReplaceAll(jrrpbk, "你", outputUserName)
 				// Format handle process.
-				outputUserName := tools.LoadUserNickname(userS)
-				replaceUserFormatJrrp := strings.ReplaceAll(jrrpbk, "你", outputUserName)
 				ctx.SendChain(message.At(user),
 					message.Text(fmt.Sprintf("\n%s\nLucy正在帮%s整理哦~\n", uptime, outputUserName)),
 					message.Text("今日的人品值为", result[user]),
-					message.Text(replaceUserFormatJrrp),
+					message.Text(jrrpbk),
 					message.Text("\n今日一言:\n"),
 					message.Text(yiyan, "\n"),
 					message.Text("今日塔罗牌是: \n归类于", cardtype, reasons[rand.Intn(len(reasons))], position[p], " 的 ", name, "\n"),

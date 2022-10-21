@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/FloatTech/ZeroBot-Plugin/dependence/name"
 	"github.com/FloatTech/floatbox/process"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
@@ -196,8 +197,9 @@ func atriSleep(ctx *zero.Ctx) bool {
 
 func RandWithReplaceName(ctx *zero.Ctx, text ...string) message.MessageSegment {
 	getNum := rand.Intn(len(text))
-	nameStr := strconv.FormatInt(ctx.Event.UserID, 10)
+	IDStr := strconv.FormatInt(ctx.Event.UserID, 10)
 	needToReplace := text[getNum]
-	output := strings.ReplaceAll(needToReplace, "你", nameStr)
+	getName := name.LoadUserNickname(IDStr)
+	output := strings.ReplaceAll(needToReplace, "你", getName)
 	return message.Text(output)
 }
