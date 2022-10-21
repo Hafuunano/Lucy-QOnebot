@@ -22,10 +22,10 @@ type partygame struct {
 
 var (
 	pgs          = make(pg, 256)
-	RateLimit    = rate.NewManager[int64](time.Second*60, 9)
-	CheckLimit   = rate.NewManager[int64](time.Minute*1, 4)
-	CatchLimit   = rate.NewManager[int64](time.Hour*1, 8)
-	processLimit = rate.NewManager[int64](time.Hour*1, 3)
+	RateLimit    = rate.NewManager[int64](time.Second*60, 9) // time setup
+	CheckLimit   = rate.NewManager[int64](time.Minute*1, 4)  // time setup
+	CatchLimit   = rate.NewManager[int64](time.Hour*1, 8)    // time setup
+	processLimit = rate.NewManager[int64](time.Hour*1, 3)    // time setup
 )
 
 type pg = map[string]partygame
@@ -57,7 +57,7 @@ func init() {
 		si := sdb.GetSignInByUID(uid) // 获取用户目前状况信息
 		userCurrentCoins := si.Coins  // loading coins status
 		checkEnoughCoins := checkUserCoins(userCurrentCoins)
-		if checkEnoughCoins == false {
+		if !checkEnoughCoins {
 			ctx.SendChain(message.Reply(uid), message.Text("本次参与的柠檬片不够哦~请多多打卡w"))
 			return
 		}
@@ -141,21 +141,21 @@ func init() {
 		uid := ctx.Event.UserID
 		siEventUser := sdb.GetSignInByUID(uid)        // 获取主用户目前状况信息
 		siTargetUser := sdb.GetSignInByUID(TargetInt) // 获得被抢用户目前情况信息
-		if siTargetUser.Coins < int(modifyCoins) {
+		if siTargetUser.Coins < modifyCoins {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("太坏了~试图的对象貌似没有足够多的柠檬片~"))
 			return
 		}
 		switch {
-		case siTargetUser.Coins < int(modifyCoins):
+		case siTargetUser.Coins < modifyCoins:
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("太坏了~试图的对象貌似没有足够多的柠檬片~"))
 			return
-		case siEventUser.Coins < int(modifyCoins):
+		case siEventUser.Coins < modifyCoins:
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("貌似你需要有那么多数量的柠檬片哦w"))
 			return
 		}
 		eventUserName := ctx.CardOrNickName(uid)
 		eventTargetName := ctx.CardOrNickName(TargetInt)
-		if rand.Intn(2100)/int(2100-modifyCoins) != 0 { // failed
+		if rand.Intn(2100)/2100-modifyCoins != 0 { // failed
 			doubledModifyNum := modifyCoins * 2
 			if doubledModifyNum > siEventUser.Coins {
 				doubledModifyNum = siEventUser.Coins

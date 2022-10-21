@@ -16,6 +16,7 @@ func StringInArray(aim string, list []string) bool {
 	return false
 }
 
+// Store names in jsons
 func StoreUserNickname(userID string, nickname string) error {
 	var userNicknameData map[string]interface{}
 	filePath := "file:///root/Lucy_Project/workon/main/data/zbp/users.json"
@@ -40,6 +41,7 @@ func StoreUserNickname(userID string, nickname string) error {
 	return nil
 }
 
+// Load UserNames(if had.)
 func LoadUserNickname(userID string) string {
 	var d map[string]string
 	filePath := "/root/Lucy_Project/workon/main/data/zbp/users.json"

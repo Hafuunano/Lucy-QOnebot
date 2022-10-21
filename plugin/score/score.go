@@ -1,4 +1,4 @@
-package score
+package score // package score
 
 import (
 	"fmt"
