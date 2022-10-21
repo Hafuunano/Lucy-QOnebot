@@ -47,17 +47,14 @@ func LoadUserNickname(userID string) string {
 	filePath := "/root/Lucy_Project/workon/main/data/zbp/users.json"
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
-
 		return "你"
 	}
 	err = json.Unmarshal(data, &d)
 	if err != nil {
-
 		return "你"
 	}
 	result := d[userID]
 	if result == "" {
-
 		result = "你"
 	}
 	return result

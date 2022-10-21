@@ -201,6 +201,5 @@ func init() {
 		_ = sdb.InsertOrUpdateSignInCountByUID(siEventUser.UID, 0, siEventUser.Coins-modifyCoins)
 		time.Sleep(time.Second * 2)
 		_ = sdb.InsertOrUpdateSignInCountByUID(siTargetUser.UID, 0, siTargetUser.Coins+modifyCoins)
-
 	})
 }
