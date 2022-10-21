@@ -86,7 +86,7 @@ func init() {
 			}
 			back, err := gg.LoadImage(picFile)
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR:", err, "\nLoading Pic ERROR"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERROR:", err, "\nloading picture err , cannot draw."))
 				return
 			}
 			if siUpdateTimeStr != today {

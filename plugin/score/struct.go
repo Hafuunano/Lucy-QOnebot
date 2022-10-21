@@ -1,10 +1,10 @@
 package score
 
 import (
+	"io/ioutil"
 	"os"
 	"time"
 
-	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/web"
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
@@ -151,7 +151,8 @@ func getLevel(count int) int {
 }
 
 func initPic(picFile string) {
-	if file.IsNotExist(picFile) {
+	content, _ := ioutil.ReadFile(picFile)
+	if len(content) == 0 {
 		data, err := web.GetData(backgroundURL)
 		if err != nil {
 			log.Errorln("[score]", err)
