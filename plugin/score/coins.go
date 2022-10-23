@@ -155,7 +155,7 @@ func init() {
 		}
 		eventUserName := ctx.CardOrNickName(uid)
 		eventTargetName := ctx.CardOrNickName(TargetInt)
-		if rand.Intn(2100)/2100-modifyCoins != 0 { // failed
+		if rand.Intn(2100)/modifyCoins != 0 { // failed
 			doubledModifyNum := modifyCoins * 2
 			if doubledModifyNum > siEventUser.Coins {
 				doubledModifyNum = siEventUser.Coins
