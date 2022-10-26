@@ -1,4 +1,4 @@
-package score // package score
+package score // Package score
 
 import (
 	"fmt"
@@ -46,7 +46,6 @@ type scoredb gorm.DB
 type scoretable struct {
 	UID   int64 `gorm:"column:uid;primary_key"`
 	Score int   `gorm:"column:score;default:0"`
-	Coins int   `gorm:"column:coins;default:0"`
 }
 
 // TableName ...
@@ -75,7 +74,7 @@ func init() {
 			si := sdb.GetSignInByUID(uid)
 			drawedFile := cachePath + strconv.FormatInt(uid, 10) + today + "signin.png"
 			picFile := cachePath + strconv.FormatInt(uid, 10) + today + ".png"
-			initPic(picFile)
+			initPic(ctx, picFile)
 			siUpdateTimeStr := si.UpdatedAt.Format("20060102")
 			if si.Count >= signinMax && siUpdateTimeStr == today {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("酱~ 你今天已经签到过了哦w"))
@@ -90,10 +89,11 @@ func init() {
 				return
 			}
 			if siUpdateTimeStr != today {
-				_ = sdb.InsertOrUpdateSignInCountByUID(uid, 0, 0)
+				_ = sdb.InsertOrUpdateSignInCountByUID(uid, 0)
 			}
 			coinsGet := rand.Intn(100)
-			_ = sdb.InsertOrUpdateSignInCountByUID(uid, si.Count+1, si.Coins+coinsGet)
+			_ = sdb.InsertUserCoins(uid, si.Coins+coinsGet)
+			_ = sdb.InsertOrUpdateSignInCountByUID(uid, si.Count+1)
 			// 避免图片过大，最大 1280*720
 			back = img.Limit(back, 1280, 720)
 
@@ -129,7 +129,7 @@ func init() {
 			canvas.DrawString(nickName+fmt.Sprintf(" 签到天数+%d", add), float64(back.Bounds().Size().X)*0.1, float64(back.Bounds().Size().Y)*1.3)
 			score := sdb.GetScoreByUID(uid).Score
 			score += add
-			_ = sdb.InsertOrUpdateScoreByUID(uid, score, coinsGet)
+			_ = sdb.InsertOrUpdateScoreByUID(uid, score)
 			level := getLevel(score)
 			canvas.DrawString("当前签到天数:"+strconv.FormatInt(int64(score), 10)+"  |  柠檬片 + "+strconv.FormatInt(int64(coinsGet), 10)+" 片", float64(back.Bounds().Size().X)*0.1, float64(back.Bounds().Size().Y)*1.4)
 			canvas.DrawString("LEVEL:"+strconv.FormatInt(int64(level), 10)+" | "+handleMsg, float64(back.Bounds().Size().X)*0.1, float64(back.Bounds().Size().Y)*1.5)
@@ -147,7 +147,6 @@ func init() {
 			canvas.SetRGB255(102, 102, 102)
 			canvas.Fill()
 			canvas.DrawString(fmt.Sprintf("%d/%d", score, nextLevelScore), float64(back.Bounds().Size().X)*0.75, float64(back.Bounds().Size().Y)*1.62)
-
 			f, err := os.Create(drawedFile)
 			if err != nil {
 				log.Errorln("[score]", err)
@@ -165,7 +164,7 @@ func init() {
 			ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
 			time.Sleep(time.Second * 5)
 		})
-	engine.OnPrefix("获得签到背景", zero.OnlyGroup).SetBlock(true).
+	engine.OnFullMatch("获得打卡背景", zero.OnlyGroup).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			param := ctx.State["args"].(string)
 			var uidStr string
@@ -176,7 +175,7 @@ func init() {
 			}
 			picFile := cachePath + uidStr + time.Now().Format("20060102") + ".png"
 			if file.IsNotExist(picFile) {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天你还没有签到哦w"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天你还没有打卡哦w"))
 				return
 			}
 			ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + picFile))

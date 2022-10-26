@@ -1,12 +1,11 @@
-package name // 获取名字
+package name // Package name 获取名字
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 )
 
-// 检查列表是否有关键词 https://github.com/Kyomotoi/go-ATRI
+// StringInArray 检查列表是否有关键词 https://github.com/Kyomotoi/go-ATRI
 func StringInArray(aim string, list []string) bool {
 	for _, i := range list {
 		if i == aim {
@@ -16,14 +15,14 @@ func StringInArray(aim string, list []string) bool {
 	return false
 }
 
-// Store names in jsons
+// StoreUserNickname Store names in jsons
 func StoreUserNickname(userID string, nickname string) error {
 	var userNicknameData map[string]interface{}
 	filePath := "file:///root/Lucy_Project/workon/main/data/zbp/users.json"
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			_ = ioutil.WriteFile(filePath, []byte("{}"), 0777)
+			_ = os.WriteFile(filePath, []byte("{}"), 0777)
 		} else {
 			return err
 		}
@@ -37,15 +36,15 @@ func StoreUserNickname(userID string, nickname string) error {
 	if err != nil {
 		return err
 	}
-	_ = ioutil.WriteFile(filePath, newData, 0777)
+	_ = os.WriteFile(filePath, newData, 0777)
 	return nil
 }
 
-// Load UserNames(if had.)
+// LoadUserNickname Load UserNames(if had.)
 func LoadUserNickname(userID string) string {
 	var d map[string]string
 	filePath := "/root/Lucy_Project/workon/main/data/zbp/users.json"
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return "你"
 	}

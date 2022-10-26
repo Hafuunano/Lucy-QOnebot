@@ -120,7 +120,7 @@ func init() { // 插件主体
 				// 5分钟共8块命令牌 一次消耗3块命令牌
 				time.Sleep(time.Second * 1)
 				ctx.SendChain(message.Text([]string{"请不要戳" + nickname + " >_<", "再戳也不会理你的哦！", "别以为人家会搭理哦！",
-					"呜…别戳了…", "别戳了！", "喵~", "有笨蛋在戳我，我不说是谁", "达咩呦，达咩达咩", "好怪..你不要过来啊啊啊啊啊", "别戳啦！"}[rand.Intn(10)]))
+					"呜…别戳了…", "别戳了！", "喵~", "有笨蛋在戳我，我不说是谁", "达咩呦，达咩达咩", "哼!不许戳啦 大笨蛋", "别戳啦！", "有笨蛋~让咱看看是谁"}[rand.Intn(11)]))
 			case poke.Load(ctx.Event.GroupID).Acquire():
 				// 5分钟共8块命令牌 一次消耗1块命令牌
 				time.Sleep(time.Second * 1)
@@ -143,7 +143,7 @@ func init() { // 插件主体
 				ctx.Send(message.Poke(ctx.Event.UserID))
 			} else {
 				process.SleepAbout1sTo2s()
-				ctx.Send(message.Text("哼！Lucy才不想戳你"))
+				ctx.Send(message.Text("哼！Lucy才不想戳"))
 			}
 		})
 
@@ -198,23 +198,23 @@ func init() { // 插件主体
 			}
 		})
 	// 针对于自己的添加w 我很懒不要打我a.a
-	engine.OnKeywordGroup([]string{"会什么"}, zero.OnlyToMe).SetBlock(true).
+	engine.OnKeywordGroup([]string{"会什么", "用法"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(RandText(
-				"麻烦看一下说明书惹 群内发送lucy.help即可w",
+			ctx.SendChain(randImage("file_3492331.jpg"), RandText(
+				"可以试着发送Lucy.help呢(",
 			))
 		})
 	engine.OnFullMatch("捏脸", zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(RandText("大笨蛋！不许捏٩(๑`^´๑)۶", "疼....不许这样！哼！"), randImage("26329371069850.jpg"))
+			ctx.SendChain(RandText("大笨蛋！不许捏٩(๑`^´๑)۶", "疼....不许这样！哼！"), randImage("26329371069850.jpg", "2941750127783.jpg", "2OTN7BQ_1`YOPRH89[K{W8N.jpg"))
 		})
 	engine.OnFullMatch("摸头", zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(randImage("6126814446620.jpg", "kawaii.jpg"), RandText("咱超可爱的w"))
+			ctx.SendChain(randImage("6126814446620.jpg", "$OUXKWYM4LYHXT6)9I1WR5W.jpg", "file_3492330.jpg", "file_3491851.jpg", "file_3492333.jpg"), RandText("咱超可爱的w"))
 		})
 	engine.OnFullMatch("敲我", zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(randImage("797198491dc98e4f.jpg"))
+			ctx.SendChain(randImage("797198491dc98e4f.jpg", "file_3492319.jpg", "file_3492325.jpg"))
 			process.SleepAbout1sTo2s()
 			ctx.Send(randImage("6170420371656.jpg"))
 			process.SleepAbout1sTo2s()
@@ -234,20 +234,20 @@ func init() { // 插件主体
 		})
 	engine.OnFullMatch("摸摸", zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(RandText("啾啾~", "呼呼~", "摸摸~"), randImage("22b530369f3c0fdd.jpg"))
+			ctx.SendChain(RandText("啾啾~", "呼呼~", "摸摸~"), randImage("8256CAEDA0E96A12875487BF2073256E.gif", "load.jpg", "-33ee3a0711f11810.jpg"))
 		})
 	engine.OnFullMatchGroup([]string{"呼呼", "抱抱"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(randImage("26329502616465.jpg", "sleep.jpg"))
+			ctx.SendChain(randImage("1ce0f012eded2538.gif", "61KWD{AMBW[B3_AGSWJ6~}6.jpg", "wwwss.jpg"))
 		})
 	engine.OnFullMatch("抱住", zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(randImage("22b530369f3c0fdd.jpg", "6126814446620.jpg", "wwwss.jpg"))
+			ctx.SendChain(randImage("3006028784945.jpg", "6126814446620.jpg", "2948706690280.jpg"))
 		})
 	engine.OnFullMatch("举高高", zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			process.SleepAbout1sTo2s()
-			ctx.SendChain(message.Text("哼！才不让举高高呢"), randImage("dcf07a381f30e9240bf68c845b086e061c95f72a.jpg"))
+			ctx.SendChain(message.Text("哼！才不让举高高呢"), randImage("file_3492332.jpg"))
 		})
 	engine.OnKeywordGroup([]string{"MoYoez", "MoeMagicMango"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
@@ -255,7 +255,7 @@ func init() { // 插件主体
 		})
 	engine.OnFullMatchGroup([]string{"是笨蛋"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(randImage("sasda.jpg", "55D0B4A5E335FE55A924E71469F35AC7.png"))
+			ctx.SendChain(randImage("SNDNYSG004[GH[E%$PJ~VCT.jpg", "55D0B4A5E335FE55A924E71469F35AC7.png", "file_3492326.jpg"))
 		})
 }
 func RandText(text ...string) message.MessageSegment {

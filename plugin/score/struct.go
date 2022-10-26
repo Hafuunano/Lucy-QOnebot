@@ -1,14 +1,15 @@
 package score
 
 import (
-	"io/ioutil"
+	"github.com/FloatTech/floatbox/web"
+	"github.com/tidwall/gjson"
+	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/message"
 	"os"
 	"time"
 
-	"github.com/FloatTech/floatbox/web"
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
-	"github.com/tidwall/gjson"
 )
 
 func init() {
@@ -32,7 +33,13 @@ func initialize(dbpath string) *scoredb {
 		if err != nil {
 			return nil
 		}
-		defer f.Close()
+		defer func(f *os.File) {
+			err := f.Close()
+			if err != nil {
+				panic(err)
+			}
+		}(f)
+
 	}
 	gdb, err := gorm.Open("sqlite3", dbpath)
 	if err != nil {
@@ -55,13 +62,12 @@ func (sdb *scoredb) GetScoreByUID(uid int64) (s scoretable) {
 	return s
 }
 
-// InsertOrUpdateScoreByUID 插入或更新打卡累计 + 签到分数(随机化)
-func (sdb *scoredb) InsertOrUpdateScoreByUID(uid int64, score int, coins int) (err error) {
+// InsertOrUpdateScoreByUID 插入或更新打卡累计 初始化更新临时保存
+func (sdb *scoredb) InsertOrUpdateScoreByUID(uid int64, score int) (err error) {
 	db := (*gorm.DB)(sdb)
 	s := scoretable{
 		UID:   uid,
 		Score: score,
-		Coins: coins,
 	}
 	if err = db.Debug().Model(&scoretable{}).First(&s, "uid = ? ", uid).Error; err != nil {
 		// error handling...
@@ -72,7 +78,6 @@ func (sdb *scoredb) InsertOrUpdateScoreByUID(uid int64, score int, coins int) (e
 		err = db.Debug().Model(&scoretable{}).Where("uid = ? ", uid).Update(
 			map[string]interface{}{
 				"score": score,
-				"coins": coins,
 			}).Error
 	}
 	return
@@ -86,12 +91,11 @@ func (sdb *scoredb) GetSignInByUID(uid int64) (si signintable) {
 }
 
 // InsertOrUpdateSignInCountByUID 插入或更新签到次数
-func (sdb *scoredb) InsertOrUpdateSignInCountByUID(uid int64, count int, coins int) (err error) {
+func (sdb *scoredb) InsertOrUpdateSignInCountByUID(uid int64, count int) (err error) {
 	db := (*gorm.DB)(sdb)
 	si := signintable{
 		UID:   uid,
 		Count: count,
-		Coins: coins,
 	}
 	if err = db.Debug().Model(&signintable{}).First(&si, "uid = ? ", uid).Error; err != nil {
 		// error handling...
@@ -102,13 +106,32 @@ func (sdb *scoredb) InsertOrUpdateSignInCountByUID(uid int64, count int, coins i
 		err = db.Debug().Model(&signintable{}).Where("uid = ? ", uid).Update(
 			map[string]interface{}{
 				"count": count,
-				"Coins": coins,
 			}).Error
 	}
 	return
 }
 
-func checkUserCoins(coins int) bool { // 参与一次15柠檬片
+func (sdb *scoredb) InsertUserCoins(uid int64, coins int) (err error) { // 修改金币数值
+	db := (*gorm.DB)(sdb)
+	si := signintable{
+		UID:   uid,
+		Coins: coins,
+	}
+	if err = db.Debug().Model(&signintable{}).First(&si, "uid = ? ", uid).Error; err != nil {
+		// error handling...
+		if gorm.IsRecordNotFoundError(err) {
+			db.Debug().Model(&signintable{}).Create(&si) // newUser not user
+		}
+	} else {
+		err = db.Debug().Model(&signintable{}).Where("uid = ? ", uid).Update(
+			map[string]interface{}{
+				"coins": coins,
+			}).Error
+	}
+	return
+}
+
+func checkUserCoins(coins int) bool { // 参与一次15个柠檬片
 	if coins-15 < 0 {
 		return false
 	} else {
@@ -123,16 +146,16 @@ func getHourWord(t time.Time) (sign string, reply string) {
 		reply = "今天又是新的一天呢ww"
 	case 12 <= t.Hour() && t.Hour() < 14:
 		sign = "中午好"
-		reply = "吃饭了嘛w 如果没有快去吃饭哦w"
+		reply = "吃饭了嘛w~如果没有快去吃饭哦w"
 	case 14 <= t.Hour() && t.Hour() < 19:
 		sign = "下午好"
-		reply = "记得多去补点水哦~ww"
+		reply = "记得多去补点水呢~ww"
 	case 19 <= t.Hour() && t.Hour() < 24:
 		sign = "晚上好"
 		reply = "今天过的开心嘛ww"
 	case 0 <= t.Hour() && t.Hour() < 5:
 		sign = "凌晨好"
-		reply = "快去睡觉哦w~已经很晚了"
+		reply = "快去睡觉~已经很晚了w"
 	default:
 		sign = ""
 	}
@@ -150,12 +173,13 @@ func getLevel(count int) int {
 	return -1
 }
 
-func initPic(picFile string) {
-	content, _ := ioutil.ReadFile(picFile)
+func initPic(ctx *zero.Ctx, picFile string) {
+	content, _ := os.ReadFile(picFile)
 	if len(content) == 0 {
 		data, err := web.GetData(backgroundURL)
 		if err != nil {
-			log.Errorln("[score]", err)
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERROR occurred when handling picture file,please retry for a while.", err))
+			return
 		}
 		picURL := gjson.Get(string(data), "acgurl").String()
 		data, err = web.GetData(picURL)

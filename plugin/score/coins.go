@@ -68,7 +68,7 @@ func init() {
 		getCoinsInt, _ := strconv.Atoi(getCoinsStr)
 		getDesc := referpg.Desc
 		addNewCoins := si.Coins + getCoinsInt - 15
-		err = sdb.InsertOrUpdateSignInCountByUID(uid, 0, addNewCoins)
+		err = sdb.InsertUserCoins(uid, addNewCoins)
 		if err != nil {
 			ctx.SendChain(message.Text("ERR:", err))
 			return
@@ -105,16 +105,16 @@ func init() {
 		eventTargetName := ctx.CardOrNickName(TargetInt)
 		modifyCoins := rand.Intn(50)
 		if rand.Intn(10)/7 != 0 { // 6成失败概率
-			_ = sdb.InsertOrUpdateSignInCountByUID(siEventUser.UID, 0, siEventUser.Coins-modifyCoins)
+			_ = sdb.InsertUserCoins(siEventUser.UID, siEventUser.Coins-modifyCoins)
 			time.Sleep(time.Second * 2)
-			_ = sdb.InsertOrUpdateSignInCountByUID(siTargetUser.UID, 0, siTargetUser.Coins+modifyCoins)
+			_ = sdb.InsertUserCoins(siTargetUser.UID, siTargetUser.Coins+modifyCoins)
 			time.Sleep(time.Second * 2)
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("试着去拿走 ", eventTargetName, " 的柠檬片时,被发现了.\n所以 ", eventUserName, " 失去了 ", modifyCoins, " 个柠檬片\n\n同时 ", eventTargetName, " 得到了 ", modifyCoins, " 个柠檬片"))
 			return
 		}
-		_ = sdb.InsertOrUpdateSignInCountByUID(siEventUser.UID, 0, siEventUser.Coins+modifyCoins)
+		_ = sdb.InsertUserCoins(siEventUser.UID, siEventUser.Coins+modifyCoins)
 		time.Sleep(time.Second * 2)
-		_ = sdb.InsertOrUpdateSignInCountByUID(siTargetUser.UID, 0, siTargetUser.Coins-modifyCoins)
+		_ = sdb.InsertUserCoins(siTargetUser.UID, siTargetUser.Coins-modifyCoins)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("试着去拿走 ", eventTargetName, " 的柠檬片时,成功了.\n所以 ", eventUserName, " 得到了 ", modifyCoins, " 个柠檬片\n\n同时 ", eventTargetName, " 失去了 ", modifyCoins, " 个柠檬片"))
 	})
 
@@ -159,23 +159,23 @@ func init() {
 			doubledModifyNum := modifyCoins * 2
 			if doubledModifyNum > siEventUser.Coins {
 				doubledModifyNum = siEventUser.Coins
-				_ = sdb.InsertOrUpdateSignInCountByUID(siEventUser.UID, 0, siEventUser.Coins-doubledModifyNum)
+				_ = sdb.InsertUserCoins(siEventUser.UID, siEventUser.Coins-doubledModifyNum)
 				time.Sleep(time.Second * 2)
-				_ = sdb.InsertOrUpdateSignInCountByUID(siTargetUser.UID, 0, siTargetUser.Coins+doubledModifyNum)
+				_ = sdb.InsertUserCoins(siTargetUser.UID, siTargetUser.Coins+doubledModifyNum)
 				time.Sleep(time.Second * 2)
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("试着去骗走 ", eventTargetName, " 的柠檬片时,被 ", eventTargetName, " 发现了.\n本该失去 ", modifyCoins*2, "\n但因为 ", eventUserName, " 的柠檬片过少，所以 ", eventUserName, " 失去了 ", doubledModifyNum, " 个柠檬片\n\n同时 ", eventTargetName, " 得到了 ", doubledModifyNum, " 个柠檬片"))
 				return
 			}
-			_ = sdb.InsertOrUpdateSignInCountByUID(siEventUser.UID, 0, siEventUser.Coins-doubledModifyNum)
+			_ = sdb.InsertUserCoins(siEventUser.UID, siEventUser.Coins-doubledModifyNum)
 			time.Sleep(time.Second * 2)
-			_ = sdb.InsertOrUpdateSignInCountByUID(siTargetUser.UID, 0, siTargetUser.Coins+doubledModifyNum)
+			_ = sdb.InsertUserCoins(siTargetUser.UID, siTargetUser.Coins+doubledModifyNum)
 			time.Sleep(time.Second * 2)
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("试着去骗走 ", eventTargetName, " 的柠檬片时,被 ", eventTargetName, " 发现了.\n所以 ", eventUserName, " 失去了 ", doubledModifyNum, " 个柠檬片\n\n同时 ", eventTargetName, " 得到了 ", doubledModifyNum, " 个柠檬片"))
 			return
 		}
-		_ = sdb.InsertOrUpdateSignInCountByUID(siEventUser.UID, 0, siEventUser.Coins+modifyCoins)
+		_ = sdb.InsertUserCoins(siEventUser.UID, siEventUser.Coins+modifyCoins)
 		time.Sleep(time.Second * 2)
-		_ = sdb.InsertOrUpdateSignInCountByUID(siTargetUser.UID, 0, siTargetUser.Coins-modifyCoins)
+		_ = sdb.InsertUserCoins(siTargetUser.UID, siTargetUser.Coins-modifyCoins)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("试着去拿走 ", eventTargetName, " 的柠檬片时,成功了.\n所以 ", eventUserName, " 得到了 ", modifyCoins, " 个柠檬片\n\n同时 ", eventTargetName, " 失去了 ", modifyCoins, " 个柠檬片"))
 	})
 	engine.OnRegex(`^给\s?\[CQ:at,qq=(\d+)\]\s转(\d+)个柠檬片$`, zero.OnlyGroup).Handle(func(ctx *zero.Ctx) {
@@ -198,8 +198,8 @@ func init() {
 			return
 		}
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("转账成功了哦~\n", ctx.CardOrNickName(siEventUser.UID), " 变化为 ", siEventUser.Coins, " - ", modifyCoins, "\n", ctx.CardOrNickName(siTargetUser.UID), " 变化为: ", siTargetUser.Coins, " + ", modifyCoins))
-		_ = sdb.InsertOrUpdateSignInCountByUID(siEventUser.UID, 0, siEventUser.Coins-modifyCoins)
+		_ = sdb.InsertUserCoins(siEventUser.UID, siEventUser.Coins-modifyCoins)
 		time.Sleep(time.Second * 2)
-		_ = sdb.InsertOrUpdateSignInCountByUID(siTargetUser.UID, 0, siTargetUser.Coins+modifyCoins)
+		_ = sdb.InsertUserCoins(siTargetUser.UID, siTargetUser.Coins+modifyCoins)
 	})
 }

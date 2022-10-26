@@ -22,7 +22,6 @@ import (
 
 const (
 	servicename = "atri"
-	Lucyimg     = "file:///root/Lucy_Project/memes/"
 )
 
 func init() { // 插件主体
@@ -189,7 +188,7 @@ func init() { // 插件主体
 }
 
 // atriSleep 凌晨0点到6点，ATRI 在睡觉，不回应任何请求
-func atriSleep(ctx *zero.Ctx) bool {
+func atriSleep(*zero.Ctx) bool {
 	if now := time.Now().Hour(); now >= 0 && now < 6 {
 		return false
 	}

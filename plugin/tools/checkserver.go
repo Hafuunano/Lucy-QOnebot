@@ -1,4 +1,4 @@
-// Package aifalse 暂时只有服务器监控
+// Package tools 暂时只有服务器监控
 package tools
 
 import (
@@ -28,7 +28,7 @@ func init() { // 插件主体
 			)
 		})
 
-		// 作为信息推送工具使用
+	// 作为信息推送工具使用
 	engine.OnRegex(`^【PUSH】.*`, zero.SuperUserPermission).SetBlock(false).
 		Handle(func(ctx *zero.Ctx) {
 			m, ok := control.Lookup("tools")
