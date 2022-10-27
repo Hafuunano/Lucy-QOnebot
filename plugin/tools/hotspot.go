@@ -1,4 +1,4 @@
-package tools // 参考了 Cha0sIDL 的 zbp hotspot热点
+package tools // Package tools 参考了 Cha0sIDL 的 zbp hotspot热点
 
 import (
 	"strconv"
@@ -14,7 +14,7 @@ import (
 func init() {
 	engine.OnFullMatch("微博热搜", zero.OnlyToMe).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		rsp := "微博实时热榜:\n"
-		url := "http://api.weibo.cn/2/guest/search/hot/word"
+		url := "https://api.weibo.cn/2/guest/search/hot/word"
 		data, err := web.RequestDataWith(web.NewDefaultClient(), url, "GET", "", web.RandUA())
 		if err != nil {
 			msg := message.Text("ERROR:", err)

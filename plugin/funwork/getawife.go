@@ -24,7 +24,7 @@ func init() {
 			name := ctx.CardOrNickName(ctx.Event.UserID)
 			n := fcext.RandSenderPerDayN(ctx.Event.UserID, len(wifes))
 			wn := wifes[n].Name()
-			reg := regexp.MustCompile(`[^\.]+`)
+			reg := regexp.MustCompile(`[^.]+`)
 			list := reg.FindAllString(wn, -1)
 			deleteme := ctx.SendChain(
 				message.Text(name, "さんが二次元で結婚するであろうヒロインは、", "\n"),

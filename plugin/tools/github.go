@@ -1,4 +1,4 @@
-// Package github GitHub 仓库搜索
+// Package tools_github GitHub 仓库搜索
 package tools
 
 import (

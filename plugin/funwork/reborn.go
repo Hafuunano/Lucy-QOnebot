@@ -3,8 +3,8 @@ package funwork
 
 import (
 	"fmt"
-	"io/ioutil"
 	"math/rand"
+	"os"
 
 	"encoding/json"
 
@@ -68,7 +68,7 @@ func init() {
 
 // load 加载rate数据
 func load(area *ratego, jsonfile string) error {
-	data, err := ioutil.ReadFile(jsonfile)
+	data, err := os.ReadFile(jsonfile)
 	if err != nil {
 		return err
 	}

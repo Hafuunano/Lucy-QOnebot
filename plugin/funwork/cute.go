@@ -36,7 +36,7 @@ func init() {
 			if cutename == "" {
 				cutename = who.Get("nickname").Str
 			}
-			avtar := fmt.Sprintf("[CQ:image,file=http://q4.qlogo.cn/g?b=qq&nk=%d&s=640,cache=0]", cuteid)
+			avtar := fmt.Sprintf("[CQ:image,file=https://q4.qlogo.cn/g?b=qq&nk=%d&s=640,cache=0]", cuteid)
 			msg := fmt.Sprintf("今日小可爱是%s\n【%s】(%d)哒！", avtar, cutename, cuteid)
 			msg = message.UnescapeCQCodeText(msg)
 			ctx.SendGroupMessage(ctx.Event.GroupID, message.ParseMessageFromString(msg))

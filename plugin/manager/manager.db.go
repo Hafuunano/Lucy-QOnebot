@@ -7,6 +7,6 @@ type welcome struct {
 
 type member struct {
 	QQ int64 `db:"qq"`
-	// github username
+	// GitHub username
 	Ghun string `db:"ghun"`
 }

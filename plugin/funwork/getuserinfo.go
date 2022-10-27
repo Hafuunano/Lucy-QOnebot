@@ -7,13 +7,11 @@ import (
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
-	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
 // debug
 var fail = "获取精华消息失败喵~可能是这条信息在数据库中无法查询~"
-var limitinfo = rate.NewManager[int64](time.Minute*5, 1)
 
 func init() {
 	/* engine.OnRegex(`^查找信息(\d+)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
@@ -55,14 +53,12 @@ func init() {
 			IDx := rand.Intn(essenceCount)
 			essenceMessage := essenceList.Array()[IDx]
 			var (
-				ID       = gjson.Get(essenceMessage.Raw, "sender_id").Int()
 				nickname = gjson.Get(essenceMessage.Raw, "sender_nick")
 				msID     = gjson.Get(essenceMessage.Raw, "message_id")
 			)
 			ctx.GetGroupMessageHistory(ctx.Event.GroupID, msID.Int())
 			ms := ctx.GetMessage(message.NewMessageIDFromInteger(msID.Int()))
-			honorTitle := getUserHonorTitle(*ctx, ID)
-			reportText := message.Text("Lucy抓到了这一条消息~\n[", honorTitle, "]", "(", nickname, ")")
+			reportText := message.Text("Lucy抓到了这一条消息~\nUsername: ", nickname)
 			report := make(message.Message, len(ms.Elements))
 			report = append(report, reportText)
 			report = append(report, ms.Elements...)
@@ -71,14 +67,4 @@ func init() {
 			ctx.DeleteMessage(deleteme)
 		}
 	})
-}
-
-func getUserHonorTitle(ctx zero.Ctx, uid int64) (title string) {
-	gmi := ctx.GetGroupMemberInfo(ctx.Event.GroupID, uid, true)
-	if titleStr := gjson.Get(gmi.Raw, "title").Str; titleStr == "" {
-		title = titleStr
-	} else {
-		title = gjson.Get(gmi.Raw, "title").Str
-	}
-	return
 }

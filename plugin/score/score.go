@@ -2,6 +2,7 @@ package score // Package score
 
 import (
 	"fmt"
+	"github.com/wdvxdr1123/ZeroBot/extension/single"
 	"math/rand"
 	"os"
 	"strconv"
@@ -36,7 +37,17 @@ var (
 		DisableOnDefault:  false,
 		Help:              "Hi NekoPachi!\n说明书: https://manual-lucy.himoyo.cn",
 		PrivateDataFolder: "score",
-	})
+	}).ApplySingle(single.New(
+		single.WithKeyFn(func(ctx *zero.Ctx) int64 { return ctx.Event.GroupID }),
+		single.WithPostFn[int64](func(ctx *zero.Ctx) {
+			ctx.Block()
+			ctx.Send(
+				message.ReplyWithMessage(ctx.Event.MessageID,
+					message.Text("Status Code : 403 Forbbiden"),
+				),
+			)
+		}),
+	))
 )
 
 // scoredb 分数数据库

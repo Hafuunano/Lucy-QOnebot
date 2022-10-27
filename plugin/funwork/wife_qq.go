@@ -24,7 +24,7 @@ import (
 	"github.com/fogleman/gg"
 )
 
-//nolint: asciicheck
+// nolint: asciicheck
 type 婚姻登记 struct {
 	db   *sql.Sqlite
 	dbmu sync.RWMutex
@@ -321,7 +321,7 @@ func init() {
 				ctx.SendChain(
 					message.At(uid),
 					message.Text("\n今天你已经娶过了，群老婆是"),
-					message.Image("http://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(targetinfo.Target, 10)+"&s=640").Add("cache", 0),
+					message.Image("https://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(targetinfo.Target, 10)+"&s=640").Add("cache", 0),
 					message.Text(
 						"\n",
 						"(", titleTarget, ")", " [", cardTarget, "]",
@@ -335,7 +335,7 @@ func init() {
 				ctx.SendChain(
 					message.At(uid),
 					message.Text("\n今天你被娶了，群老公是"),
-					message.Image("http://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(targetinfo.User, 10)+"&s=640").Add("cache", 0),
+					message.Image("https://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(targetinfo.User, 10)+"&s=640").Add("cache", 0),
 					message.Text(
 						"\n",
 						"(", titleTarget, ")", " [", cardTarget, "]",
@@ -381,7 +381,7 @@ func init() {
 			ctx.SendChain(
 				message.At(uid),
 				message.Text("今天你的群老婆是"),
-				message.Image("http://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(fiancee, 10)+"&s=640").Add("cache", 0),
+				message.Image("https://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(fiancee, 10)+"&s=640").Add("cache", 0),
 				message.Text(
 					"\n",
 					"[", ctx.CardOrNickName(fiancee), "]",
@@ -462,7 +462,7 @@ func init() {
 				message.Text(sendtext[0][rand.Intn(len(sendtext[0]))]),
 				message.At(uid),
 				message.Text(choicetext),
-				message.Image("http://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(fiancee, 10)+"&s=640").Add("cache", 0),
+				message.Image("https://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(fiancee, 10)+"&s=640").Add("cache", 0),
 				message.Text(
 					"\n",
 					"[", ctx.CardOrNickName(fiancee), "]",
@@ -525,7 +525,7 @@ func init() {
 				message.Text(sendtext[2][rand.Intn(len(sendtext[2]))]),
 				message.At(uid),
 				message.Text("今天你的群"+choicetext+"是"),
-				message.Image("http://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(fiancee, 10)+"&s=640").Add("cache", 0),
+				message.Image("https://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(fiancee, 10)+"&s=640").Add("cache", 0),
 				message.Text(
 					"\n",
 					"[", ctx.CardOrNickName(fiancee), "]",
@@ -631,10 +631,6 @@ func init() {
 				ctx.SendChain(message.Text(sendtext[4][1]))
 			}
 		})
-}
-
-func GetTitle(ctx zero.Ctx, i int64) {
-	panic("unimplemented")
 }
 
 // 以群号和昵称为限制

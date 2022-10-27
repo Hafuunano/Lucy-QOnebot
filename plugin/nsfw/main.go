@@ -15,8 +15,7 @@ import (
 )
 
 const (
-	Referer = "https://manual-lucy.himoyo.cn"
-	api     = "https://api.lolicon.app/setu/v2"
+	api = "https://api.lolicon.app/setu/v2"
 )
 
 var (

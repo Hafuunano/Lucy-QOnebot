@@ -1,4 +1,4 @@
-// Package epidemic 城市疫情查询
+// Package tools_epidemic 城市疫情查询
 package tools
 
 import (

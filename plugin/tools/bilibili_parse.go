@@ -1,8 +1,9 @@
-// Package bilibiliparse b站视频链接解析
+// Package tools_bilibiliparse b站视频链接解析
 package tools
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -59,7 +60,7 @@ type owner struct {
 
 const (
 	videoapi = "https://api.bilibili.com/x/web-interface/view?"
-	cardapi  = "http://api.bilibili.com/x/web-interface/card?"
+	cardapi  = "https://api.bilibili.com/x/web-interface/card?"
 	origin   = "https://www.bilibili.com/video/"
 )
 
@@ -154,7 +155,12 @@ func getrealurl(url string) (realurl string, err error) {
 		return
 	}
 	realurl = data.Request.URL.String()
-	defer data.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(data.Body)
 	return
 }
 

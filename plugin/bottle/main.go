@@ -1,4 +1,4 @@
-package bottle // zbp driftbottle 魔改
+package bottle // Package bottle driftbottle 魔改
 
 import (
 	"fmt"
@@ -101,7 +101,7 @@ func fetchBottle(db *sql.Sqlite) (*sea, error) {
 	return be, db.Pick("global", be)
 }
 
-// 初始化包
+// CreateChannel 初始化包
 func CreateChannel(db *sql.Sqlite) error {
 	seaLocker.Lock()
 	defer seaLocker.Unlock()

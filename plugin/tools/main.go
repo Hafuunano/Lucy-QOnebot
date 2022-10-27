@@ -14,7 +14,3 @@ var (
 		PrivateDataFolder: "tools",
 	})
 )
-
-const (
-	Referer = "https://manual-lucy.himoyo.cn"
-)

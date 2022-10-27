@@ -18,7 +18,7 @@ import (
 // Clock 时钟
 type Clock struct {
 	db       *sql.Sqlite
-	timers   *(map[uint32]*Timer)
+	timers   *map[uint32]*Timer
 	timersmu sync.RWMutex
 	// cron 定时器
 	cron *cron.Cron

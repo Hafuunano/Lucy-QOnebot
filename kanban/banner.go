@@ -1,9 +1,7 @@
-package kanban // package kanban 初始化
+package kanban // Package kanban package kanban 初始化
 
 import (
 	"strings"
-
-	"github.com/fumiama/go-registry"
 )
 
 var (
@@ -17,19 +15,4 @@ var (
 	}
 	// Banner ...
 	Banner = strings.Join(info[:], "\n")
-	reg    = registry.NewRegReader("reilia.fumiama.top:32664", "fumiama")
 )
-
-// Kanban ...
-func Kanban() string {
-	err := reg.Connect()
-	if err != nil {
-		return err.Error()
-	}
-	defer reg.Close()
-	text, err := reg.Get("ZeroBot-Plugin/kanban")
-	if err != nil {
-		return err.Error()
-	}
-	return text
-}

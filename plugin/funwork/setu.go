@@ -1,4 +1,4 @@
-// 使用国内源的iw233 + 新背景实现
+// Package funwork 使用国内源的iw233 + 新背景实现
 package funwork
 
 import (

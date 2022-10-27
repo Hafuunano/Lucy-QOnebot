@@ -1,4 +1,4 @@
-// Package myfortune 简单的测人品 仿照的是鱼子酱的www
+// Package funwork 简单的测人品 仿照的是鱼子酱的www
 package funwork
 
 import (
@@ -47,16 +47,15 @@ var (
 	cardMap  = make(cardset, 256)
 	reasons  = []string{" | "}
 	position = []string{"正位", "逆位"}
-	result   map[int64](int)
-	egg      map[string](int)
-	signTF   map[string](int)
-	Lookup   string
+	result   map[int64]int
+	egg      map[string]int
+	signTF   map[string]int
 )
 
 func init() {
-	signTF = make(map[string](int))
-	egg = make(map[string](int))
-	result = make(map[int64](int))
+	signTF = make(map[string]int)
+	egg = make(map[string]int)
+	result = make(map[int64]int)
 
 	getTarot := fcext.DoOnceOnSuccess(
 		func(ctx *zero.Ctx) bool { // 检查 塔罗牌文件是否存在
@@ -100,7 +99,7 @@ func init() {
 			userS := strconv.FormatInt(user, 10)
 			now := time.Now().Format("20060102")
 			randEveryone := fcext.RandSenderPerDayN(ctx.Event.UserID, 100)
-			var si string = now + userS // 合成
+			var si = now + userS // 合成
 			dyn := time.Now().Hour()
 			weeks := time.Now().Weekday()
 			outputUserName := tools.LoadUserNickname(userS)
@@ -124,8 +123,8 @@ func init() {
 			uptime = strings.ReplaceAll(uptime, "你", outputUserName)
 			// CTRL C + CTRL V
 			if signTF[si] == 0 {
-				signTF[si] = (1)
-				result[user] = (randEveryone)
+				signTF[si] = 1
+				result[user] = randEveryone
 				switch {
 				case result[user] <= 20:
 					jrrpbk = "[小凶]\n#Lucy抱了抱你~"
@@ -159,7 +158,7 @@ func init() {
 			if ok {
 				if m.IsEnabledIn(ctx.Event.GroupID) {
 					if result[user] >= 90 && result[user] < 100 && egg[si] == 0 {
-						egg[si] = (1)
+						egg[si] = 1
 						img, err := web.GetData("https://api.lolicon.app/setu/v2?r18=1&num=1")
 						if err != nil {
 							ctx.SendChain(message.Text("ERROR:", err))

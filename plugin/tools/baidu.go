@@ -1,4 +1,4 @@
-// Package baidu 百度一下
+// Package tools 百度一下
 package tools
 
 import (

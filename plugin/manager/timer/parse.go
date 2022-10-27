@@ -63,7 +63,7 @@ func GetFilledTimer(dateStrs []string, botqq, grp int64, matchDateOnly bool) *Ti
 			return &t
 		}
 		t.SetDay(d)
-	case dayWeekStr[lenOfDW-1] == rune('日'): // xx日
+	case dayWeekStr[lenOfDW-1] == '日': // xx日
 		dayWeekStr = dayWeekStr[:lenOfDW-1]
 		d := chineseNum2Int(dayWeekStr)
 		if (d != -1 && d <= 0) || d > 31 { // 日期非法
@@ -71,7 +71,7 @@ func GetFilledTimer(dateStrs []string, botqq, grp int64, matchDateOnly bool) *Ti
 			return &t
 		}
 		t.SetDay(d)
-	case dayWeekStr[0] == rune('每'): // 每周
+	case dayWeekStr[0] == '每': // 每周
 		t.SetWeek(-1)
 	default: // 周x
 		w := chineseNum2Int(dayWeekStr[1:])
@@ -125,7 +125,7 @@ func GetFilledTimer(dateStrs []string, botqq, grp int64, matchDateOnly bool) *Ti
 func chineseNum2Int(rs []rune) int {
 	r := -1
 	l := len(rs)
-	mai := rune('每')
+	mai := '每'
 	if unicode.IsDigit(rs[0]) { // 默认可能存在的第二位也为int
 		r, _ = strconv.Atoi(string(rs))
 	} else {
@@ -153,7 +153,7 @@ func chineseNum2Int(rs []rune) int {
 
 // chineseChar2Int 处理单个字符的映射0~10
 func chineseChar2Int(c rune) int {
-	if c == rune('日') || c == rune('天') { // 周日/周天
+	if c == '日' || c == '天' { // 周日/周天
 		return 7
 	}
 	match := []rune("零一二三四五六七八九十")

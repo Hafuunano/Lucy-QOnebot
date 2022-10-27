@@ -38,8 +38,8 @@ const (
 		"- 退出群聊 1234@bot\n" +
 		"- 群聊转发 1234 XXX\n" +
 		"- 私聊转发 0000 XXX\n" +
-		"- 在MM月dd日的hh点mm分时(用http://url)提醒大家XXX\n" +
-		"- 在MM月[每周 | 周几]的hh点mm分时(用http://url)提醒大家XXX\n" +
+		"- 在MM月dd日的hh点mm分时(用https://url)提醒大家XXX\n" +
+		"- 在MM月[每周 | 周几]的hh点mm分时(用https://url)提醒大家XXX\n" +
 		"- 取消在MM月dd日的hh点mm分的提醒\n" +
 		"- 取消在MM月[每周 | 周几]的hh点mm分的提醒\n" +
 		"- 在\"cron\"时(用[url])提醒大家[xxx]\n" +
@@ -538,7 +538,7 @@ func init() { // 插件主体
 // 传入 ctx 和 welcome格式string 返回cq格式string  使用方法:welcometocq(ctx,w.Msg)
 func welcometocq(ctx *zero.Ctx, welcome string) string {
 	at := "[CQ:at,qq=" + strconv.FormatInt(ctx.Event.UserID, 10) + "]"
-	avatar := "[CQ:image,file=" + "http://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640]"
+	avatar := "[CQ:image,file=" + "https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640]"
 	id := strconv.FormatInt(ctx.Event.UserID, 10)
 	nickname := ctx.CardOrNickName(ctx.Event.UserID)
 	cqstring := strings.ReplaceAll(welcome, "{at}", at)

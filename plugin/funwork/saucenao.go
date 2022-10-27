@@ -1,4 +1,4 @@
-// Package saucenao P站ID/saucenao/ascii2d搜图
+// Package funwork_saucenao P站ID/saucenao/ascii2d搜图
 package funwork
 
 import (
@@ -25,6 +25,7 @@ var (
 	saucenaocli *gophersauce.Client
 )
 
+//goland:noinspection GoDeferInLoop
 func init() { // 插件主体
 	apikeyfile := engine.DataFolder() + "apikey.txt"
 	if file.IsExist(apikeyfile) {

@@ -1,4 +1,4 @@
-// funwork Hi NekoPachi!
+// Package funwork Hi NekoPachi!
 package funwork
 
 import (
@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/FloatTech/floatbox/web"
-	sql "github.com/FloatTech/sqlite"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/ctxext"
@@ -17,18 +16,12 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 )
 
-type tiangou struct {
-	ID   uint32 `db:"id"`
-	Text string `db:"text"`
-}
-
 const (
 	ua      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36"
 	Referer = "https://manual-lucy.himoyo.cn"
 )
 
 var (
-	db     = &sql.Sqlite{}
 	engine = control.Register("funwork", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
 		Help:              "Hi NekoPachi!\n说明书: https://manual-lucy.himoyo.cn",

@@ -1,4 +1,4 @@
-// Package music 网易云、酷狗、酷我 点歌
+// Package funwork_music 网易云、酷狗、酷我 点歌
 package funwork
 
 import (
@@ -55,7 +55,7 @@ func kuwo(keyword string) message.MessageSegment {
 	}.Encode()
 	info := gjson.ParseBytes(netGet(search.String(), headers)).Get("data.list.0")
 	// 获得音乐直链
-	music, _ := url.Parse("http://www.kuwo.cn/url")
+	music, _ := url.Parse("https://www.kuwo.cn/url")
 	music.RawQuery = url.Values{
 		"format":      []string{"mp3"},
 		"rid":         []string{fmt.Sprintf("%d", info.Get("rid").Int())},
@@ -130,7 +130,7 @@ func kugou(keyword string) message.MessageSegment {
 
 // cloud163 返回网易云音乐卡片
 func cloud163(keyword string) (msg message.MessageSegment) {
-	requestURL := "http://music.163.com/api/search/get/web?type=1&limit=1&s=" + url.QueryEscape(keyword)
+	requestURL := "https://music.163.com/api/search/get/web?type=1&limit=1&s=" + url.QueryEscape(keyword)
 	data, err := web.GetData(requestURL)
 	var webStatusCode *http.Response
 	if err != nil {
@@ -157,7 +157,12 @@ func netGet(url string, header http.Header) []byte {
 	if err != nil {
 		return nil
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(res.Body)
 	result, _ := io.ReadAll(res.Body)
 	return result
 }
