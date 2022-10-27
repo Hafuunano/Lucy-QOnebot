@@ -1,6 +1,6 @@
 name: 最新版
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 env:
   BINARY_PREFIX: "zbp_"
@@ -15,8 +15,8 @@ jobs:
     strategy:
       matrix:
         # build and publish in parallel: linux/386, linux/amd64, windows/386, windows/amd64, darwin/amd64, darwin/arm64
-        goos: [linux, windows]
-        goarch: ["386", amd64, arm, arm64]
+        goos: [ linux, windows ]
+        goarch: [ "386", amd64, arm, arm64 ]
         exclude:
           - goos: windows
             goarch: arm
