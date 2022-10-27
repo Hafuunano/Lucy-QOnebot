@@ -1,12 +1,13 @@
 package score
 
 import (
+	"os"
+	"time"
+
 	"github.com/FloatTech/floatbox/web"
 	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
-	"os"
-	"time"
 
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
@@ -39,7 +40,6 @@ func initialize(dbpath string) *scoredb {
 				panic(err)
 			}
 		}(f)
-
 	}
 	gdb, err := gorm.Open("sqlite3", dbpath)
 	if err != nil {
