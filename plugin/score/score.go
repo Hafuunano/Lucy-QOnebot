@@ -2,11 +2,12 @@ package score // Package score
 
 import (
 	"fmt"
-	"github.com/wdvxdr1123/ZeroBot/extension/single"
 	"math/rand"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/wdvxdr1123/ZeroBot/extension/single"
 
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/img/writer"
