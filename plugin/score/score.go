@@ -7,8 +7,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/wdvxdr1123/ZeroBot/extension/single"
-
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/img/writer"
 	ctrl "github.com/FloatTech/zbpctrl"
@@ -38,17 +36,7 @@ var (
 		DisableOnDefault:  false,
 		Help:              "Hi NekoPachi!\n说明书: https://manual-lucy.himoyo.cn",
 		PrivateDataFolder: "score",
-	}).ApplySingle(single.New(
-		single.WithKeyFn(func(ctx *zero.Ctx) int64 { return ctx.Event.GroupID }),
-		single.WithPostFn[int64](func(ctx *zero.Ctx) {
-			ctx.Block()
-			ctx.Send(
-				message.ReplyWithMessage(ctx.Event.MessageID,
-					message.Text("正在处理任务哦~不要心急"),
-				),
-			)
-		}),
-	))
+	})
 )
 
 // scoredb 分数数据库

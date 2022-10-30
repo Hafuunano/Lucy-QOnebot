@@ -1,8 +1,6 @@
 package funwork
 
 import (
-	"encoding/base64"
-	"github.com/FloatTech/floatbox/web"
 	"math/rand"
 	"time"
 
@@ -69,10 +67,8 @@ func init() {
 			ctx.DeleteMessage(deleteme)
 		}
 	})
-	engine.OnRegex(`!catch(\d+)$`).Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`!catch\s?.*?(.*)$`).Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		url := ctx.State["regex_matched"].([]string)[1]
-		pic, _ := web.GetData("https://ovooa.com/API/Website_snapshot/?url=" + url)
-		base64pic := base64.StdEncoding.EncodeToString(pic)
-		ctx.Send(message.Image(base64pic))
+		ctx.Send(message.Image("https://ovooa.com/API/Website_snapshot/?url=" + url))
 	})
 }

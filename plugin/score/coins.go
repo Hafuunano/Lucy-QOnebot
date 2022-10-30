@@ -30,7 +30,7 @@ type pg = map[string]partygame
 
 func init() {
 	// 借鉴了其他bot的功能 编写而成
-	engine.OnFullMatch("柠檬片总数", zero.OnlyGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnFullMatch("柠檬片总数", zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		uid := ctx.Event.UserID
 		si := sdb.GetSignInByUID(uid)
 		ctx.SendChain(message.Text("您的柠檬片数量一共是: ", si.Coins))
