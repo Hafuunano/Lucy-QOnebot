@@ -1,13 +1,9 @@
 package score
 
 import (
+	"github.com/FloatTech/floatbox/file"
 	"os"
 	"time"
-
-	"github.com/FloatTech/floatbox/web"
-	"github.com/tidwall/gjson"
-	zero "github.com/wdvxdr1123/ZeroBot"
-	"github.com/wdvxdr1123/ZeroBot/message"
 
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
@@ -173,22 +169,9 @@ func getLevel(count int) int {
 	return -1
 }
 
-func initPic(ctx *zero.Ctx, picFile string) {
-	content, _ := os.ReadFile(picFile)
-	if len(content) == 0 {
-		data, err := web.GetData(backgroundURL)
-		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERROR occurred when handling picture file,please retry for a while.", err))
-			return
-		}
-		picURL := gjson.Get(string(data), "acgurl").String()
-		data, err = web.GetData(picURL)
-		if err != nil {
-			log.Errorln("[score]", err)
-		}
-		err = os.WriteFile(picFile, data, 0666)
-		if err != nil {
-			log.Errorln("[score]", err)
-		}
+func initPic(picFile string) error {
+	if file.IsExist(picFile) {
+		return nil
 	}
+	return file.DownloadTo(backgroundURL, picFile, true)
 }

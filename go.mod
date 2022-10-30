@@ -3,14 +3,13 @@ module github.com/FloatTech/ZeroBot-Plugin
 go 1.19
 
 require (
-	github.com/FloatTech/AnimeAPI v1.5.2-0.20221007041953-504c6d0e683b
-	github.com/FloatTech/floatbox v0.0.0-20221004092550-1ebf9b4e6198
+	github.com/FloatTech/AnimeAPI v1.5.2-0.20221029160612-a8d3d8e63d8f
+	github.com/FloatTech/floatbox v0.0.0-20221029160423-446812ec82d9
 	github.com/FloatTech/sqlite v0.5.0
-	github.com/FloatTech/zbpctrl v1.5.2-0.20220921013146-40d64bc7799c
-	github.com/FloatTech/zbputils v1.5.1-0.20221004094248-ad5a9235757e
+	github.com/FloatTech/zbpctrl v1.5.2-0.20221029160446-3a9370488e9d
+	github.com/FloatTech/zbputils v1.5.1-0.20221029160537-f23f4c7e87f5
 	github.com/fogleman/gg v1.3.0
 	github.com/fumiama/cron v1.3.0
-	github.com/fumiama/go-registry v0.1.6
 	github.com/fumiama/gotracemoe v0.0.3
 	github.com/fumiama/sqlite3 v1.14.6
 	github.com/jinzhu/gorm v1.9.16
@@ -19,10 +18,8 @@ require (
 	github.com/shirou/gopsutil/v3 v3.22.8
 	github.com/sirupsen/logrus v1.9.0
 	github.com/tidwall/gjson v1.14.3
-	github.com/wdvxdr1123/ZeroBot v1.5.2-0.20220917061201-be873b3fa0fb
+	github.com/wdvxdr1123/ZeroBot v1.6.3
 )
-
-require github.com/jinzhu/now v1.1.4 // indirect
 
 require (
 	github.com/Coloured-glaze/gg v1.3.4 // indirect
@@ -32,6 +29,8 @@ require (
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4 // indirect
 	github.com/fumiama/go-base16384 v1.6.1 // indirect
+	github.com/fumiama/go-registry v0.2.1 // indirect
+	github.com/fumiama/go-simple-protobuf v0.1.0 // indirect
 	github.com/fumiama/gofastTEA v0.0.10 // indirect
 	github.com/gabriel-vasile/mimetype v1.0.4 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect

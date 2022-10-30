@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	backgroundURL = "https://img.moehu.org/pic.php?id=pc&return=json"
+	backgroundURL = "https://img.moehu.org/pic.php?id=pc"
 	signinMax     = 1
 	// SCOREMAX 分数上限定为600
 	SCOREMAX = 600
@@ -44,7 +44,7 @@ var (
 			ctx.Block()
 			ctx.Send(
 				message.ReplyWithMessage(ctx.Event.MessageID,
-					message.Text("Status Code : 403 Forbbiden"),
+					message.Text("正在处理任务哦~不要心急"),
 				),
 			)
 		}),
@@ -86,7 +86,7 @@ func init() {
 			si := sdb.GetSignInByUID(uid)
 			drawedFile := cachePath + strconv.FormatInt(uid, 10) + today + "signin.png"
 			picFile := cachePath + strconv.FormatInt(uid, 10) + today + ".png"
-			initPic(ctx, picFile)
+			initPic(picFile)
 			siUpdateTimeStr := si.UpdatedAt.Format("20060102")
 			if si.Count >= signinMax && siUpdateTimeStr == today {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("酱~ 你今天已经签到过了哦w"))
@@ -176,7 +176,7 @@ func init() {
 			ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
 			time.Sleep(time.Second * 5)
 		})
-	engine.OnFullMatch("获得打卡背景", zero.OnlyGroup).SetBlock(true).
+	engine.OnPrefixGroup([]string{"获得打卡背景", "获得签到背景"}, zero.OnlyGroup).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			param := ctx.State["args"].(string)
 			var uidStr string
