@@ -25,7 +25,6 @@ var (
 	saucenaocli *gophersauce.Client
 )
 
-//goland:noinspection GoDeferInLoop
 func init() { // 插件主体
 	apikeyfile := engine.DataFolder() + "apikey.txt"
 	if file.IsExist(apikeyfile) {

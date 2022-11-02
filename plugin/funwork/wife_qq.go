@@ -10,7 +10,6 @@ import (
 	fcext "github.com/FloatTech/floatbox/ctxext"
 	"github.com/FloatTech/floatbox/math"
 	"github.com/FloatTech/zbputils/ctxext"
-	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
@@ -24,7 +23,7 @@ import (
 	"github.com/fogleman/gg"
 )
 
-//nolint: asciicheck
+// nolint: asciicheck
 type 婚姻登记 struct {
 	db   *sql.Sqlite
 	dbmu sync.RWMutex
@@ -45,13 +44,6 @@ type updateinfo struct {
 	GID        int64
 	Updatetime string // 登记时间
 
-}
-
-func checkUserSex(ctx *zero.Ctx, uid int64) (usersex string) {
-	getUserInfo := ctx.GetGroupMemberInfo(ctx.Event.GroupID, uid, false)
-	tempUserInfo := getUserInfo.String()
-	userSexInfo := gjson.Get(tempUserInfo, "sex").String()
-	return userSexInfo
 }
 
 func (sql *婚姻登记) checkupdate(gid int64) (updatetime string, err error) {
@@ -408,11 +400,6 @@ func init() {
 				ctx.Send(message.Text("笨蛋！不准娶我~"))
 				return
 			}
-			TargetSEX := checkUserSex(ctx, fiancee)
-			if TargetSEX == "male" {
-				ctx.Send(message.Text("怪哦~男孩子干嘛要娶欸 太坏了"))
-				return
-			}
 			if uid == fiancee { // 如果是自己
 				switch rand.Intn(5) { // 5分之一概率浪费技能
 				case 1:
@@ -480,11 +467,7 @@ func init() {
 				ctx.SendChain(message.Text("要骗别人哦~为什么要骗自己呢x"))
 				return
 			}
-			TargetSEX := checkUserSex(ctx, fiancee)
-			if TargetSEX == "male" {
-				ctx.Send(message.Text("怪哦~男孩子干嘛要娶欸 太坏了~"))
-				return
-			}
+
 			if rand.Intn(10)/4 != 0 { // 十分之三的概率NTR成功
 				ctx.SendChain(message.At(uid), message.Text("\n今天没有骗成qwq"))
 				return
@@ -695,7 +678,7 @@ func checkdog(ctx *zero.Ctx) bool {
 	return true
 }
 
-// 注入判断 是否满足小三要求
+// 注入判断 是否满足小三的要求
 func checkcp(ctx *zero.Ctx) bool {
 	gid := ctx.Event.GroupID
 	updatetime, err := 民政局.checkupdate(gid)

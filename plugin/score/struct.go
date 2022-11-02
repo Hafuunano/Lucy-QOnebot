@@ -128,7 +128,7 @@ func (sdb *scoredb) InsertUserCoins(uid int64, coins int) (err error) { // 修�
 }
 
 func checkUserCoins(coins int) bool { // 参与一次15个柠檬片
-	if coins-15 < 0 {
+	if coins-50 < 0 {
 		return false
 	} else {
 		return true

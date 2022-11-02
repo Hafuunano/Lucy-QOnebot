@@ -83,7 +83,8 @@ func init() {
 			// 获取一言
 			yiyan := gjson.Get(helper.BytesToString(yiyanRaw), "hitokoto")
 			p := rand.Intn(2)
-			i := rand.Intn(78)
+			is := rand.Intn(77)
+			i := is + 1
 			card := cardMap[(strconv.Itoa(i))]
 			name := card.Name
 			cardtype := card.Cardtype

@@ -91,7 +91,7 @@ func init() {
 			if siUpdateTimeStr != today {
 				_ = sdb.InsertOrUpdateSignInCountByUID(uid, 0)
 			}
-			coinsGet := rand.Intn(100)
+			coinsGet := 200 + rand.Intn(200)
 			_ = sdb.InsertUserCoins(uid, si.Coins+coinsGet)
 			_ = sdb.InsertOrUpdateSignInCountByUID(uid, si.Count+1)
 			// 避免图片过大，最大 1280*720
