@@ -212,5 +212,6 @@ func init() {
 		}
 		hadModifyCoins := currentUserCoins - modifyCoins
 		_ = sdb.InsertUserCoins(handleUser.UID, hadModifyCoins)
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经帮你扔掉了哦"))
 	})
 }
