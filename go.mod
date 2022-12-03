@@ -3,6 +3,7 @@ module github.com/FloatTech/ZeroBot-Plugin
 go 1.19
 
 require (
+	github.com/Coloured-glaze/gg v1.3.4
 	github.com/FloatTech/AnimeAPI v1.5.2-0.20221029160612-a8d3d8e63d8f
 	github.com/FloatTech/floatbox v0.0.0-20221029160423-446812ec82d9
 	github.com/FloatTech/sqlite v0.5.0
@@ -10,6 +11,7 @@ require (
 	github.com/FloatTech/zbputils v1.5.1-0.20221029160537-f23f4c7e87f5
 	github.com/fogleman/gg v1.3.0
 	github.com/fumiama/cron v1.3.0
+	github.com/fumiama/go-registry v0.2.1
 	github.com/fumiama/gotracemoe v0.0.3
 	github.com/fumiama/sqlite3 v1.14.6
 	github.com/jinzhu/gorm v1.9.16
@@ -22,14 +24,12 @@ require (
 )
 
 require (
-	github.com/Coloured-glaze/gg v1.3.4 // indirect
 	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b // indirect
 	github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c // indirect
 	github.com/RomiChan/websocket v1.4.3-0.20220123145318-307a86b127bc // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4 // indirect
 	github.com/fumiama/go-base16384 v1.6.1 // indirect
-	github.com/fumiama/go-registry v0.2.1 // indirect
 	github.com/fumiama/go-simple-protobuf v0.1.0 // indirect
 	github.com/fumiama/gofastTEA v0.0.10 // indirect
 	github.com/gabriel-vasile/mimetype v1.0.4 // indirect

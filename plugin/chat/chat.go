@@ -120,7 +120,7 @@ func init() { // 插件主体
 				// 5分钟共8块命令牌 一次消耗3块命令牌
 				time.Sleep(time.Second * 1)
 				ctx.SendChain(message.Text([]string{"请不要戳" + nickname + " >_<", "再戳也不会理你的哦！", "别以为人家会搭理哦！",
-					"呜…别戳了…", "别戳了！", "喵~", "有笨蛋在戳我，我不说是谁", "达咩呦，达咩达咩", "哼!不许戳啦 大笨蛋", "别戳啦！", "有笨蛋~让咱看看是谁"}[rand.Intn(11)]))
+					"呜…别戳了…", "别戳了！", "喵~", "有笨蛋在戳我，我不说是谁", "达咩呦，达咩达咩", "哼!不许戳啦 大笨蛋", "别戳啦！", "有笨蛋~让咱看看是谁"}[rand.Intn(11)]), message.Image([]string{img + "2941750127783.jpg", img + "C(185HMG2G0FY`3~2_[_H)W.gif", img + "file_3491851.jpg", img + "file_3492326.jpg", img + "file_3492330.jpg", img + "load.jpg"}[rand.Intn(6)]))
 			case poke.Load(ctx.Event.GroupID).Acquire():
 				// 5分钟共8块命令牌 一次消耗1块命令牌
 				time.Sleep(time.Second * 1)
