@@ -94,7 +94,6 @@ func init() {
 			} else {
 				info = card.Info.ReverseDescription
 			} // 塔罗牌生成 (随机的)
-
 			// 写得非常恶心 建议有时间赶紧重构x awa
 			user := ctx.Event.UserID
 			userS := strconv.FormatInt(user, 10)
