@@ -250,21 +250,22 @@ var (
 		db: &sql.Sqlite{},
 	}
 	skillCD  = rate.NewManager[string](time.Hour*12, 1)
+	healCD   = rate.NewManager[string](time.Hour*6, 1)
 	sendtext = [...][]string{
 		{ // 表白成功
 			"是个勇敢的孩子(*/ω＼*) 今天的运气都降临在你的身边~\n\n",
-			"QWQ貌似成功了哦~~运气buff显灵~\n\n",
+			"貌似很成功的一次尝试呢w~\n\n",
 		},
 		{ // 表白失败
 			"今天的运气有一点背哦~明天再试试叭",
 			"_(:з」∠)_下次还有机会 咱抱抱你w",
-			"今天失败了惹. 摸摸头~咱明天还有机会",
+			"今天失败了ama. 摸摸头~咱明天还有机会",
 		},
 		{ // ntr成功
 			"欸~成功了哦_(:з」∠)_w\n\n",
 		},
 		{ // 离婚失败
-			"为什么要分手呢?这样做可不好哦x",
+			"为什么要分呢? 这样做可不好哦x 让咱捏捏w",
 			"太坏了啦！不许！",
 		},
 		{ // 离婚成功
@@ -305,10 +306,9 @@ func init() {
 				ctx.SendChain(message.Text("ERR:", err))
 				return
 			case status != 3 && targetinfo.Target == 0: // 如果为单身贵族
-				ctx.SendChain(message.At(uid), message.Text("\n今天你没有老婆哦"))
+				ctx.SendChain(message.At(uid), message.Text("\n今天没有老婆哦 ^^ 是不是觉得咱很坏呢 那就下次再来吧(笑"))
 				return
 			case status == 1: // 娶过别人
-
 				cardTarget := ctx.CardOrNickName(targetinfo.Target)
 				ctx.SendChain(
 					message.At(uid),
@@ -322,7 +322,6 @@ func init() {
 				)
 				return
 			case status == 0: // 嫁给别人
-
 				cardTarget := ctx.CardOrNickName(targetinfo.User)
 				ctx.SendChain(
 					message.At(uid),
@@ -360,7 +359,7 @@ func init() {
 			// 随机抽娶
 			fiancee := qqgrouplist[rand.Intn(len(qqgrouplist))]
 			if fiancee == uid { // 如果是自己
-				ctx.SendChain(message.At(uid), message.Text("\n今天你没有老婆哦 Lucy再给你一次机会哦"))
+				ctx.SendChain(message.At(uid), message.Text("\n^^ 可能运气比较好呢~抽到了自己^^,Lucy再让你抽一下哦"))
 				return
 			}
 			// 去民政局办证
@@ -389,15 +388,15 @@ func init() {
 			uid := ctx.Event.UserID
 			gid := ctx.Event.GroupID
 			if fiancee == 462637257 {
-				ctx.Send(message.Text("笨蛋！不准娶我~"))
+				ctx.Send(message.Text("笨蛋！不准娶~ ama"))
 				return
 			}
 			if fiancee == 1292581422 {
-				ctx.Send(message.Text("这是夹子~貌似设定上不许特意去娶x"))
+				ctx.Send(message.Text("a 为什么要娶夹子哦 ^^ 这是咱的"))
 				return
 			}
 			if fiancee == 3260947298 {
-				ctx.Send(message.Text("笨蛋！不准娶我~"))
+				ctx.Send(message.Text("笨蛋！不准娶~ ama"))
 				return
 			}
 			if uid == fiancee { // 如果是自己
@@ -408,19 +407,13 @@ func init() {
 						ctx.SendChain(message.Text("ERR:", err))
 						return
 					}
-					ctx.SendChain(message.Text("TYPE ERR：因为某种原因 好像成功了x"))
+					ctx.Send(message.ReplyWithMessage(message.Text("貌似Lucy故意添加了 --force 的命令，成功了(笑")))
 				default:
 					ctx.SendChain(message.Text("笨蛋！娶你自己干什么a"))
 				}
 				return
 			}
 			randbook := rand.Intn(2)
-			if ctx.Event.UserID == 2896285821 && fiancee == 363128 {
-				randbook = 1
-			}
-			if fiancee == 2896285821 && ctx.Event.UserID == 363128 {
-				randbook = 1
-			}
 			if randbook == 0 {
 				ctx.SendChain(message.Text(sendtext[1][rand.Intn(len(sendtext[1]))]))
 				return
@@ -467,7 +460,6 @@ func init() {
 				ctx.SendChain(message.Text("要骗别人哦~为什么要骗自己呢x"))
 				return
 			}
-
 			if rand.Intn(10)/4 != 0 { // 十分之三的概率NTR成功
 				ctx.SendChain(message.At(uid), message.Text("\n今天没有骗成qwq"))
 				return
@@ -478,7 +470,7 @@ func init() {
 			_, gender, err := 民政局.查户口(gid, fiancee)
 			switch gender {
 			case 3:
-				ctx.SendChain(message.Text("他现在还是一人哦~你可以试着娶他 成功可能性更高x"))
+				ctx.SendChain(message.Text("他现在还是一人哦~成功可能性更高x 不过看起来今天又浪费了一次机会ww "))
 				return
 			case 2:
 				ctx.SendChain(message.Text("ERR:", err))
@@ -614,12 +606,55 @@ func init() {
 				ctx.SendChain(message.Text(sendtext[4][1]))
 			}
 		})
+	// beta 肯定一堆bug
+	engine.OnRegex(`撮合\s?\[CQ:at,qq=(\d+)\]\s?\[CQ:at,qq=(\d+)\]`, zero.OnlyGroup).SetBlock(true).Limit(healCDCheck, ishealCDCheck).Handle(func(ctx *zero.Ctx) {
+		mainTarget := ctx.State["regex_matched"].([]string)[0]
+		sideTarget := ctx.State["regex_matched"].([]string)[1]
+		mainTargetReverse, _ := strconv.ParseInt(mainTarget, 10, 64)
+		sideTargetReverse, _ := strconv.ParseInt(sideTarget, 10, 64)
+		if mainTarget == sideTarget {
+			ctx.SendChain(message.Text("貌似你不能试着让", ctx.CardOrNickName(mainTargetReverse), "成为单身贵族哦(笑"))
+			return
+		}
+		_, getMainTargetStatus, _ := 民政局.查户口(ctx.Event.GroupID, mainTargetReverse)
+		_, getSideTargetStatus, _ := 民政局.查户口(ctx.Event.GroupID, sideTargetReverse)
+		/*	if getMainTargetInfo.Target == getSideTargetInfo.User {
+				ctx.Send(message.Text("貌似他们两个已经是CP了哦~成功浪费掉今天的机会^^"))
+				return
+			}
+		*/
+		if getMainTargetStatus == 3 && getSideTargetStatus == 3 {
+			if rand.Intn(10)/2 != 0 { // 20%
+				ctx.Send(message.Text("\n坏诶 没有成功哦("))
+				return
+			}
+			_ = 民政局.登记(ctx.Event.GroupID, mainTargetReverse, sideTargetReverse, ctx.CardOrNickName(mainTargetReverse), ctx.CardOrNickName(sideTargetReverse))
+			ctx.SendChain(
+				message.Text("貌似你成功撮合了一对CP ^^"),
+				message.Text("是 [", ctx.CardOrNickName(mainTargetReverse), "]"),
+				message.Image("https://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(mainTargetReverse, 10)+"&s=320").Add("cache", 0),
+				message.Text("\n和", ctx.CardOrNickName(sideTargetReverse), "\n"),
+				message.Image("https://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(sideTargetReverse, 10)+"&s=320").Add("cache", 0),
+				message.Text("哒"))
+			// Handle Your work.
+		} else {
+			ctx.Send(message.Text("貌似不符合标准呢^^ 需要双方都需要为单身哦w，看起来又浪费了一次机会("))
+		}
+
+	})
 }
 
 // 以群号和昵称为限制
 func cdcheck(ctx *zero.Ctx) *rate.Limiter {
 	limitID := strconv.FormatInt(ctx.Event.GroupID, 10) + strconv.FormatInt(ctx.Event.UserID, 10)
 	return skillCD.Load(limitID)
+}
+func healCDCheck(ctx *zero.Ctx) *rate.Limiter {
+	limitID := strconv.FormatInt(ctx.Event.GroupID, 10) + strconv.FormatInt(ctx.Event.UserID, 10)
+	return healCD.Load(limitID)
+}
+func ishealCDCheck(ctx *zero.Ctx) {
+	ctx.SendChain(message.Text("貌似不能尝试得太频繁呢^^ 可以等6个小时再试试哦 Wink~"))
 }
 func iscding(ctx *zero.Ctx) {
 	ctx.SendChain(message.Text("还在cd哦~请12小时后再来"))
