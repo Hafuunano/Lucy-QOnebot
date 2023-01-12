@@ -85,7 +85,7 @@ func init() { // 插件主体
 					"标题: ", illust.Title, "\n",
 					"插画ID: ", illust.Pid, "\n",
 					"画师: ", illust.UserName, "\n",
-					"画师ID: ", illust.UserId, "\n",
+					"Tags: ", illust.Tags, "\n",
 					"直链: ", "https://pixivel.moe/detail?id=", illust.Pid,
 				)
 				if imgs != nil {

@@ -9,13 +9,13 @@ import (
 
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/img/writer"
+	_ "github.com/FloatTech/sqlite" // import sql
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/img"
 	"github.com/FloatTech/zbputils/img/text"
 	"github.com/fogleman/gg"
-	_ "github.com/fumiama/sqlite3" // import sql
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -103,7 +103,7 @@ func init() {
 			canvas.DrawImage(back, 0, 0)
 			monthWord := now.Format("01/02")
 			hourWord, handleMsg := getHourWord(now)
-			_, err = file.GetLazyData(text.BoldFontFile, false)
+			_, err = file.GetLazyData(text.BoldFontFile, control.Md5File, false)
 			if err != nil {
 				ctx.SendChain(message.Text("ERROR:", err))
 				return
@@ -116,7 +116,7 @@ func init() {
 			canvas.DrawString(hourWord, float64(back.Bounds().Size().X)*0.1, float64(back.Bounds().Size().Y)*1.2)
 			canvas.DrawString(monthWord, float64(back.Bounds().Size().X)*0.6, float64(back.Bounds().Size().Y)*1.2)
 			nickName := ctx.CardOrNickName(uid)
-			_, err = file.GetLazyData(text.FontFile, false)
+			_, err = file.GetLazyData(text.FontFile, control.Md5File, false)
 			if err != nil {
 				ctx.SendChain(message.Text("ERROR:", err))
 				return

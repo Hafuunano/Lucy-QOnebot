@@ -76,7 +76,7 @@ func init() {
 		Handle(func(ctx *zero.Ctx) {
 			var mutex sync.RWMutex // 添加读写锁以保证稳定性
 			mutex.Lock()
-			yiyanRaw, err := web.RequestDataWith(web.NewDefaultClient(), "https://v1.hitokoto.cn/", "GET", Referer, ua)
+			yiyanRaw, err := web.RequestDataWith(web.NewDefaultClient(), "https://v1.hitokoto.cn/", "GET", Referer, ua, nil)
 			if err != nil {
 				return
 			}
@@ -148,6 +148,7 @@ func init() {
 					message.Text("今日塔罗牌是: \n归类于", cardtype, reasons[rand.Intn(len(reasons))], position[p], " 的 ", name, "\n"),
 					message.Image(bed+cardurl),
 					message.Text("\n其意义为：\n", info, "\n", vme50))
+				message.Text("\n新年快乐哦ww")
 			} else {
 				ctx.SendChain(message.At(user), message.Text(" 今天已经测过了哦~今日的人品值为", result[user], "呢~"))
 			}

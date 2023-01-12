@@ -173,5 +173,5 @@ func initPic(picFile string) error {
 	if file.IsExist(picFile) {
 		return nil
 	}
-	return file.DownloadTo(backgroundURL, picFile, true)
+	return file.DownloadTo(backgroundURL, picFile)
 }

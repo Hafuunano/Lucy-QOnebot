@@ -2,6 +2,7 @@
 package funwork
 
 import (
+	"regexp"
 	"time"
 
 	"github.com/FloatTech/floatbox/web"
@@ -21,13 +22,14 @@ func init() {
 		if !limit.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
-		data, err := web.RequestDataWith(web.NewDefaultClient(), "https://mirlkoi.ifast3.vipnps.vip/api.php?sort=random&type=json", "GET", Referer, ua)
+		data, err := web.RequestDataWith(web.NewDefaultClient(), "https://mirlkoi.ifast3.vipnps.vip/api.php?sort=random&type=json", "GET", Referer, ua, nil)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR:", err))
 			return
 		}
-		picURL := gjson.Get(string(data), "pic.0").String()
-
+		picURLRaw := gjson.Get(string(data), "pic.0").String()
+		replaceRegexp := regexp.MustCompile(`https://[0-9a-zA-Z]+.sinaimg.cn/`)
+		picURL := replaceRegexp.ReplaceAllString(picURLRaw, "https://simg.himoyo.cn/")
 		messageID := ctx.SendChain(message.Image(picURL))
 		time.Sleep(time.Second * 20)
 		ctx.DeleteMessage(messageID)
@@ -37,12 +39,14 @@ func init() {
 		if !limit.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
-		data, err := web.RequestDataWith(web.NewDefaultClient(), "https://mirlkoi.ifast3.vipnps.vip/api.php?sort=xing&type=json", "GET", Referer, ua)
+		data, err := web.RequestDataWith(web.NewDefaultClient(), "https://mirlkoi.ifast3.vipnps.vip/api.php?sort=xing&type=json", "GET", Referer, ua, nil)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR:", err))
 			return
 		}
-		picURL := gjson.Get(string(data), "pic.0").String()
+		picURLRaw := gjson.Get(string(data), "pic.0").String()
+		replaceRegexp := regexp.MustCompile(`https://[0-9a-zA-Z]+.sinaimg.cn/`)
+		picURL := replaceRegexp.ReplaceAllString(picURLRaw, "https://simg.himoyo.cn/")
 		ctx.SendChain(message.Image(picURL))
 	})
 
@@ -50,12 +54,14 @@ func init() {
 		if !limit.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
-		data, err := web.RequestDataWith(web.NewDefaultClient(), "https://mirlkoi.ifast3.vipnps.vip/api.php?sort=cat&type=json", "GET", Referer, ua)
+		data, err := web.RequestDataWith(web.NewDefaultClient(), "https://mirlkoi.ifast3.vipnps.vip/api.php?sort=cat&type=json", "GET", Referer, ua, nil)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR:", err))
 			return
 		}
-		picURL := gjson.Get(string(data), "pic.0").String()
+		picURLRaw := gjson.Get(string(data), "pic.0").String()
+		replaceRegexp := regexp.MustCompile(`https://[0-9a-zA-Z]+.sinaimg.cn/`)
+		picURL := replaceRegexp.ReplaceAllString(picURLRaw, "https://simg.himoyo.cn/")
 		messageID := ctx.SendChain(message.Image(picURL))
 		time.Sleep(time.Second * 20)
 		ctx.DeleteMessage(messageID)
@@ -65,12 +71,14 @@ func init() {
 		if !limit.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
-		data, err := web.RequestDataWith(web.NewDefaultClient(), "https://mirlkoi.ifast3.vipnps.vip/api.php?sort=yin&type=json", "GET", Referer, ua)
+		data, err := web.RequestDataWith(web.NewDefaultClient(), "https://mirlkoi.ifast3.vipnps.vip/api.php?sort=yin&type=json", "GET", Referer, ua, nil)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR:", err))
 			return
 		}
-		picURL := gjson.Get(string(data), "pic.0").String()
+		picURLRaw := gjson.Get(string(data), "pic.0").String()
+		replaceRegexp := regexp.MustCompile(`https://[0-9a-zA-Z]+.sinaimg.cn/`)
+		picURL := replaceRegexp.ReplaceAllString(picURLRaw, "https://simg.himoyo.cn/")
 		messageID := ctx.SendChain(message.Image(picURL))
 		time.Sleep(time.Second * 20)
 		ctx.DeleteMessage(messageID)

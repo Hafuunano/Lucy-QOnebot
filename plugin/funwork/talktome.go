@@ -18,7 +18,7 @@ import (
 
 const (
 	ua      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36"
-	Referer = "https://manual-lucy.himoyo.cn"
+	Referer = "https://tvax4.sinaimg.cn/"
 )
 
 var (
@@ -47,7 +47,7 @@ func init() {
 	})
 
 	engine.OnFullMatch("动漫一言").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		data, err := web.RequestDataWith(web.NewDefaultClient(), "https://v1.hitokoto.cn/?c=a&c=b&encode=text", "GET", Referer, ua)
+		data, err := web.RequestDataWith(web.NewDefaultClient(), "https://v1.hitokoto.cn/?c=a&c=b&encode=text", "GET", Referer, ua, nil)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR:", err))
 			return
@@ -57,7 +57,7 @@ func init() {
 
 	engine.OnFullMatch("来份网易云热评").SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {
-			data, err := web.RequestDataWith(web.NewDefaultClient(), "https://v1.hitokoto.cn/?c=j&encode=text", "GET", Referer, ua)
+			data, err := web.RequestDataWith(web.NewDefaultClient(), "https://v1.hitokoto.cn/?c=j&encode=text", "GET", Referer, ua, nil)
 			if err != nil {
 				ctx.SendChain(message.Text("ERROR:", err))
 				return

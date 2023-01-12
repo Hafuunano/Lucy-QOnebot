@@ -15,7 +15,7 @@ func init() {
 	engine.OnFullMatch("微博热搜", zero.OnlyToMe).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		rsp := "微博实时热榜:\n"
 		url := "https://api.weibo.cn/2/guest/search/hot/word"
-		data, err := web.RequestDataWith(web.NewDefaultClient(), url, "GET", "", web.RandUA())
+		data, err := web.RequestDataWith(web.NewDefaultClient(), url, "GET", "", web.RandUA(), nil)
 		if err != nil {
 			msg := message.Text("ERROR:", err)
 			ctx.SendChain(msg)

@@ -249,8 +249,8 @@ var (
 	民政局 = &婚姻登记{
 		db: &sql.Sqlite{},
 	}
-	skillCD  = rate.NewManager[string](time.Hour*12, 1)
-	healCD   = rate.NewManager[string](time.Hour*6, 1)
+	skillCD = rate.NewManager[string](time.Hour*12, 1)
+	//	healCD   = rate.NewManager[string](time.Hour*6, 1)
 	sendtext = [...][]string{
 		{ // 表白成功
 			"是个勇敢的孩子(*/ω＼*) 今天的运气都降临在你的身边~\n\n",
@@ -607,7 +607,7 @@ func init() {
 			}
 		})
 	// beta 肯定一堆bug
-	engine.OnRegex(`撮合\s?\[CQ:at,qq=(\d+)\]\s?\[CQ:at,qq=(\d+)\]`, zero.OnlyGroup).SetBlock(true).Limit(healCDCheck, ishealCDCheck).Handle(func(ctx *zero.Ctx) {
+	/* engine.OnRegex(`撮合\s?\[CQ:at,qq=(\d+)\]\s?\[CQ:at,qq=(\d+)\]`, zero.OnlyGroup).SetBlock(true).Limit(healCDCheck, ishealCDCheck).Handle(func(ctx *zero.Ctx) {
 		mainTarget := ctx.State["regex_matched"].([]string)[0]
 		sideTarget := ctx.State["regex_matched"].([]string)[1]
 		mainTargetReverse, _ := strconv.ParseInt(mainTarget, 10, 64)
@@ -618,11 +618,11 @@ func init() {
 		}
 		_, getMainTargetStatus, _ := 民政局.查户口(ctx.Event.GroupID, mainTargetReverse)
 		_, getSideTargetStatus, _ := 民政局.查户口(ctx.Event.GroupID, sideTargetReverse)
-		/*	if getMainTargetInfo.Target == getSideTargetInfo.User {
+			if getMainTargetInfo.Target == getSideTargetInfo.User {
 				ctx.Send(message.Text("貌似他们两个已经是CP了哦~成功浪费掉今天的机会^^"))
 				return
 			}
-		*/
+
 		if getMainTargetStatus == 3 && getSideTargetStatus == 3 {
 			if rand.Intn(10)/2 != 0 { // 20%
 				ctx.Send(message.Text("\n坏诶 没有成功哦("))
@@ -642,6 +642,8 @@ func init() {
 		}
 
 	})
+	*/
+
 }
 
 // 以群号和昵称为限制
@@ -649,13 +651,17 @@ func cdcheck(ctx *zero.Ctx) *rate.Limiter {
 	limitID := strconv.FormatInt(ctx.Event.GroupID, 10) + strconv.FormatInt(ctx.Event.UserID, 10)
 	return skillCD.Load(limitID)
 }
-func healCDCheck(ctx *zero.Ctx) *rate.Limiter {
-	limitID := strconv.FormatInt(ctx.Event.GroupID, 10) + strconv.FormatInt(ctx.Event.UserID, 10)
-	return healCD.Load(limitID)
-}
-func ishealCDCheck(ctx *zero.Ctx) {
-	ctx.SendChain(message.Text("貌似不能尝试得太频繁呢^^ 可以等6个小时再试试哦 Wink~"))
-}
+
+/*
+	func healCDCheck(ctx *zero.Ctx) *rate.Limiter {
+		limitID := strconv.FormatInt(ctx.Event.GroupID, 10) + strconv.FormatInt(ctx.Event.UserID, 10)
+		return healCD.Load(limitID)
+	}
+
+	func ishealCDCheck(ctx *zero.Ctx) {
+		ctx.SendChain(message.Text("貌似不能尝试得太频繁呢^^ 可以等6个小时再试试哦 Wink~"))
+	}
+*/
 func iscding(ctx *zero.Ctx) {
 	ctx.SendChain(message.Text("还在cd哦~请12小时后再来"))
 }
