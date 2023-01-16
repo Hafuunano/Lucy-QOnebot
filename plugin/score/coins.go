@@ -2,16 +2,17 @@ package score // Package score
 
 import (
 	"encoding/json"
-	fcext "github.com/FloatTech/floatbox/ctxext"
-	"github.com/FloatTech/zbputils/ctxext"
-	zero "github.com/wdvxdr1123/ZeroBot"
-	"github.com/wdvxdr1123/ZeroBot/extension/rate"
-	"github.com/wdvxdr1123/ZeroBot/message"
 	"math/rand"
 	"os"
 	"strconv"
 	"sync"
 	"time"
+
+	fcext "github.com/FloatTech/floatbox/ctxext"
+	"github.com/FloatTech/zbputils/ctxext"
+	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/extension/rate"
+	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
 type partygame struct {

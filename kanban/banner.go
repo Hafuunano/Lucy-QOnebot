@@ -1,9 +1,10 @@
 package kanban // Package kanban package kanban 初始化
 
 import (
+	"strings"
+
 	"github.com/FloatTech/zbputils/control"
 	"github.com/fumiama/go-registry"
-	"strings"
 )
 
 var (
