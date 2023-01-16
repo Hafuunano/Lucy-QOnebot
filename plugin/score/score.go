@@ -101,7 +101,11 @@ func init() {
 				_ = dayGround.LoadFontFace(engine.DataFolder()+"dyh.ttf", 40)
 				dayGround.DrawString(strconv.Itoa(currentNextGoalMeasure)+"/"+strconv.Itoa(measureGoalsLens), 710, 610)
 				_ = dayGround.SavePNG(drawedFile)
-				ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
+				msgid := ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
+				time.Sleep(time.Second * 5)
+				deleteThisOne := ctx.Send(message.ReplyWithMessage(msgid, message.Image(picFile)))
+				time.Sleep(time.Second * 40)
+				ctx.DeleteMessage(deleteThisOne)
 			} else {
 				// nightVision
 				// package for test draw.
@@ -141,7 +145,11 @@ func init() {
 				_ = nightGround.LoadFontFace(engine.DataFolder()+"dyh.ttf", 40)
 				nightGround.DrawString(strconv.Itoa(currentNextGoalMeasure)+"/"+strconv.Itoa(measureGoalsLens), 710, 610)
 				_ = nightGround.SavePNG(drawedFile)
-				ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
+				msgid := ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
+				time.Sleep(time.Second * 5)
+				deleteThisOne := ctx.Send(message.ReplyWithMessage(msgid, message.Image(picFile)))
+				time.Sleep(time.Second * 40)
+				ctx.DeleteMessage(deleteThisOne)
 			}
 		})
 }
