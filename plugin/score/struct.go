@@ -200,9 +200,9 @@ func getHourWord(t time.Time) (reply string) {
 	case 12 <= t.Hour() && t.Hour() < 14:
 		reply = "吃饭了嘛w~如果没有快去吃饭哦w"
 	case 14 <= t.Hour() && t.Hour() < 19:
-		reply = "记得多去补点水呢~ww"
+		reply = "记得多去补点水呢~ww,辛苦了哦w"
 	case 19 <= t.Hour() && t.Hour() < 24:
-		reply = "今天过的开心嘛ww"
+		reply = "晚上好吖w 今天过的开心嘛ww"
 	case 0 <= t.Hour() && t.Hour() < 5:
 		reply = "快去睡觉~已经很晚了w"
 	default:

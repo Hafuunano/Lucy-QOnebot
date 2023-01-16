@@ -107,7 +107,7 @@ func init() {
 			case dyn <= 6 && dyn >= 0:
 				uptime = "凌晨好~还没有睡觉呢~再不睡觉的话咱把你敲晕~" // 计算是早上还是晚上
 			case dyn <= 11 && dyn > 6:
-				uptime = "上午好~~是个笨蛋(bushi)~"
+				uptime = "上午好~~今天一定要继续加油摸鱼哦(雾"
 			case dyn <= 14 && dyn > 11:
 				uptime = "中午好~吃饭了嘛w 如果没有快去吃饭哦w"
 			case dyn <= 18 && dyn > 14:

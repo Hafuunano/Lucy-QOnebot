@@ -14,27 +14,6 @@ import (
 var fail = "获取精华消息失败喵~可能是这条信息在数据库中无法查询~"
 
 func init() {
-	/* engine.OnRegex(`^查找信息(\d+)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		if !limitinfo.Load(ctx.Event.UserID).Acquire() {
-			return
-		}
-		reachinfo, _ := strconv.ParseInt(ctx.State["regex_matched"].([]string)[1], 10, 64)
-		getUserInfo := ctx.GetGroupMemberInfo(ctx.Event.GroupID, reachinfo, false)
-		tempUserInfo := getUserInfo.String()
-		userName := ctx.CardOrNickName(reachinfo)
-		userSexInfo := gjson.Get(tempUserInfo, "sex")
-		userJoinTimeUnix := gjson.Get(tempUserInfo, "join_time").Int()
-		userJoinTime := time.Unix(userJoinTimeUnix, 0).Format("2006-01-02 03:04:05 PM")
-		lastSendTimeUnix := gjson.Get(tempUserInfo, "last_sent_time").Int()
-		userLastSendTIme := time.Unix(lastSendTimeUnix, 0).Format("2006-01-02 03:04:05 PM")
-		userUnfriendly := gjson.Get(tempUserInfo, "unfriendly")
-		userHonorTitle := gjson.Get(tempUserInfo, "title")
-		// userArea := gjson.Get(tempUserInfo, "area")
-		//	userAge := ctx.Event.Sender.Age
-		// userLevel := gjson.Get(tempUserInfo, "level")
-		ctx.SendChain(message.Text("你查询的人为: ", userName, "\n性别:", userSexInfo, "\n最后一次发送信息时间 :", userLastSendTIme, "\n加入时间:", userJoinTime, "\n是否有不友好记录:", userUnfriendly, "\n头衔:", userHonorTitle))
-	})
-	*/
 	engine.OnFullMatch("今日龙王", zero.OnlyGroup).Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		list := ctx.GetGroupHonorInfo(ctx.Event.GroupID, "talkative")
 		temp := list.String()
@@ -67,6 +46,7 @@ func init() {
 			ctx.DeleteMessage(deleteme)
 		}
 	})
+	// ovooa API
 	engine.OnRegex(`!catch\s?.*?(.*)$`).Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		url := ctx.State["regex_matched"].([]string)[1]
 		ctx.Send(message.Image("https://ovooa.com/API/Website_snapshot/?url=" + url))
