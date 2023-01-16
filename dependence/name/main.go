@@ -18,22 +18,25 @@ func StringInArray(aim string, list []string) bool {
 // StoreUserNickname Store names in jsons
 func StoreUserNickname(userID string, nickname string) error {
 	var userNicknameData map[string]interface{}
-	filePath := "file:///root/Lucy_Project/workon/main/data/zbp/users.json"
+	filePath := "./data/zbp/users.json"
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			_ = os.WriteFile(filePath, []byte("{}"), 0777)
 		} else {
+			panic(err)
 			return err
 		}
 	}
 	err = json.Unmarshal(data, &userNicknameData)
 	if err != nil {
+		panic(err)
 		return err
 	}
 	userNicknameData[userID] = nickname
 	newData, err := json.Marshal(userNicknameData)
 	if err != nil {
+		panic(err)
 		return err
 	}
 	_ = os.WriteFile(filePath, newData, 0777)
@@ -43,7 +46,7 @@ func StoreUserNickname(userID string, nickname string) error {
 // LoadUserNickname Load UserNames(if had.)
 func LoadUserNickname(userID string) string {
 	var d map[string]string
-	filePath := "/root/Lucy_Project/workon/main/data/zbp/users.json"
+	filePath := "./data/zbp/users.json"
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return "你"

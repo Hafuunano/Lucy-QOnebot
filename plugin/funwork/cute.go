@@ -16,7 +16,7 @@ import (
 )
 
 func init() {
-	engine.OnFullMatchGroup([]string{"今日小可爱"}, zero.OnlyGroup).SetBlock(false).Limit(ctxext.LimitByGroup).
+	engine.OnFullMatchGroup([]string{"今日本群RBQ"}, zero.OnlyGroup).SetBlock(false).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
 			list := ctx.CallAction("get_group_member_list", zero.Params{
 				"group_id": ctx.Event.GroupID,
@@ -37,7 +37,7 @@ func init() {
 				cutename = who.Get("nickname").Str
 			}
 			avtar := fmt.Sprintf("[CQ:image,file=https://q4.qlogo.cn/g?b=qq&nk=%d&s=640,cache=0]", cuteid)
-			msg := fmt.Sprintf("今日小可爱是%s\n【%s】(%d)哒！", avtar, cutename, cuteid)
+			msg := fmt.Sprintf("今日本群RBQ是%s\n【%s】(%d)哒！", avtar, cutename, cuteid)
 			msg = message.UnescapeCQCodeText(msg)
 			ctx.SendGroupMessage(ctx.Event.GroupID, message.ParseMessageFromString(msg))
 		})

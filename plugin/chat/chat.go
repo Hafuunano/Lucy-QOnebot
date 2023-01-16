@@ -72,6 +72,7 @@ func init() { // 插件主体
 			err = name.StoreUserNickname(userID, texts)
 			if err != nil {
 				ctx.Send(message.Text("发生了一些不可预料的问题 请稍后再试,ERR: ", err))
+				return
 			}
 			ctx.Send(message.Text("好哦~ ", texts, " ちゃん~~~"))
 		})

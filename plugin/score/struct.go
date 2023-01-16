@@ -1,7 +1,6 @@
 package score
 
 import (
-	"github.com/FloatTech/floatbox/file"
 	"os"
 	"time"
 
@@ -220,11 +219,4 @@ func getLevel(count int) int {
 		}
 	}
 	return -1
-}
-
-func initPic(picFile string) error {
-	if file.IsExist(picFile) {
-		return nil
-	}
-	return file.DownloadTo(backgroundURL, picFile)
 }
