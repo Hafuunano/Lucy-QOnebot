@@ -1,17 +1,19 @@
 package score // Package score
 
 import (
-	"github.com/FloatTech/ZeroBot-Plugin/plugin/funwork"
+	"math/rand"
+	"regexp"
+	"strconv"
+	"time"
+
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/fogleman/gg"
 	"github.com/tidwall/gjson"
 	"github.com/wdvxdr1123/ZeroBot/message"
-	"math/rand"
-	"regexp"
-	"strconv"
-	"time"
+
+	"github.com/FloatTech/ZeroBot-Plugin/plugin/funwork"
 
 	_ "github.com/FloatTech/sqlite" // import sql
 	ctrl "github.com/FloatTech/zbpctrl"
