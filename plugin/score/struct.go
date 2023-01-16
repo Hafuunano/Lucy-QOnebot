@@ -16,6 +16,39 @@ func init() {
 	}()
 }
 
+// scoredb 分数数据库
+type scoredb gorm.DB
+
+// scoretable 分数结构体
+type scoretable struct {
+	UID   int64 `gorm:"column:uid;primary_key"`
+	Score int   `gorm:"column:score;default:0"`
+}
+
+// signintable 签到结构体
+type signintable struct {
+	UID       int64 `gorm:"column:uid;primary_key"`
+	Count     int   `gorm:"column:count;default:0"`
+	Coins     int   `gorm:"column:coins;default:0"`
+	UpdatedAt time.Time
+}
+
+// globalTable 总体结构体
+type globaltable struct {
+	Counttime int `gorm:"column:counttime;default:0"`
+	Times     string
+}
+
+// TableName ...
+func (globaltable) TableName() string {
+	return "global"
+}
+
+// TableName ...
+func (scoretable) TableName() string {
+	return "score"
+}
+
 // TableName ...
 func (signintable) TableName() string {
 	return "sign_in"
@@ -41,7 +74,7 @@ func initialize(dbpath string) *scoredb {
 	if err != nil {
 		panic(err)
 	}
-	gdb.AutoMigrate(&scoretable{}).AutoMigrate(&signintable{})
+	gdb.AutoMigrate(&scoretable{}).AutoMigrate(&signintable{}).AutoMigrate(&globaltable{})
 	return (*scoredb)(gdb)
 }
 
@@ -86,6 +119,13 @@ func (sdb *scoredb) GetSignInByUID(uid int64) (si signintable) {
 	return si
 }
 
+// GetCurrentCount 取得现在的人数
+func (sdb *scoredb) GetCurrentCount(times string) (si globaltable) {
+	db := (*gorm.DB)(sdb)
+	db.Debug().Model(&globaltable{}).FirstOrCreate(&si, "times = ? ", times)
+	return si
+}
+
 // InsertOrUpdateSignInCountByUID 插入或更新签到次数
 func (sdb *scoredb) InsertOrUpdateSignInCountByUID(uid int64, count int) (err error) {
 	db := (*gorm.DB)(sdb)
@@ -127,6 +167,25 @@ func (sdb *scoredb) InsertUserCoins(uid int64, coins int) (err error) { // 修�
 	return
 }
 
+func (sdb *scoredb) UpdateUserTime(counttime int, times string) (err error) {
+	db := (*gorm.DB)(sdb)
+	si := globaltable{
+		Counttime: counttime,
+		Times:     times,
+	}
+	if err = db.Debug().Model(&globaltable{}).First(&si, "times = ?", times).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			db.Debug().Model(&globaltable{}).Create(&si) // judge if the table remain.
+		}
+	} else {
+		// do your favor
+		err = db.Debug().Model(&globaltable{}).Where("times = ?", times).Update(map[string]interface{}{
+			"counttime": counttime,
+		}).Error
+	}
+	return err
+}
+
 func checkUserCoins(coins int) bool { // 参与一次15个柠檬片
 	if coins-50 < 0 {
 		return false
@@ -135,25 +194,19 @@ func checkUserCoins(coins int) bool { // 参与一次15个柠檬片
 	}
 }
 
-func getHourWord(t time.Time) (sign string, reply string) {
+func getHourWord(t time.Time) (reply string) {
 	switch {
 	case 5 <= t.Hour() && t.Hour() < 12:
-		sign = "早上好"
 		reply = "今天又是新的一天呢ww"
 	case 12 <= t.Hour() && t.Hour() < 14:
-		sign = "中午好"
 		reply = "吃饭了嘛w~如果没有快去吃饭哦w"
 	case 14 <= t.Hour() && t.Hour() < 19:
-		sign = "下午好"
 		reply = "记得多去补点水呢~ww"
 	case 19 <= t.Hour() && t.Hour() < 24:
-		sign = "晚上好"
 		reply = "今天过的开心嘛ww"
 	case 0 <= t.Hour() && t.Hour() < 5:
-		sign = "凌晨好"
 		reply = "快去睡觉~已经很晚了w"
 	default:
-		sign = ""
 	}
 	return
 }
