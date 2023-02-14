@@ -3,8 +3,9 @@ package funwork
 
 import (
 	"encoding/base64"
-	"github.com/FloatTech/AnimeAPI/bilibili"
 	"time"
+
+	"github.com/FloatTech/AnimeAPI/bilibili"
 
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/zbputils/ctxext"

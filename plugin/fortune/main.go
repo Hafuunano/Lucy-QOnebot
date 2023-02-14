@@ -6,11 +6,12 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/FloatTech/imgfactory"
 	"image"
 	"io"
 	"os"
 	"strconv"
+
+	"github.com/FloatTech/imgfactory"
 
 	"github.com/FloatTech/gg" // 注册了 jpg png gif
 	"github.com/sirupsen/logrus"

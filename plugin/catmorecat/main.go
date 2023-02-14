@@ -1,11 +1,12 @@
 package catmorecat
 
 import (
+	"sync"
+
 	sql "github.com/FloatTech/sqlite"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	zero "github.com/wdvxdr1123/ZeroBot"
-	"sync"
 )
 
 var (

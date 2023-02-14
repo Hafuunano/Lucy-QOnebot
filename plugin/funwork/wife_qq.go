@@ -1,12 +1,13 @@
 package funwork
 
 import (
-	"github.com/FloatTech/imgfactory"
 	"math/rand"
 	"sort"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/FloatTech/imgfactory"
 
 	fcext "github.com/FloatTech/floatbox/ctxext"
 	"github.com/FloatTech/floatbox/math"
@@ -23,7 +24,7 @@ import (
 	"github.com/FloatTech/gg"
 )
 
-// nolint: asciicheck
+//nolint: asciicheck
 type 婚姻登记 struct {
 	db   *sql.Sqlite
 	dbmu sync.RWMutex
@@ -548,7 +549,6 @@ func init() {
 			}
 			data, _ := imgfactory.ToBytes(canvas.Image())
 			ctx.SendChain(message.ImageBytes(data))
-
 		})
 
 	engine.OnFullMatch("我要离婚", zero.OnlyToMe, zero.OnlyGroup, getdb).SetBlock(true).Limit(cdcheck, iscding2).

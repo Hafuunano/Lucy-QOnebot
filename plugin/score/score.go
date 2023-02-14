@@ -1,11 +1,12 @@
 package score // Package score
 
 import (
-	"github.com/FloatTech/AnimeAPI/bilibili"
 	"math/rand"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/FloatTech/AnimeAPI/bilibili"
 
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/web"
