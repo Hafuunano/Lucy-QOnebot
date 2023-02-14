@@ -1,8 +1,9 @@
 package score // Package score
 
 import (
+	"github.com/FloatTech/AnimeAPI/bilibili"
 	"math/rand"
-	"regexp"
+	"os"
 	"strconv"
 	"time"
 
@@ -10,10 +11,7 @@ import (
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/fogleman/gg"
-	"github.com/tidwall/gjson"
 	"github.com/wdvxdr1123/ZeroBot/message"
-
-	"github.com/FloatTech/ZeroBot-Plugin/plugin/funwork"
 
 	_ "github.com/FloatTech/sqlite" // import sql
 	ctrl "github.com/FloatTech/zbpctrl"
@@ -22,7 +20,7 @@ import (
 )
 
 const (
-	backgroundURL = "https://iw233.cn/api.php?sort=iw233&type=json"
+	backgroundURL = "https://iw233.cn/api.php?sort=iw233"
 	signinMax     = 1
 )
 
@@ -47,6 +45,7 @@ func init() {
 			now := time.Now()
 			today := now.Format("20060102")
 			si := sdb.GetSignInByUID(uid)
+			pic := "file:///" + file.BOTPATH + "/" + cachePath + strconv.FormatInt(uid, 10) + today + ".png"
 			drawedFile := cachePath + strconv.FormatInt(uid, 10) + today + "signin.png"
 			siUpdateTimeStr := si.UpdatedAt.Format("20060102")
 			if si.Count >= signinMax && siUpdateTimeStr == today {
@@ -106,16 +105,17 @@ func init() {
 				dayGround.DrawString(strconv.Itoa(currentNextGoalMeasure)+"/"+strconv.Itoa(measureGoalsLens), 710, 610)
 				_ = dayGround.SavePNG(drawedFile)
 				ctx.SendChain(message.At(uid), message.Text("[HiMoYoBot]签到成功\n"), message.Image("file:///"+file.BOTPATH+"/"+drawedFile))
-				time.Sleep(time.Second * 5)
-				data, err := web.RequestDataWith(web.NewDefaultClient(), backgroundURL, "GET", funwork.Referer, web.RandUA(), nil)
+				realLink, err := bilibili.GetRealURL(backgroundURL)
+				if err != nil {
+					return
+				}
+				data, err := web.RequestDataWith(web.NewDefaultClient(), realLink, "GET", "https://sina.com", web.RandUA(), nil)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
 				}
-				picURLRaw := gjson.Get(string(data), "pic.0").String()
-				replaceRegexp := regexp.MustCompile(`https://[0-9a-zA-Z]+.sinaimg.cn/`)
-				picURL := replaceRegexp.ReplaceAllString(picURLRaw, "https://simg.himoyo.cn/")
-				deleteThisOne := ctx.SendChain(message.At(uid), message.Text("今日份图片\n"), message.Image(picURL))
+				os.WriteFile(pic, data, 0777)
+				deleteThisOne := ctx.SendChain(message.At(uid), message.Text("今日份图片\n"), message.Image(pic))
 				time.Sleep(time.Second * 40)
 				ctx.DeleteMessage(deleteThisOne)
 			} else {
@@ -124,7 +124,7 @@ func init() {
 				getTimeReplyMsg := getHourWord(time.Now()) // get time and msg
 				currentTime := time.Now().Format("2006-01-02 15:04:05")
 				nightTimeImg, _ := gg.LoadImage(engine.DataFolder() + "BetaScoreNight.png")
-				nightGround := gg.NewContext(1886, 1080)
+				nightGround := gg.NewContext(1886, 1060)
 				nightGround.DrawImage(nightTimeImg, 0, 0)
 				_ = nightGround.LoadFontFace(engine.DataFolder()+"dyh.ttf", 60)
 				nightGround.SetRGB255(255, 255, 255)
@@ -158,16 +158,17 @@ func init() {
 				nightGround.DrawString(strconv.Itoa(currentNextGoalMeasure)+"/"+strconv.Itoa(measureGoalsLens), 710, 610)
 				_ = nightGround.SavePNG(drawedFile)
 				ctx.SendChain(message.At(uid), message.Text("[HiMoYoBot]签到成功\n"), message.Image("file:///"+file.BOTPATH+"/"+drawedFile))
-				time.Sleep(time.Second * 5)
-				data, err := web.RequestDataWith(web.NewDefaultClient(), backgroundURL, "GET", funwork.Referer, web.RandUA(), nil)
+				realLink, err := bilibili.GetRealURL(backgroundURL)
+				if err != nil {
+					return
+				}
+				data, err := web.RequestDataWith(web.NewDefaultClient(), realLink, "GET", "https://sina.com", web.RandUA(), nil)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
 				}
-				picURLRaw := gjson.Get(string(data), "pic.0").String()
-				replaceRegexp := regexp.MustCompile(`https://[0-9a-zA-Z]+.sinaimg.cn/`)
-				picURL := replaceRegexp.ReplaceAllString(picURLRaw, "https://simg.himoyo.cn/")
-				deleteThisOne := ctx.SendChain(message.At(uid), message.Text("今日份图片\n"), message.Image(picURL))
+				os.WriteFile(pic, data, 0777)
+				deleteThisOne := ctx.SendChain(message.At(uid), message.Text("今日份图片\n"), message.Image(pic))
 				time.Sleep(time.Second * 40)
 				ctx.DeleteMessage(deleteThisOne)
 			}

@@ -46,9 +46,4 @@ func init() {
 			ctx.DeleteMessage(deleteme)
 		}
 	})
-	// ovooa API
-	engine.OnRegex(`!catch\s?.*?(.*)$`).Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		url := ctx.State["regex_matched"].([]string)[1]
-		ctx.Send(message.Image("https://ovooa.com/API/Website_snapshot/?url=" + url))
-	})
 }

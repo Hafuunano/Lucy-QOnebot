@@ -13,8 +13,8 @@ var (
 		"* Hosted On Tencent LightCloudServer in Nanjing.",
 		"* Made By MoeMagicMango and FloatTech Project With ❤",
 		"* Project: https://github.com/FloatTech/ZeroBot-Plugin",
-		"* 说明书: https://manual-lucy.himoyo.cn",
-		"* Copyright © 2021-2022 FloatTech. All Rights Reserved.",
+		"* 说明书: https://lucy.impart.icu",
+		"* Copyright © 2021-2023 FloatTech. All Rights Reserved.",
 	}
 	reg = registry.NewRegReader("reilia.fumiama.top:32664", control.Md5File, "fumiama")
 	// Banner ...

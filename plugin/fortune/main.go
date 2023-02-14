@@ -6,12 +6,13 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"github.com/FloatTech/imgfactory"
 	"image"
 	"io"
 	"os"
 	"strconv"
 
-	"github.com/Coloured-glaze/gg" // 注册了 jpg png gif
+	"github.com/FloatTech/gg" // 注册了 jpg png gif
 	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -19,7 +20,6 @@ import (
 
 	fcext "github.com/FloatTech/floatbox/ctxext"
 	"github.com/FloatTech/floatbox/file"
-	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/floatbox/math"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
@@ -230,7 +230,7 @@ func draw(back image.Image, title, txt string, f io.Writer) (int64, error) {
 			}
 		}
 	}
-	return writer.WriteTo(canvas.Image(), f)
+	return imgfactory.WriteTo(canvas.Image(), f)
 }
 
 func offest(total, now int, distance float64) float64 {

@@ -1,6 +1,7 @@
 package funwork
 
 import (
+	"github.com/FloatTech/imgfactory"
 	"math/rand"
 	"sort"
 	"strconv"
@@ -16,14 +17,13 @@ import (
 	// 数据库
 	sql "github.com/FloatTech/sqlite"
 	// 定时器
-	"github.com/wdvxdr1123/ZeroBot/extension/rate"
-	// 画图
-	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/zbputils/img/text"
-	"github.com/fogleman/gg"
+	"github.com/wdvxdr1123/ZeroBot/extension/rate"
+
+	"github.com/FloatTech/gg"
 )
 
-//nolint: asciicheck
+// nolint: asciicheck
 type 婚姻登记 struct {
 	db   *sql.Sqlite
 	dbmu sync.RWMutex
@@ -249,8 +249,7 @@ var (
 	民政局 = &婚姻登记{
 		db: &sql.Sqlite{},
 	}
-	skillCD = rate.NewManager[string](time.Hour*12, 1)
-	//	healCD   = rate.NewManager[string](time.Hour*6, 1)
+	skillCD  = rate.NewManager[string](time.Hour*24, 4)
 	sendtext = [...][]string{
 		{ // 表白成功
 			"是个勇敢的孩子(*/ω＼*) 今天的运气都降临在你的身边~\n\n",
@@ -539,7 +538,7 @@ func init() {
 				ctx.SendChain(message.Text("ERROR:", err))
 				return
 			}
-			_, h = canvas.MeasureString("焯")
+			_, h = canvas.MeasureString("坏")
 			for i, info := range list {
 				canvas.DrawString(slicename(info[0], canvas), 0, float64(260+50*i)-h)
 				canvas.DrawString("("+info[1]+")", 350, float64(260+50*i)-h)
@@ -547,9 +546,9 @@ func init() {
 				canvas.DrawString(slicename(info[2], canvas), 800, float64(260+50*i)-h)
 				canvas.DrawString("("+info[3]+")", 1150, float64(260+50*i)-h)
 			}
-			data, cl := writer.ToBytes(canvas.Image())
+			data, _ := imgfactory.ToBytes(canvas.Image())
 			ctx.SendChain(message.ImageBytes(data))
-			cl()
+
 		})
 
 	engine.OnFullMatch("我要离婚", zero.OnlyToMe, zero.OnlyGroup, getdb).SetBlock(true).Limit(cdcheck, iscding2).
@@ -579,27 +578,19 @@ func init() {
 				ctx.SendChain(message.Text("ERR:", err))
 				return
 			case 1:
-				if rand.Intn(8) != 1 { // 十分之一的概率成功
-					ctx.SendChain(message.Text(sendtext[3][rand.Intn(len(sendtext[3]))]))
-					return
-				}
+				ctx.SendChain(message.Text(sendtext[4][rand.Intn(len(sendtext[4]))]))
 				err := 民政局.离婚休妻(gid, info.Target)
 				if err != nil {
 					ctx.SendChain(message.Text("ERR:", err))
 					return
 				}
-				ctx.SendChain(message.Text(sendtext[4][0]))
 			case 0:
-				if rand.Intn(8) != 0 { // 十分之一的概率成功
-					ctx.SendChain(message.Text(sendtext[3][rand.Intn(len(sendtext[3]))]))
-					return
-				}
+				ctx.SendChain(message.Text(sendtext[4][rand.Intn(len(sendtext[4]))]))
 				err := 民政局.离婚休夫(gid, info.User)
 				if err != nil {
 					ctx.SendChain(message.Text("ERR:", err))
 					return
 				}
-				ctx.SendChain(message.Text(sendtext[4][1]))
 			}
 		})
 }
@@ -611,7 +602,7 @@ func cdcheck(ctx *zero.Ctx) *rate.Limiter {
 }
 
 func iscding(ctx *zero.Ctx) {
-	ctx.SendChain(message.Text("还在cd哦~请12小时后再来"))
+	ctx.SendChain(message.Text("还在cd哦~请24小时后再来"))
 }
 
 // 注入判断 是否为单身
@@ -727,5 +718,5 @@ func checkcp(ctx *zero.Ctx) bool {
 	return true
 }
 func iscding2(ctx *zero.Ctx) {
-	ctx.SendChain(message.Text("哒咩 不可以这样做哦x~cd状态,12小时后再来试试吧x"))
+	ctx.SendChain(message.Text("哒咩 不可以这样做哦x~cd状态,24小时后再来试试吧x"))
 }

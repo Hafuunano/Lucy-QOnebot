@@ -16,7 +16,7 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
-const apiprefix = "https://wtfstory.himoyo.cn/api/run/"
+const apiprefix = "https://wtfstory.impart.icu/api/run/"
 
 type wtf struct {
 	name string

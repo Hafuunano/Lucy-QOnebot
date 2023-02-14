@@ -24,8 +24,6 @@ import (
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/score" // 签到
 
-	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/wordle" // wordle
-
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/chat" // 回复
 
 	"github.com/FloatTech/floatbox/process"
@@ -131,7 +129,7 @@ func init() {
 
 func main() {
 	rand.Seed(time.Now().UnixNano()) // 全局 seed，其他插件无需再 seed
-	zero.OnFullMatchGroup([]string{".help"}, zero.OnlyToMe).SetBlock(true).
+	zero.OnFullMatchGroup([]string{".help", "帮助", "/help"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(message.Text(kanban.Banner))
 		})
