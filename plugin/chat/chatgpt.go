@@ -3,13 +3,14 @@ package chat // Package chat base on Zerobot-Plugin Playground.
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+	"net/http"
+	"os"
+
 	"github.com/FloatTech/floatbox/file"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
-	"io"
-	"net/http"
-	"os"
 )
 
 const baseURL = "https://api.openai.com/v1/"
