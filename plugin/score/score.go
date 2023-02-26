@@ -1,6 +1,7 @@
 package score // Package score
 
 import (
+	"encoding/base64"
 	"github.com/FloatTech/AnimeAPI/bilibili"
 	"math/rand"
 	"os"
@@ -115,9 +116,7 @@ func init() {
 					return
 				}
 				os.WriteFile(pic, data, 0777)
-				deleteThisOne := ctx.SendChain(message.At(uid), message.Text("今日份图片\n"), message.Image(pic))
-				time.Sleep(time.Second * 40)
-				ctx.DeleteMessage(deleteThisOne)
+				ctx.SendChain(message.At(uid), message.Text("今日份图片\n"), message.Image("base64://"+base64.StdEncoding.EncodeToString(data)))
 			} else {
 				// nightVision
 				// package for test draw.
@@ -167,10 +166,7 @@ func init() {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
 				}
-				os.WriteFile(pic, data, 0777)
-				deleteThisOne := ctx.SendChain(message.At(uid), message.Text("今日份图片\n"), message.Image(pic))
-				time.Sleep(time.Second * 40)
-				ctx.DeleteMessage(deleteThisOne)
+				ctx.SendChain(message.At(uid), message.Text("今日份图片\n"), message.Image("base64://"+base64.StdEncoding.EncodeToString(data)))
 			}
 		})
 }
