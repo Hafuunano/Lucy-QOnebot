@@ -3,9 +3,12 @@ package chat // Package chat base on Zerobot-Plugin Playground.
 import (
 	"bytes"
 	"encoding/json"
-	"io"
+	"fmt"
+	"github.com/FloatTech/ttl"
 	"net/http"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/FloatTech/floatbox/file"
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -13,27 +16,102 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 )
 
-const baseURL = "https://api.openai.com/v1/"
+const (
+	proxyURL           = "https://openai.geekr.cool/v1/"
+	modelGPT3Dot5Turbo = "gpt-3.5-turbo"
+)
 
-// chatGPTResponseBody 请求体
-type chatGPTResponseBody struct {
-	ID      string                   `json:"id"`
-	Object  string                   `json:"object"`
-	Created int                      `json:"created"`
-	Model   string                   `json:"model"`
-	Choices []map[string]interface{} `json:"choices"`
-	Usage   map[string]interface{}   `json:"usage"`
+var apiKey string
+
+type sessionKey struct {
+	group int64
+	user  int64
 }
 
-// chatGPTRequestBody 响应体
+var cache = ttl.NewCache[sessionKey, []chatMessage](time.Minute * 15)
+
+// chatGPTResponseBody 响应体
+type chatGPTResponseBody struct {
+	ID      string       `json:"id"`
+	Object  string       `json:"object"`
+	Created int          `json:"created"`
+	Model   string       `json:"model"`
+	Choices []chatChoice `json:"choices"`
+	Usage   chatUsage    `json:"usage"`
+}
+
+// chatGPTRequestBody 请求体
 type chatGPTRequestBody struct {
-	Model            string  `json:"model"`
-	Prompt           string  `json:"prompt"`
-	MaxTokens        int     `json:"max_tokens"`
-	Temperature      float32 `json:"temperature"`
-	TopP             int     `json:"top_p"`
-	FrequencyPenalty int     `json:"frequency_penalty"`
-	PresencePenalty  int     `json:"presence_penalty"`
+	Model       string        `json:"model,omitempty"` // gpt3.5-turbo
+	Messages    []chatMessage `json:"messages,omitempty"`
+	Temperature float64       `json:"temperature,omitempty"`
+	N           int           `json:"n,omitempty"`
+	MaxTokens   int           `json:"max_tokens,omitempty"`
+}
+
+// chatMessage 消息
+type chatMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type chatChoice struct {
+	Index        int `json:"index"`
+	Message      chatMessage
+	FinishReason string `json:"finish_reason"`
+}
+
+type chatUsage struct {
+	PromptTokens     int `json:"prompt_tokens"`
+	CompletionTokens int `json:"completion_tokens"`
+	TotalTokens      int `json:"total_tokens"`
+}
+
+var client = &http.Client{
+	Transport: &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+	},
+	Timeout: 5 * time.Minute,
+}
+
+// 可以直接使用web封包 无需二次构建
+// completions gtp3.5文本模型回复
+// curl https://api.openai.com/v1/chat/completions
+// -H "Content-Type: application/json"
+// -H "Authorization: Bearer YOUR_API_KEY"
+// -d '{ "model": "gpt-3.5-turbo",  "messages": [{"role": "user", "content": "Hello!"}]}'
+func completions(messages []chatMessage, apiKey string) (*chatGPTResponseBody, error) {
+	com := chatGPTRequestBody{
+		Messages: messages,
+	}
+	// default model
+	if com.Model == "" {
+		com.Model = modelGPT3Dot5Turbo
+	}
+
+	body, err := json.Marshal(com)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, proxyURL+"chat/completions", bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/json; charset=utf-8")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	v := new(chatGPTResponseBody)
+	if err = json.NewDecoder(res.Body).Decode(&v); err != nil {
+		return nil, err
+	}
+	return v, nil
 }
 
 func init() {
@@ -46,68 +124,31 @@ func init() {
 		}
 		gptkey = helper.BytesToString(apikey)
 	}
-	engine.OnRegex(`^/chat\s*(.*)$`).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			args := ctx.State["regex_matched"].([]string)[1]
-			ans, err := WriteProcess(args, gptkey)
-			if err != nil {
-				ctx.SendChain(message.Text("ERROR: ", err))
-				return
-			}
-			ctx.SendChain(message.At(ctx.Event.UserID), message.Text(ans))
+	engine.OnRegex(`^/chat\s*(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		args := ctx.State["regex_matched"].([]string)[1]
+		key := sessionKey{
+			group: ctx.Event.GroupID,
+			user:  ctx.Event.UserID,
+		}
+		if args == "reset" {
+			cache.Delete(key)
+			ctx.SendChain(message.Text("Clean("))
+			return
+		}
+		messages := cache.Get(key)
+		messages = append(messages, chatMessage{
+			Role:    "user",
+			Content: args,
 		})
-}
-
-func WriteProcess(msg string, apiKey string) (string, error) {
-	requestBody := chatGPTRequestBody{
-		Model:            "text-davinci-003",
-		Prompt:           msg,
-		MaxTokens:        2048,
-		Temperature:      0.7,
-		TopP:             1,
-		FrequencyPenalty: 0,
-		PresencePenalty:  0,
-	}
-	requestData, err := json.Marshal(requestBody)
-
-	if err != nil {
-		return "", err
-	}
-	req, err := http.NewRequest("POST", baseURL+"completions", bytes.NewBuffer(requestData))
-	if err != nil {
-		return "", err
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+apiKey)
-	client := &http.Client{}
-	response, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
+		resp, err := completions(messages, apiKey)
 		if err != nil {
-			panic(err)
+			ctx.SendChain(message.Text("Some err occurred when requesting :( : ", err))
+			return
 		}
-	}(response.Body)
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return "", err
-	}
-
-	gptResponseBody := &chatGPTResponseBody{}
-	err = json.Unmarshal(body, gptResponseBody)
-	if err != nil {
-		return "", err
-	}
-	var reply string
-	if len(gptResponseBody.Choices) > 0 {
-		for _, v := range gptResponseBody.Choices {
-			reply = v["text"].(string)
-			break
-		}
-	}
-	return reply, nil
+		reply := resp.Choices[0].Message
+		reply.Content = strings.TrimSpace(reply.Content)
+		messages = append(messages, reply)
+		cache.Set(key, messages)
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(reply.Content))
+	})
 }
