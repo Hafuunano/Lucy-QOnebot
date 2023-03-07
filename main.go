@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"math/rand"
 	"os"
 	"strconv"
 	"time"
@@ -23,6 +22,8 @@ import (
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/funwork" // 好玩的整合工具
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/score" // 签到
+
+	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/steam" // steam
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/chat" // 回复
 
@@ -128,7 +129,6 @@ func init() {
 }
 
 func main() {
-	rand.Seed(time.Now().UnixNano()) // 全局 seed，其他插件无需再 seed
 	zero.OnFullMatchGroup([]string{".help", "帮助", "/help"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(message.Text(kanban.Banner))

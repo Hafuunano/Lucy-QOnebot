@@ -17,11 +17,9 @@ import (
 )
 
 const (
-	proxyURL           = "https://openai.geekr.cool/v1/"
+	proxyURL           = "https://openai-api.impart.icu/"
 	modelGPT3Dot5Turbo = "gpt-3.5-turbo"
 )
-
-var apiKey string
 
 type sessionKey struct {
 	group int64
@@ -88,12 +86,10 @@ func completions(messages []chatMessage, apiKey string) (*chatGPTResponseBody, e
 	if com.Model == "" {
 		com.Model = modelGPT3Dot5Turbo
 	}
-
 	body, err := json.Marshal(com)
 	if err != nil {
 		return nil, err
 	}
-
 	req, err := http.NewRequest(http.MethodPost, proxyURL+"chat/completions", bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -101,7 +97,6 @@ func completions(messages []chatMessage, apiKey string) (*chatGPTResponseBody, e
 	req.Header.Set("Accept", "application/json; charset=utf-8")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiKey))
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-
 	res, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -115,7 +110,7 @@ func completions(messages []chatMessage, apiKey string) (*chatGPTResponseBody, e
 }
 
 func init() {
-	// easy and work well with chatgpt?
+	// easy and work well with chatgpt? key handler.
 	gptkey := engine.DataFolder() + "gptkey.txt"
 	if file.IsExist(gptkey) {
 		apikey, err := os.ReadFile(gptkey)
@@ -124,7 +119,8 @@ func init() {
 		}
 		gptkey = helper.BytesToString(apikey)
 	}
-	engine.OnRegex(`^/chat\s*(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	// trigger for chatgpt
+	engine.OnRegex(`^/chat\s*(.*)$`, zero.OnlyToMe).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		args := ctx.State["regex_matched"].([]string)[1]
 		key := sessionKey{
 			group: ctx.Event.GroupID,
@@ -132,7 +128,7 @@ func init() {
 		}
 		if args == "reset" {
 			cache.Delete(key)
-			ctx.SendChain(message.Text("Clean("))
+			ctx.Send(message.ReplyWithMessage(message.Text("Session Cleaned (")))
 			return
 		}
 		messages := cache.Get(key)
@@ -140,9 +136,9 @@ func init() {
 			Role:    "user",
 			Content: args,
 		})
-		resp, err := completions(messages, apiKey)
+		resp, err := completions(messages, gptkey)
 		if err != nil {
-			ctx.SendChain(message.Text("Some err occurred when requesting :( : ", err))
+			ctx.SendChain(message.Text("Some errors occurred when requesting :( : ", err))
 			return
 		}
 		reply := resp.Choices[0].Message
