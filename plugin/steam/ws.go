@@ -9,7 +9,7 @@ import (
 	sql "github.com/FloatTech/sqlite"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
-	corn "github.com/robfig/cron/v3"
+	"github.com/fumiama/cron"
 	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -74,7 +74,7 @@ type player struct {
 	LastUpdate    int64  `json:"last_update"`     // 更新时间
 }
 
-func main(ctx *zero.Ctx) {
+func init() {
 	go func() {
 		if file.IsNotExist(steamKeyFile) {
 			_, err := os.Create(steamKeyFile)
@@ -87,11 +87,16 @@ func main(ctx *zero.Ctx) {
 			panic(err)
 		}
 		apiKey = binary.BytesToString(apikey)
+		c := cron.New(cron.WithSeconds())
+		spec := "*/30 * * * * *"
+		var ctx *zero.Ctx
+		c.AddFunc(spec, func() {
+			listenUserChange(ctx)
+		})
+		c.Start()
 	}()
-	cornWork(ctx)
 	engine.OnFullMatch("拉取steam绑定用户状态", getDB).SetBlock(true).Handle(listenUserChange)
-
-	engine.OnRegex(`^/steam bind \s*(\d+)$`, zero.OnlyGroup, getDB).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^/steam\sbind\s*(\d+)$`, zero.OnlyGroup, getDB).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		steamID := ctx.State["regex_matched"].([]string)[1]
 		// 获取用户状态
 		playerStatus, err := getPlayerStatus([]string{steamID})
@@ -131,8 +136,7 @@ func main(ctx *zero.Ctx) {
 		}
 		ctx.SendChain(message.Text("oki!"))
 	})
-	// 删除绑定流程
-	engine.OnRegex(`^/steam unbind \s*(\d+)$`, zero.OnlyGroup, getDB).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^/steam\sunbind\s*(\d+)$`, zero.OnlyGroup, getDB).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		steamID := ctx.State["regex_matched"].([]string)[1]
 		groupID := strconv.FormatInt(ctx.Event.GroupID, 10)
 		// 判断是否已经绑定该steamID，若已绑定就将群列表从推送群列表钟去除
@@ -168,15 +172,6 @@ func main(ctx *zero.Ctx) {
 		}
 		ctx.SendChain(message.Text("设置成功"))
 	})
-}
-
-// corn
-func cornWork(ctx *zero.Ctx) {
-	newCorn := corn.New()
-	newCorn.AddFunc("*/1 * * * *", func() {
-		listenUserChange(ctx)
-	})
-	newCorn.Start()
 }
 
 // listenUserChange 用于监听用户的信息变化
