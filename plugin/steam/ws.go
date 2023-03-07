@@ -47,8 +47,6 @@ var (
 			ctx.SendChain(message.Text("[steam] ERROR: Steam API 密钥尚未初始化"))
 			return false
 		}
-		// corn
-		cornWork(ctx)
 		return true
 	})
 	apiKey       string
@@ -76,7 +74,7 @@ type player struct {
 	LastUpdate    int64  `json:"last_update"`     // 更新时间
 }
 
-func init() {
+func main(ctx *zero.Ctx) {
 	go func() {
 		if file.IsNotExist(steamKeyFile) {
 			_, err := os.Create(steamKeyFile)
@@ -90,6 +88,7 @@ func init() {
 		}
 		apiKey = binary.BytesToString(apikey)
 	}()
+	cornWork(ctx)
 	engine.OnFullMatch("拉取steam绑定用户状态", getDB).SetBlock(true).Handle(listenUserChange)
 
 	engine.OnRegex(`^/steam bind \s*(\d+)$`, zero.OnlyGroup, getDB).SetBlock(true).Handle(func(ctx *zero.Ctx) {
