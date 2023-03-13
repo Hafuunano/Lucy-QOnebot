@@ -87,14 +87,8 @@ func init() {
 			panic(err)
 		}
 		apiKey = binary.BytesToString(apikey)
-		c := cron.New(cron.WithSeconds())
-		spec := "*/30 * * * * *"
-		var ctx *zero.Ctx
-		c.AddFunc(spec, func() {
-			listenUserChange(ctx)
-		})
-		c.Start()
 	}()
+	c := cron.New(cron.WithSeconds())
 	engine.OnFullMatch("拉取steam绑定用户状态", getDB).SetBlock(true).Handle(listenUserChange)
 	engine.OnRegex(`^/steam\sbind\s*(\d+)$`, zero.OnlyGroup, getDB).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		steamID := ctx.State["regex_matched"].([]string)[1]
@@ -171,6 +165,17 @@ func init() {
 			}
 		}
 		ctx.SendChain(message.Text("设置成功"))
+	})
+	engine.OnFullMatch("/steam start fetch", zero.SuperUserPermission, getDB).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		//	c := cron.New(cron.WithSeconds())
+		spec := "*/30 * * * * *"
+		c.AddFunc(spec, func() {
+			listenUserChange(ctx)
+		})
+		c.Start()
+	})
+	engine.OnFullMatch("/steam stop fetch", zero.SuperUserPermission).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		c.Stop()
 	})
 }
 

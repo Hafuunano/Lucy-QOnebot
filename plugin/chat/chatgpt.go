@@ -128,7 +128,7 @@ func init() {
 		}
 		if args == "reset" {
 			cache.Delete(key)
-			ctx.Send(message.ReplyWithMessage(message.Text("Session Cleaned (")))
+			ctx.Send("Session Cleaned (")
 			return
 		}
 		messages := cache.Get(key)
