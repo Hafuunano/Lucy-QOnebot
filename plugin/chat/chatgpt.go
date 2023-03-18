@@ -35,7 +35,6 @@ type chatGPTResponseBody struct {
 	Created int          `json:"created"`
 	Model   string       `json:"model"`
 	Choices []chatChoice `json:"choices"`
-	Usage   chatUsage    `json:"usage"`
 }
 
 // chatGPTRequestBody 请求体
@@ -57,19 +56,6 @@ type chatChoice struct {
 	Index        int `json:"index"`
 	Message      chatMessage
 	FinishReason string `json:"finish_reason"`
-}
-
-type chatUsage struct {
-	PromptTokens     int `json:"prompt_tokens"`
-	CompletionTokens int `json:"completion_tokens"`
-	TotalTokens      int `json:"total_tokens"`
-}
-
-var client = &http.Client{
-	Transport: &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-	},
-	Timeout: 5 * time.Minute,
 }
 
 // 可以直接使用web封包 无需二次构建
@@ -97,6 +83,7 @@ func completions(messages []chatMessage, apiKey string) (*chatGPTResponseBody, e
 	req.Header.Set("Accept", "application/json; charset=utf-8")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiKey))
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	var client http.Client
 	res, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -128,7 +115,7 @@ func init() {
 		}
 		if args == "reset" {
 			cache.Delete(key)
-			ctx.Send("Session Cleaned (")
+			ctx.Send("Session cleaned.")
 			return
 		}
 		messages := cache.Get(key)

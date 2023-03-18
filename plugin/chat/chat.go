@@ -147,58 +147,6 @@ func init() { // 插件主体
 				ctx.Send(message.Text("哼！Lucy才不想戳"))
 			}
 		})
-
-	// 群空调
-	var AirConditTemp = map[int64]int{}
-	var AirConditSwitch = map[int64]bool{}
-	engine.OnFullMatch("空调开").SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			AirConditSwitch[ctx.Event.GroupID] = true
-			ctx.SendChain(message.Text("❄️哔~"))
-		})
-	engine.OnFullMatch("空调关").SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			AirConditSwitch[ctx.Event.GroupID] = false
-			delete(AirConditTemp, ctx.Event.GroupID)
-			ctx.SendChain(message.Text("💤哔~"))
-		})
-	engine.OnRegex(`设置温度(\d+)`).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			if _, exist := AirConditTemp[ctx.Event.GroupID]; !exist {
-				AirConditTemp[ctx.Event.GroupID] = 26
-			}
-			if AirConditSwitch[ctx.Event.GroupID] {
-				temp := ctx.State["regex_matched"].([]string)[1]
-				AirConditTemp[ctx.Event.GroupID], _ = strconv.Atoi(temp)
-				ctx.SendChain(message.Text(
-					"❄️风速中", "\n",
-					"群温度 ", AirConditTemp[ctx.Event.GroupID], "℃",
-				))
-			} else {
-				ctx.SendChain(message.Text(
-					"💤", "\n",
-					"群温度 ", AirConditTemp[ctx.Event.GroupID], "℃",
-				))
-			}
-		})
-	engine.OnFullMatch(`群温度`).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			if _, exist := AirConditTemp[ctx.Event.GroupID]; !exist {
-				AirConditTemp[ctx.Event.GroupID] = 26
-			}
-			if AirConditSwitch[ctx.Event.GroupID] {
-				ctx.SendChain(message.Text(
-					"❄️风速中", "\n",
-					"群温度 ", AirConditTemp[ctx.Event.GroupID], "℃",
-				))
-			} else {
-				ctx.SendChain(message.Text(
-					"💤", "\n",
-					"群温度 ", AirConditTemp[ctx.Event.GroupID], "℃",
-				))
-			}
-		})
-	// 针对于自己的添加w 我很懒不要打我a.a
 	engine.OnKeywordGroup([]string{"会什么", "用法"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(randImage("file_3492331.jpg"), RandText(

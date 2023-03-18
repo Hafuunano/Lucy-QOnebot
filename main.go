@@ -23,8 +23,6 @@ import (
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/score" // 签到
 
-	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/steam" // steam
-
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/chat" // 回复
 
 	"github.com/FloatTech/floatbox/process"

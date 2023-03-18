@@ -5,7 +5,8 @@ import (
 	"image/color"
 )
 
-// GetMainColor Idea from stack Overflow (summarize main color and be in a map,when needed,decode an img file and compare which is main color)
+// GetMainColor Idea from stack Overflow
+// (summarize main color and be in a map,when needed,decode an img file and compare which is main color)
 func GetMainColor(img image.Image) color.Color {
 	model := color.Palette{
 		color.RGBA{A: 255},                         // 黑色
