@@ -8,8 +8,10 @@ require (
 	github.com/FloatTech/gg v1.1.1
 	github.com/FloatTech/imgfactory v0.2.1
 	github.com/FloatTech/sqlite v1.5.7
+	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b
 	github.com/FloatTech/zbpctrl v1.5.3-0.20230130095145-714ad318cd52
 	github.com/FloatTech/zbputils v1.6.2-0.20230207084008-8c14cb9fcacb
+	github.com/MoYoez/Go-ArcaeaUnlimitedAPI v0.0.0-20230319163602-e33ab0c757b6
 	github.com/fogleman/gg v1.3.0
 	github.com/fumiama/cron v1.3.0
 	github.com/fumiama/go-registry v0.2.5
@@ -25,8 +27,6 @@ require (
 
 require (
 	github.com/FloatTech/rendercard v0.0.9 // indirect
-	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b // indirect
-	github.com/MoYoez/Go-ArcaeaUnlimitedAPI v0.0.0-20230316161236-bdc8adb499b9 // indirect
 	github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e // indirect
 	github.com/RomiChan/websocket v1.4.3-0.20220227141055-9b2c6168c9c5 // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect
@@ -45,7 +45,6 @@ require (
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
-	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect

@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
+	aua "github.com/MoYoez/Go-ArcaeaUnlimitedAPI"
 	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/message"
+	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 	"os"
 )
 
@@ -108,15 +111,30 @@ var (
 	engine = control.Register("arcaea", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
 		Help:              "Hi NekoPachi!\n说明书: https://manual-lucy.himoyo.cn",
-		PrivateDataFolder: "tools",
+		PrivateDataFolder: "arcaea",
 	})
 )
 
 func init() {
-	engine.OnFullMatchGroup([]string{"arc"}, zero.OnlyToMe).SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		playerJson, _ := os.ReadFile("./player.json")
+	// no database support yet due to i am lazy.
+	engine.OnRegex(`^!test arc\s*(\d+)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		id := ctx.State["regex_matched"].([]string)[1]
+		// get token
+		tokenFolder := engine.DataFolder() + "arc.txt"
+		token, err := os.ReadFile(tokenFolder)
+		if err != nil {
+			return
+		}
+		// get player info
+		playerdata, err := aua.Best30("https://server.awbugl.top", helper.BytesToString(token), id)
+		if err != nil {
+			panic(err)
+		}
+		playerdataByte := helper.StringToBytes(playerdata)
 		var r arcaea
-		_ = json.Unmarshal(playerJson, &r)
+		_ = json.Unmarshal(playerdataByte, &r)
+		// get first song
+		ctx.SendChain(message.Text("test\n"), message.Text(r.Content.Best30List[1].SongId))
 	})
 
 }

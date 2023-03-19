@@ -23,6 +23,8 @@ import (
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/score" // 签到
 
+	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/arc" // arcaea
+
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/chat" // 回复
 
 	"github.com/FloatTech/floatbox/process"
