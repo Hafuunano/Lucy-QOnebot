@@ -26,6 +26,7 @@ require (
 require (
 	github.com/FloatTech/rendercard v0.0.9 // indirect
 	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b // indirect
+	github.com/MoYoez/Go-ArcaeaUnlimitedAPI v0.0.0-20230316161236-bdc8adb499b9 // indirect
 	github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e // indirect
 	github.com/RomiChan/websocket v1.4.3-0.20220227141055-9b2c6168c9c5 // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect
