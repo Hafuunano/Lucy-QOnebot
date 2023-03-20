@@ -32,7 +32,6 @@ import (
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/driver"
 	"github.com/wdvxdr1123/ZeroBot/message"
-	// -----------------------以上为内置依赖，勿动------------------------ //
 )
 
 type zbpcfg struct {

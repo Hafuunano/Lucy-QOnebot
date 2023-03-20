@@ -94,14 +94,13 @@ func init() {
 			} else {
 				info = card.Info.ReverseDescription
 			} // 塔罗牌生成 (随机的)
-			// 写得非常恶心 建议有时间赶紧重构x awa
+			// 摆了 不重构了
 			user := ctx.Event.UserID
 			userS := strconv.FormatInt(user, 10)
 			now := time.Now().Format("20060102")
 			randEveryone := fcext.RandSenderPerDayN(ctx.Event.UserID, 100)
 			var si = now + userS // 合成
 			dyn := time.Now().Hour()
-			weeks := time.Now().Weekday()
 			outputUserName := tools.LoadUserNickname(userS)
 			switch {
 			case dyn <= 6 && dyn >= 0:
@@ -114,11 +113,6 @@ func init() {
 				uptime = "下午好ww~咱很高兴看到你精力充沛的样子w"
 			case dyn <= 24 && dyn > 18:
 				uptime = "晚上好吖w~今天过的开心嘛ww"
-			}
-			if weeks.String() == "Thursday" {
-				vme50 = "今天是疯狂星期四 v我50好嘛 www"
-			} else {
-				vme50 = ""
 			}
 			uptime = strings.ReplaceAll(uptime, "你", outputUserName)
 			// CTRL C + CTRL V
