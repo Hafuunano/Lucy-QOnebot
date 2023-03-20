@@ -10,10 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/FloatTech/floatbox/file"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
-	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 )
 
 const (
@@ -98,14 +96,6 @@ func completions(messages []chatMessage, apiKey string) (*chatGPTResponseBody, e
 
 func init() {
 	// easy and work well with chatgpt? key handler.
-	gptkey := engine.DataFolder() + "gptkey.txt"
-	if file.IsExist(gptkey) {
-		apikey, err := os.ReadFile(gptkey)
-		if err != nil {
-			panic(err)
-		}
-		gptkey = helper.BytesToString(apikey)
-	}
 	// trigger for chatgpt
 	engine.OnRegex(`^/chat\s*(.*)$`, zero.OnlyToMe).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		args := ctx.State["regex_matched"].([]string)[1]
@@ -123,7 +113,7 @@ func init() {
 			Role:    "user",
 			Content: args,
 		})
-		resp, err := completions(messages, gptkey)
+		resp, err := completions(messages, os.Getenv("gptkey"))
 		if err != nil {
 			ctx.SendChain(message.Text("Some errors occurred when requesting :( : ", err))
 			return

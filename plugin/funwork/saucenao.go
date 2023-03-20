@@ -26,20 +26,10 @@ var (
 )
 
 func init() { // 插件主体
-	apikeyfile := engine.DataFolder() + "apikey.txt"
-	if file.IsExist(apikeyfile) {
-		key, err := os.ReadFile(apikeyfile)
-		if err != nil {
-			panic(err)
-		}
-		saucenaocli, err = gophersauce.NewClient(&gophersauce.Settings{
-			MaxResults: 1,
-			APIKey:     binary.BytesToString(key),
-		})
-		if err != nil {
-			panic(err)
-		}
-	}
+	saucenaocli, _ = gophersauce.NewClient(&gophersauce.Settings{
+		MaxResults: 1,
+		APIKey:     os.Getenv("saucenao_apikey"),
+	})
 	// 根据 PID 搜图
 	engine.OnRegex(`^搜图(\d+)$`).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {

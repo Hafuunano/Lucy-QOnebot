@@ -17,6 +17,7 @@ require (
 	github.com/fumiama/go-registry v0.2.5
 	github.com/fumiama/gotracemoe v0.0.3
 	github.com/jinzhu/gorm v1.9.16
+	github.com/joho/godotenv v1.5.1
 	github.com/jozsefsallai/gophersauce v1.0.1
 	github.com/mroth/weightedrand v1.0.0
 	github.com/shirou/gopsutil/v3 v3.23.1

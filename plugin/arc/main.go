@@ -120,15 +120,11 @@ func init() {
 	engine.OnRegex(`^!test arc\s*(\d+)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		id := ctx.State["regex_matched"].([]string)[1]
 		// get token
-		tokenFolder := engine.DataFolder() + "arc.txt"
-		token, err := os.ReadFile(tokenFolder)
-		if err != nil {
-			return
-		}
 		// get player info
-		playerdata, err := aua.Best30("https://server.awbugl.top", helper.BytesToString(token), id)
+		playerdata, err := aua.Best30(os.Getenv("aualink"), os.Getenv("auakey"), id)
 		if err != nil {
-			panic(err)
+			ctx.SendChain(message.Text("获取玩家信息失败"))
+			return
 		}
 		playerdataByte := helper.StringToBytes(playerdata)
 		var r arcaea
