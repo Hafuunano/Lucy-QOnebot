@@ -10,7 +10,7 @@ import (
 var (
 	engine = control.Register("tools", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
-		Help:              "Hi NekoPachi!\n说明书: https://manual-lucy.himoyo.cn",
+		Help:              "Hi NekoPachi!\n说明书: https://lucy.impart.icu",
 		PrivateDataFolder: "tools",
 	})
 )

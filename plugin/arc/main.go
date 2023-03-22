@@ -130,7 +130,7 @@ func init() {
 		var r arcaea
 		_ = json.Unmarshal(playerdataByte, &r)
 		// get first song
-		ctx.SendChain(message.Text("test\n"), message.Text(r.Content.Best30List[1].SongId))
+		ctx.SendChain(message.Text("test\n"), message.Text(r.Content.Best30List[0].SongId))
 	})
 
 }
