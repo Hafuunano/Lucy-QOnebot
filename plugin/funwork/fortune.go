@@ -2,15 +2,13 @@
 package funwork
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/FloatTech/AnimeAPI/bilibili"
+	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/gg"
 	"github.com/FloatTech/imgfactory"
 	"github.com/FloatTech/zbputils/img/text"
 	"image"
-	"image/jpeg"
 	"io"
 	"net/http"
 	"os"
@@ -68,18 +66,16 @@ func init() {
 			return true
 		},
 	)
-
 	engine.OnFullMatch("今日人品", getTarot).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			userPic := strconv.FormatInt(ctx.Event.UserID, 10) + time.Now().Format("20060102") + ".png"
-			userPicPath := engine.DataFolder() + "jrrp/" + userPic
+			randnum := strconv.Itoa(rand.Intn(4))
 			var mutex sync.RWMutex // 添加读写锁以保证稳定性
 			mutex.Lock()
 			p := rand.Intn(2)
 			is := rand.Intn(77)
 			i := is + 1
 			card := cardMap[(strconv.Itoa(i))]
-			name := card.Name
 			if p == 0 {
 				info = card.Info.Description
 			} else {
@@ -94,15 +90,11 @@ func init() {
 				signTF[si] = 1
 				result[user] = randEveryone
 				// background
-				realLink, _ := bilibili.GetRealURL("https://img.moehu.org/pic.php?id=pc")
-				data, err := web.RequestDataWith(web.NewDefaultClient(), realLink, "GET", "https://sina.com", ua, nil)
+				img, err := gg.LoadJPG(engine.DataFolder() + "randpic/" + randnum + ".jpg")
 				if err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
-					return
+					panic(err)
 				}
-				img := bytes.NewReader(data)
-				imgByte2Image, _ := jpeg.Decode(img)
-				bgFormat := imgfactory.Limit(imgByte2Image, 1280, 720)
+				bgFormat := imgfactory.Limit(img, 1280, 720)
 				mainContext := gg.NewContext(bgFormat.Bounds().Dx(), bgFormat.Bounds().Dy())
 				mainContextWidth := mainContext.Width()
 				mainContextHight := mainContext.Height()
@@ -110,7 +102,7 @@ func init() {
 				// draw roundretangle
 				err = mainContext.LoadFontFace(text.BoldFontFile, 50)
 				if err != nil {
-					ctx.SendChain(message.Text("Something wrong while rendering pic?"))
+					ctx.SendChain(message.Text("Something wrong while rendering pic? font"))
 					return
 				}
 				mainContext.SetLineWidth(3)
@@ -152,7 +144,7 @@ func init() {
 				mainContext.SetRGBA255(255, 255, 255, 255)
 				mainContext.DrawString("User Info", 60, float64(mainContextHight-150)+10) // basic ui
 				mainContext.SetRGBA255(155, 121, 147, 255)
-				mainContext.DrawString(name, 180, float64(mainContextHight-150)+50)
+				mainContext.DrawString(ctx.CardOrNickName(ctx.Event.UserID), 180, float64(mainContextHight-150)+50)
 				mainContext.DrawString(fmt.Sprintf("今日人品值: %d", randEveryone), 180, float64(mainContextHight-150)+100)
 				mainContext.Fill()
 				// AOSP time and date
@@ -174,7 +166,7 @@ func init() {
 				mainContext.SetRGBA255(152, 127, 176, 255)
 				err = mainContext.LoadFontFace(text.BoldFontFile, 150)
 				if err != nil {
-					ctx.SendChain(message.Text("Something wrong while rendering pic?"))
+					ctx.SendChain(message.Text("Something wrong while rendering pic?", err))
 					return
 				}
 				mainContext.SetLineWidth(3)
@@ -200,15 +192,14 @@ func init() {
 				}
 				// output
 				mainContext.Stroke()
-				err = mainContext.SavePNG(userPicPath)
+				err = mainContext.SavePNG(engine.DataFolder() + userPic)
 				if err != nil {
-					ctx.SendChain(message.Text("？这个不可能会出错的("))
+					ctx.SendChain(message.Text("Something wrong while rendering pic? save?", err))
 					return
 				}
-				ctx.SendChain(message.Image(userPicPath))
+				ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + engine.DataFolder() + userPic))
 			} else {
-				ctx.SendChain(message.Text("今天已经测试过了哦w"), message.Image(userPicPath))
-				// if done(
+				ctx.SendChain(message.Text("今天已经测试过了哦w"), message.Image("file:///"+file.BOTPATH+"/"+engine.DataFolder()+userPic))
 			}
 			mutex.Unlock()
 			// special time !
