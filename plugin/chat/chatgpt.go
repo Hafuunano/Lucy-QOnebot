@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	proxyURL           = "https://openai-api.impart.icu/"
+	proxyURL           = "https://openai.impart.icu/"
 	modelGPT3Dot5Turbo = "gpt-3.5-turbo"
 )
 
