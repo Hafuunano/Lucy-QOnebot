@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/joho/godotenv"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/joho/godotenv"
 
 	"github.com/FloatTech/ZeroBot-Plugin/kanban"           // 在最前打印 banner
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/bottle"  // 漂流瓶

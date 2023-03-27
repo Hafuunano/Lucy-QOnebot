@@ -4,10 +4,6 @@ package funwork
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/FloatTech/floatbox/file"
-	"github.com/FloatTech/gg"
-	"github.com/FloatTech/imgfactory"
-	"github.com/FloatTech/zbputils/img/text"
 	"image"
 	"io"
 	"net/http"
@@ -16,6 +12,11 @@ import (
 	"sync"
 	"time"
 	"unicode/utf8"
+
+	"github.com/FloatTech/floatbox/file"
+	"github.com/FloatTech/gg"
+	"github.com/FloatTech/imgfactory"
+	"github.com/FloatTech/zbputils/img/text"
 
 	"math/rand"
 

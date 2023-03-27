@@ -2,13 +2,14 @@ package arc
 
 import (
 	"encoding/json"
+	"os"
+
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	aua "github.com/MoYoez/Go-ArcaeaUnlimitedAPI"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
-	"os"
 )
 
 type arcaea struct {
@@ -132,5 +133,4 @@ func init() {
 		// get first song
 		ctx.SendChain(message.Text("test\n"), message.Text(r.Content.Best30List[0].SongId))
 	})
-
 }
