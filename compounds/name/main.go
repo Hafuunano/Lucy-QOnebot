@@ -1,4 +1,5 @@
-package name // Package name 获取名字
+// Package name 获取名字
+package name
 
 import (
 	"encoding/json"

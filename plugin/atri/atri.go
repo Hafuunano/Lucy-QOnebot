@@ -17,7 +17,7 @@ import (
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
-	"github.com/FloatTech/ZeroBot-Plugin/dependence/name"
+	"github.com/FloatTech/ZeroBot-Plugin/compounds/name"
 )
 
 const (

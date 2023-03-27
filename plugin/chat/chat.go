@@ -18,7 +18,7 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
-	"github.com/FloatTech/ZeroBot-Plugin/dependence/name"
+	"github.com/FloatTech/ZeroBot-Plugin/compounds/name"
 )
 
 type kimo = map[string]*[]string
