@@ -380,52 +380,74 @@ func init() {
 			)
 		})
 
-	engine.OnRegex(`^(娶|嫁)Lucy`, zero.OnlyGroup, getdb, checkdog).SetBlock(true).Limit(cdcheck, iscding).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^(娶|嫁)Lucy`, zero.OnlyGroup, getdb).SetBlock(true).Limit(cdcheck, iscding).Handle(func(ctx *zero.Ctx) {
+		// not work with checkdog, so it is useless and need to be rewritten.
 		choice := ctx.State["regex_matched"].([]string)[1]
 		gid := ctx.Event.GroupID
 		uid := ctx.Event.UserID
 		randbook := rand.Intn(2)
 		fiancee := ctx.Event.SelfID
-		if rand.Intn(5) != 1 {
-			ctx.Send(message.Text("笨蛋！不准娶~ ama"))
+		// first of all , judge if it is a dog
+		updatetime, err := mainList.checkUpdate(gid)
+		switch {
+		case err != nil:
+			ctx.SendChain(message.Text("ERR:", err))
 			return
-		}
-		ctx.Send("好嘛....就一次哦 哼ama")
-		randbook = 1
-		if randbook == 0 {
-			ctx.SendChain(message.Text(sendtext[1][rand.Intn(len(sendtext[1]))]))
-			return
-		}
-		// 去mainList登记
-		var choicetext string
-		switch choice {
-		case "娶":
-			err := mainList.GetLogined(gid, uid, fiancee, ctx.CardOrNickName(uid), ctx.CardOrNickName(fiancee))
-			if err != nil {
+		case time.Now().Format("2006/01/02") != updatetime:
+			if err := mainList.reset(strconv.FormatInt(gid, 10)); err != nil {
 				ctx.SendChain(message.Text("ERR:", err))
 				return
 			}
-			choicetext = "\n今天你的受是"
-		default:
-			err := mainList.GetLogined(gid, fiancee, uid, ctx.CardOrNickName(fiancee), ctx.CardOrNickName(uid))
-			if err != nil {
-				ctx.SendChain(message.Text("ERR:", err))
+		}
+		// 获取用户信息
+		_, uidstatus, err1 := mainList.CheckMarriedList(gid, uid)
+		_, fianceestatus, err2 := mainList.CheckMarriedList(gid, fiancee)
+		if err1 != nil || err2 != nil {
+			ctx.SendChain(message.Text("ERR:", err1, err2))
+			return
+		}
+		if uidstatus == 3 && fianceestatus == 3 {
+			if rand.Intn(5) != 1 {
+				ctx.Send(message.Text("笨蛋！不准娶~ ama"))
 				return
 			}
-			choicetext = "\n今天你的攻是"
+			ctx.Send("好嘛....就一次哦 哼ama")
+			randbook = 1
+			if randbook == 0 {
+				ctx.SendChain(message.Text(sendtext[1][rand.Intn(len(sendtext[1]))]))
+				return
+			}
+			// 去mainList登记
+			var choicetext string
+			switch choice {
+			case "娶":
+				err := mainList.GetLogined(gid, uid, fiancee, ctx.CardOrNickName(uid), ctx.CardOrNickName(fiancee))
+				if err != nil {
+					ctx.SendChain(message.Text("ERR:", err))
+					return
+				}
+				choicetext = "\n今天你的受是"
+			default:
+				err := mainList.GetLogined(gid, fiancee, uid, ctx.CardOrNickName(fiancee), ctx.CardOrNickName(uid))
+				if err != nil {
+					ctx.SendChain(message.Text("ERR:", err))
+					return
+				}
+				choicetext = "\n今天你的攻是"
+			}
+			// 请大家吃席
+			ctx.SendChain(
+				message.Text(sendtext[0][rand.Intn(len(sendtext[0]))]),
+				message.At(uid),
+				message.Text(choicetext),
+				message.Image("https://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(fiancee, 10)+"&s=640").Add("cache", 0),
+				message.Text(
+					"\n",
+					"[", ctx.CardOrNickName(fiancee), "]",
+					"(", fiancee, ")哒",
+				),
+			)
 		}
-		// 请大家吃席
-		ctx.SendChain(
-			message.Text(sendtext[0][rand.Intn(len(sendtext[0]))]),
-			message.At(uid),
-			message.Text(choicetext),
-			message.Image("https://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(fiancee, 10)+"&s=640").Add("cache", 0),
-			message.Text(
-				"\n",
-				"[", ctx.CardOrNickName(fiancee), "]",
-				"(", fiancee, ")哒",
-			),
-		)
 	})
 	// 单身技能
 	engine.OnRegex(`^(娶|嫁)\[CQ:at,qq=(\d+)\]`, zero.OnlyGroup, getdb, checkdog).SetBlock(true).Limit(cdcheck, iscding).
