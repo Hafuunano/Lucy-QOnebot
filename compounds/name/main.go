@@ -44,9 +44,10 @@ func StoreUserNickname(userID string, nickname string) error {
 	return nil
 }
 
-// LoadUserNickname Load UserNames(if had.)
+// LoadUserNickname Load UserNames to work it well.
 func LoadUserNickname(userID string) string {
 	var d map[string]string
+	// read main files
 	filePath := "./data/zbp/users.json"
 	data, err := os.ReadFile(filePath)
 	if err != nil {
