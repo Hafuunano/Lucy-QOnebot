@@ -187,10 +187,7 @@ func (sdb *scoredb) UpdateUserTime(counttime int, times string) (err error) {
 }
 
 func checkUserCoins(coins int) bool { // 参与一次15个柠檬片
-	if coins-50 < 0 {
-		return false
-	}
-	return true
+	return coins-50 >= 0
 }
 
 func getHourWord(t time.Time) (reply string) {

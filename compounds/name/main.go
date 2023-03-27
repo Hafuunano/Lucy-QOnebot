@@ -25,19 +25,16 @@ func StoreUserNickname(userID string, nickname string) error {
 		if os.IsNotExist(err) {
 			_ = os.WriteFile(filePath, []byte("{}"), 0777)
 		} else {
-			panic(err)
 			return err
 		}
 	}
 	err = json.Unmarshal(data, &userNicknameData)
 	if err != nil {
-		panic(err)
 		return err
 	}
 	userNicknameData[userID] = nickname
 	newData, err := json.Marshal(userNicknameData)
 	if err != nil {
-		panic(err)
 		return err
 	}
 	_ = os.WriteFile(filePath, newData, 0777)
