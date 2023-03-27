@@ -1,4 +1,4 @@
-// Package tools_inject 注入指令
+// Package tools inject 注入指令
 package tools
 
 import (

@@ -1,4 +1,4 @@
-// Package realcugan Real-CUGAN清晰术
+// Package tools for tools
 package tools
 
 import (

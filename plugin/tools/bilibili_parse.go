@@ -1,9 +1,8 @@
-// Package tools_bilibiliparse b站视频链接解析
+// Package tools bilibiliparse b站视频链接解析
 package tools
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -155,12 +154,7 @@ func getrealurl(url string) (realurl string, err error) {
 		return
 	}
 	realurl = data.Request.URL.String()
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(data.Body)
+	defer data.Body.Close()
 	return
 }
 

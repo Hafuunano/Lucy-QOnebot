@@ -1,4 +1,4 @@
-// Package funwork_music 网易云、酷狗、酷我 点歌
+// Package funwork music 网易云、酷狗、酷我 点歌
 package funwork
 
 import (

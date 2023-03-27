@@ -1,4 +1,5 @@
-package tools // Package tools 参考了 Cha0sIDL 的 zbp hotspot热点
+// Package tools for tools 参考了 Cha0sIDL 的 zbp hotspot热点
+package tools
 
 import (
 	"strconv"

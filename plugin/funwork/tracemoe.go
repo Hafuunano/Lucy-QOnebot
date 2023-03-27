@@ -1,4 +1,4 @@
-// Package funwork_tracemoe 搜番
+// Package funwork for tracemoe 搜番
 package funwork
 
 import (

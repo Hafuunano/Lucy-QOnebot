@@ -195,6 +195,7 @@ func atriSleep(*zero.Ctx) bool {
 	return true
 }
 
+// RandWithReplaceName 随机返回一条带有替换的文本 用于回复 同时替换掉 “你”
 func RandWithReplaceName(ctx *zero.Ctx, text ...string) message.MessageSegment {
 	getNum := rand.Intn(len(text))
 	IDStr := strconv.FormatInt(ctx.Event.UserID, 10)

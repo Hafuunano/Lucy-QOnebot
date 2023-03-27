@@ -1,3 +1,4 @@
+// Package funwork for fun
 package funwork
 
 import (

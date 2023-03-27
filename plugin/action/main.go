@@ -1,4 +1,5 @@
-package action // Package action for Lucy
+// Package action for Lucy
+package action
 
 import (
 	"math/rand"
@@ -15,8 +16,8 @@ import (
 )
 
 var (
-	limit   = rate.NewManager[int64](time.Minute*10, 15)
-	Lucyimg = "file:///root/Lucy_Project/memes/" // lucy的meme表情包地址
+	limit    = rate.NewManager[int64](time.Minute*10, 15)
+	Lucy_img = "file:///root/Lucy_Project/memes/" // lucy的meme表情包地址
 )
 
 func init() {
@@ -105,10 +106,11 @@ func init() {
 		})
 }
 
+// RandText for random text
 func RandText(text ...string) message.MessageSegment {
 	return message.Text(text[rand.Intn(len(text))])
 }
 
 func randImage(file ...string) message.MessageSegment {
-	return message.Image(Lucyimg + file[rand.Intn(len(file))])
+	return message.Image(Lucy_img + file[rand.Intn(len(file))])
 }

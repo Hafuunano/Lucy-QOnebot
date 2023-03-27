@@ -1,10 +1,8 @@
-package kanban // Package kanban package kanban 初始化
+// Package kanban package kanban 初始化
+package kanban
 
 import (
 	"strings"
-
-	"github.com/FloatTech/zbputils/control"
-	"github.com/fumiama/go-registry"
 )
 
 var (
@@ -16,7 +14,6 @@ var (
 		"* 说明书: https://lucy.impart.icu",
 		"* Copyright © 2021-2023 FloatTech. All Rights Reserved.",
 	}
-	reg = registry.NewRegReader("reilia.fumiama.top:32664", control.Md5File, "fumiama")
 	// Banner ...
 	Banner = strings.Join(info[:], "\n")
 )

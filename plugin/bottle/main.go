@@ -1,4 +1,5 @@
-package bottle // Package bottle driftbottle 魔改
+// Package bottle driftbottle 魔改
+package bottle
 
 import (
 	"fmt"
