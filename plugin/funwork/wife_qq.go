@@ -246,7 +246,6 @@ func (sql *MarryLogin) GetLogined(gid, uid, target int64, username, targetname s
 }
 
 var (
-	
 	mainList = &MarryLogin{
 		db: &sql.Sqlite{},
 	}
