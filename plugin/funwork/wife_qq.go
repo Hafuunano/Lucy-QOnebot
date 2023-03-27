@@ -24,8 +24,8 @@ import (
 	"github.com/FloatTech/gg"
 )
 
-//nolint: asciicheck
-type 婚姻登记 struct {
+// get marry login struct list.
+type MarryLogin struct {
 	db   *sql.Sqlite
 	dbmu sync.RWMutex
 }
@@ -40,14 +40,14 @@ type userinfo struct {
 
 }
 
-// 民政局的当前时间
+// mainList的当前时间
 type updateinfo struct {
 	GID        int64
 	Updatetime string // 登记时间
 
 }
 
-func (sql *婚姻登记) checkupdate(gid int64) (updatetime string, err error) {
+func (sql *MarryLogin) checkupdate(gid int64) (updatetime string, err error) {
 	sql.dbmu.Lock()
 	defer sql.dbmu.Unlock()
 	err = sql.db.Create("updateinfo", &updateinfo{})
@@ -65,7 +65,7 @@ func (sql *婚姻登记) checkupdate(gid int64) (updatetime string, err error) {
 	return
 }
 
-func (sql *婚姻登记) 重置(gid string) error {
+func (sql *MarryLogin) reset(gid string) error {
 	sql.dbmu.Lock()
 	defer sql.dbmu.Unlock()
 	if gid != "ALL" {
@@ -101,7 +101,7 @@ func (sql *婚姻登记) 重置(gid string) error {
 	return err
 }
 
-func (sql *婚姻登记) 离婚休妻(gid, wife int64) error {
+func (sql *MarryLogin) LeaveWithWife(gid, wife int64) error {
 	sql.dbmu.Lock()
 	defer sql.dbmu.Unlock()
 	gidstr := strconv.FormatInt(gid, 10)
@@ -111,7 +111,7 @@ func (sql *婚姻登记) 离婚休妻(gid, wife int64) error {
 	return err
 }
 
-func (sql *婚姻登记) 离婚休夫(gid, husband int64) error {
+func (sql *MarryLogin) LeaveWithHusband(gid, husband int64) error {
 	sql.dbmu.Lock()
 	defer sql.dbmu.Unlock()
 	gidstr := strconv.FormatInt(gid, 10)
@@ -121,7 +121,7 @@ func (sql *婚姻登记) 离婚休夫(gid, husband int64) error {
 	return err
 }
 
-func (sql *婚姻登记) 复婚(gid, uid, target int64, username, targetname string) error {
+func (sql *MarryLogin) ReMarried(gid, uid, target int64, username, targetname string) error {
 	sql.dbmu.Lock()
 	defer sql.dbmu.Unlock()
 	gidstr := strconv.FormatInt(gid, 10)
@@ -142,12 +142,12 @@ func (sql *婚姻登记) 复婚(gid, uid, target int64, username, targetname str
 	info.Target = target
 	info.Targetname = targetname
 	info.Updatetime = updatetime
-	// 民政局登记数据
+	// mainList登记数据
 	err = sql.db.Insert(gidstr, &info)
 	return err
 }
 
-func (sql *婚姻登记) 花名册(gid int64) (list [][4]string, number int, err error) {
+func (sql *MarryLogin) MarriedList(gid int64) (list [][4]string, number int, err error) {
 	sql.dbmu.Lock()
 	defer sql.dbmu.Unlock()
 	gidstr := strconv.FormatInt(gid, 10)
@@ -200,7 +200,7 @@ func slicename(name string, canvas *gg.Context) (resultname string) {
 	return
 }
 
-func (sql *婚姻登记) 查户口(gid, uid int64) (info userinfo, status int, err error) {
+func (sql *MarryLogin) CheckMarriedList(gid, uid int64) (info userinfo, status int, err error) {
 	sql.dbmu.Lock()
 	defer sql.dbmu.Unlock()
 	gidstr := strconv.FormatInt(gid, 10)
@@ -223,7 +223,7 @@ func (sql *婚姻登记) 查户口(gid, uid int64) (info userinfo, status int, e
 	return
 }
 
-func (sql *婚姻登记) 登记(gid, uid, target int64, username, targetname string) error {
+func (sql *MarryLogin) GetLogined(gid, uid, target int64, username, targetname string) error {
 	sql.dbmu.Lock()
 	defer sql.dbmu.Unlock()
 	gidstr := strconv.FormatInt(gid, 10)
@@ -240,14 +240,14 @@ func (sql *婚姻登记) 登记(gid, uid, target int64, username, targetname str
 		Targetname: targetname,
 		Updatetime: updatetime,
 	}
-	// 民政局登记数据
+	// mainList登记数据
 	err = sql.db.Insert(gidstr, &uidinfo)
 	return err
 }
 
 var (
 	//nolint: asciicheck
-	民政局 = &婚姻登记{
+	mainList = &MarryLogin{
 		db: &sql.Sqlite{},
 	}
 	skillCD  = rate.NewManager[string](time.Hour*24, 4)
@@ -277,8 +277,8 @@ var (
 
 func init() {
 	getdb := fcext.DoOnceOnSuccess(func(ctx *zero.Ctx) bool {
-		民政局.db.DBPath = engine.DataFolder() + "groupfun_wife.db"
-		err := 民政局.db.Open(time.Hour * 24)
+		mainList.db.DBPath = engine.DataFolder() + "groupfun_wife.db"
+		err := mainList.db.Open(time.Hour * 24)
 		if err != nil {
 			ctx.SendChain(message.Text("ERR:", err))
 			return false
@@ -288,19 +288,19 @@ func init() {
 	engine.OnFullMatch("娶群友", zero.OnlyGroup, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {
 			gid := ctx.Event.GroupID
-			updatetime, err := 民政局.checkupdate(gid)
+			updatetime, err := mainList.checkupdate(gid)
 			switch {
 			case err != nil:
 				ctx.SendChain(message.Text("ERR:", err))
 				return
 			case time.Now().Format("2006/01/02") != updatetime:
-				if err := 民政局.重置(strconv.FormatInt(gid, 10)); err != nil {
+				if err := mainList.reset(strconv.FormatInt(gid, 10)); err != nil {
 					ctx.SendChain(message.Text("ERR:", err))
 					return
 				}
 			}
 			uid := ctx.Event.UserID
-			targetinfo, status, err := 民政局.查户口(gid, uid)
+			targetinfo, status, err := mainList.CheckMarriedList(gid, uid)
 			switch {
 			case status == 2:
 				ctx.SendChain(message.Text("ERR:", err))
@@ -345,7 +345,7 @@ func init() {
 			qqgrouplist := make([]int64, 0, len(temp))
 			for k := 0; k < len(temp); k++ {
 				usr := temp[k].Get("user_id").Int()
-				_, status, _ := 民政局.查户口(gid, usr)
+				_, status, _ := mainList.CheckMarriedList(gid, usr)
 				if status != 3 {
 					continue
 				}
@@ -362,8 +362,8 @@ func init() {
 				ctx.SendChain(message.At(uid), message.Text("\n^^ 可能运气比较好呢~抽到了自己^^,Lucy再让你抽一下哦"))
 				return
 			}
-			// 去民政局办证
-			err = 民政局.登记(gid, uid, fiancee, ctx.CardOrNickName(uid), ctx.CardOrNickName(fiancee))
+			// 去mainList办证
+			err = mainList.GetLogined(gid, uid, fiancee, ctx.CardOrNickName(uid), ctx.CardOrNickName(fiancee))
 			if err != nil {
 				ctx.SendChain(message.Text("ERR:", err))
 				return
@@ -399,7 +399,7 @@ func init() {
 			if uid == fiancee { // 如果是自己
 				switch rand.Intn(5) { // 5分之一概率浪费技能
 				case 1:
-					err := 民政局.登记(gid, uid, 0, "", "")
+					err := mainList.GetLogined(gid, uid, 0, "", "")
 					if err != nil {
 						ctx.SendChain(message.Text("ERR:", err))
 						return
@@ -414,18 +414,18 @@ func init() {
 				ctx.SendChain(message.Text(sendtext[1][rand.Intn(len(sendtext[1]))]))
 				return
 			}
-			// 去民政局登记
+			// 去mainList登记
 			var choicetext string
 			switch choice {
 			case "娶":
-				err := 民政局.登记(gid, uid, fiancee, ctx.CardOrNickName(uid), ctx.CardOrNickName(fiancee))
+				err := mainList.GetLogined(gid, uid, fiancee, ctx.CardOrNickName(uid), ctx.CardOrNickName(fiancee))
 				if err != nil {
 					ctx.SendChain(message.Text("ERR:", err))
 					return
 				}
 				choicetext = "\n今天你的受是"
 			default:
-				err := 民政局.登记(gid, fiancee, uid, ctx.CardOrNickName(fiancee), ctx.CardOrNickName(uid))
+				err := mainList.GetLogined(gid, fiancee, uid, ctx.CardOrNickName(fiancee), ctx.CardOrNickName(uid))
 				if err != nil {
 					ctx.SendChain(message.Text("ERR:", err))
 					return
@@ -462,7 +462,7 @@ func init() {
 			gid := ctx.Event.GroupID
 			// 判断target是老公还是老婆
 			var choicetext string
-			_, gender, err := 民政局.查户口(gid, fiancee)
+			_, gender, err := mainList.CheckMarriedList(gid, fiancee)
 			switch gender {
 			case 3:
 				ctx.SendChain(message.Text("他现在还是一人哦~成功可能性更高x 不过看起来今天又浪费了一次机会ww "))
@@ -472,7 +472,7 @@ func init() {
 				return
 			case 1:
 				// 和对象结婚登记
-				err = 民政局.复婚(gid, fiancee, uid, ctx.CardOrNickName(fiancee), ctx.CardOrNickName(uid))
+				err = mainList.ReMarried(gid, fiancee, uid, ctx.CardOrNickName(fiancee), ctx.CardOrNickName(uid))
 				if err != nil {
 					ctx.SendChain(message.Text("ERR:", err))
 					return
@@ -480,7 +480,7 @@ func init() {
 				choicetext = "老公"
 			case 0:
 				// 和对象结婚登记
-				err = 民政局.复婚(gid, uid, fiancee, ctx.CardOrNickName(uid), ctx.CardOrNickName(fiancee))
+				err = mainList.ReMarried(gid, uid, fiancee, ctx.CardOrNickName(uid), ctx.CardOrNickName(fiancee))
 				if err != nil {
 					ctx.SendChain(message.Text("ERR:", err))
 					return
@@ -505,7 +505,7 @@ func init() {
 		})
 	engine.OnFullMatch("群老婆列表", zero.OnlyGroup, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {
-			list, number, err := 民政局.花名册(ctx.Event.GroupID)
+			list, number, err := mainList.MarriedList(ctx.Event.GroupID)
 			if err != nil {
 				ctx.SendChain(message.Text("ERR:", err))
 				return
@@ -553,13 +553,13 @@ func init() {
 	engine.OnFullMatch("我要离婚", zero.OnlyToMe, zero.OnlyGroup, getdb).SetBlock(true).Limit(cdcheck, iscding2).
 		Handle(func(ctx *zero.Ctx) {
 			gid := ctx.Event.GroupID
-			updatetime, err := 民政局.checkupdate(gid)
+			updatetime, err := mainList.checkupdate(gid)
 			switch {
 			case err != nil:
 				ctx.SendChain(message.Text("ERR:", err))
 				return
 			case time.Now().Format("2006/01/02") != updatetime:
-				if err := 民政局.重置(strconv.FormatInt(gid, 10)); err != nil {
+				if err := mainList.reset(strconv.FormatInt(gid, 10)); err != nil {
 					ctx.SendChain(message.Text("ERR:", err))
 					return
 				}
@@ -569,7 +569,7 @@ func init() {
 
 			// 获取用户信息
 			uid := ctx.Event.UserID
-			info, uidstatus, err := 民政局.查户口(gid, uid)
+			info, uidstatus, err := mainList.CheckMarriedList(gid, uid)
 			switch uidstatus {
 			case 3:
 				return
@@ -578,14 +578,14 @@ func init() {
 				return
 			case 1:
 				ctx.SendChain(message.Text(sendtext[4][rand.Intn(len(sendtext[4]))]))
-				err := 民政局.离婚休妻(gid, info.Target)
+				err := mainList.LeaveWithWife(gid, info.Target)
 				if err != nil {
 					ctx.SendChain(message.Text("ERR:", err))
 					return
 				}
 			case 0:
 				ctx.SendChain(message.Text(sendtext[4][rand.Intn(len(sendtext[4]))]))
-				err := 民政局.离婚休夫(gid, info.User)
+				err := mainList.LeaveWithHusband(gid, info.User)
 				if err != nil {
 					ctx.SendChain(message.Text("ERR:", err))
 					return
@@ -613,13 +613,13 @@ func checkdog(ctx *zero.Ctx) bool {
 	}
 	// 判断是否需要重置
 	gid := ctx.Event.GroupID
-	updatetime, err := 民政局.checkupdate(gid)
+	updatetime, err := mainList.checkupdate(gid)
 	switch {
 	case err != nil:
 		ctx.SendChain(message.Text("ERR:", err))
 		return false
 	case time.Now().Format("2006/01/02") != updatetime:
-		if err := 民政局.重置(strconv.FormatInt(gid, 10)); err != nil {
+		if err := mainList.reset(strconv.FormatInt(gid, 10)); err != nil {
 			ctx.SendChain(message.Text("ERR:", err))
 			return false
 		}
@@ -627,8 +627,8 @@ func checkdog(ctx *zero.Ctx) bool {
 	}
 	uid := ctx.Event.UserID
 	// 获取用户信息
-	uidtarget, uidstatus, err1 := 民政局.查户口(gid, uid)
-	fianceeinfo, fianceestatus, err2 := 民政局.查户口(gid, fiancee)
+	uidtarget, uidstatus, err1 := mainList.CheckMarriedList(gid, uid)
+	fianceeinfo, fianceestatus, err2 := mainList.CheckMarriedList(gid, fiancee)
 	switch {
 	case uidstatus == 2 || fianceestatus == 2:
 		ctx.SendChain(message.Text("ERR:", err1, "\n", err2))
@@ -660,13 +660,13 @@ func checkdog(ctx *zero.Ctx) bool {
 // 注入判断 是否满足小三的要求
 func checkcp(ctx *zero.Ctx) bool {
 	gid := ctx.Event.GroupID
-	updatetime, err := 民政局.checkupdate(gid)
+	updatetime, err := mainList.checkupdate(gid)
 	switch {
 	case err != nil:
 		ctx.SendChain(message.Text("ERR:", err))
 		return false
 	case time.Now().Format("2006/01/02") != updatetime:
-		if err := 民政局.重置(strconv.FormatInt(gid, 10)); err != nil {
+		if err := mainList.reset(strconv.FormatInt(gid, 10)); err != nil {
 			ctx.SendChain(message.Text("ERR:", err))
 		} else {
 			ctx.SendChain(message.Text("哼~果然是个笨蛋 他还是一人呢"))
@@ -682,7 +682,7 @@ func checkcp(ctx *zero.Ctx) bool {
 	}
 	// 检查用户是否登记过
 	uid := ctx.Event.UserID
-	userinfo, uidstatus, err := 民政局.查户口(gid, uid)
+	userinfo, uidstatus, err := mainList.CheckMarriedList(gid, uid)
 	switch {
 	case uidstatus == 2:
 		ctx.SendChain(message.Text("ERR:", err))
@@ -702,7 +702,7 @@ func checkcp(ctx *zero.Ctx) bool {
 		ctx.SendChain(message.Text("该是0就是0，当0有什么不好"))
 		return false
 	}
-	fianceeinfo, fianceestatus, err := 民政局.查户口(gid, fiancee)
+	fianceeinfo, fianceestatus, err := mainList.CheckMarriedList(gid, fiancee)
 	switch {
 	case fianceestatus == 2:
 		ctx.SendChain(message.Text("ERR:", err))
