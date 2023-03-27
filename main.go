@@ -1,3 +1,4 @@
+// Package main for Lucy(HiMoYo Version)
 package main
 
 import (

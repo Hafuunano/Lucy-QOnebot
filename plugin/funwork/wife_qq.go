@@ -392,10 +392,9 @@ func init() {
 				if rand.Intn(5) != 1 {
 					ctx.Send(message.Text("笨蛋！不准娶~ ama"))
 					return
-				} else {
-					ctx.Send("好嘛....就一次哦 哼ama")
-					randbook = 1
 				}
+				ctx.Send("好嘛....就一次哦 哼ama")
+				randbook = 1
 			}
 			if uid == fiancee { // 如果是自己
 				switch rand.Intn(5) { // 5分之一概率浪费技能

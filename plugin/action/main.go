@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	limit    = rate.NewManager[int64](time.Minute*10, 15)
-	Lucy_img = "file:///root/Lucy_Project/memes/" // lucy的meme表情包地址
+	limit   = rate.NewManager[int64](time.Minute*10, 15)
+	LucyImg = "file:///root/Lucy_Project/memes/" // lucy的meme表情包地址
 )
 
 func init() {
@@ -112,5 +112,5 @@ func RandText(text ...string) message.MessageSegment {
 }
 
 func randImage(file ...string) message.MessageSegment {
-	return message.Image(Lucy_img + file[rand.Intn(len(file))])
+	return message.Image(LucyImg + file[rand.Intn(len(file))])
 }

@@ -1,3 +1,4 @@
+// Package arc for arc render b30
 package arc
 
 import (
@@ -20,7 +21,7 @@ type arcaea struct {
 		AccountInfo struct {
 			Code                   string `json:"code"`
 			Name                   string `json:"name"`
-			UserId                 int    `json:"user_id"`
+			UserID                 int    `json:"user_id"`
 			IsMutual               bool   `json:"is_mutual"`
 			IsCharUncappedOverride bool   `json:"is_char_uncapped_override"`
 			IsCharUncapped         bool   `json:"is_char_uncapped"`
@@ -33,7 +34,7 @@ type arcaea struct {
 			Score             int     `json:"score"`
 			Health            int     `json:"health"`
 			Rating            float64 `json:"rating"`
-			SongId            string  `json:"song_id"`
+			SongID            string  `json:"song_id"`
 			Modifier          int     `json:"modifier"`
 			Difficulty        int     `json:"difficulty"`
 			ClearType         int     `json:"clear_type"`
@@ -48,7 +49,7 @@ type arcaea struct {
 			Score             int     `json:"score"`
 			Health            int     `json:"health"`
 			Rating            float64 `json:"rating"`
-			SongId            string  `json:"song_id"`
+			SongID            string  `json:"song_id"`
 			Modifier          int     `json:"modifier"`
 			Difficulty        int     `json:"difficulty"`
 			ClearType         int     `json:"clear_type"`
@@ -131,6 +132,6 @@ func init() {
 		var r arcaea
 		_ = json.Unmarshal(playerdataByte, &r)
 		// get first song
-		ctx.SendChain(message.Text("test\n"), message.Text(r.Content.Best30List[0].SongId))
+		ctx.SendChain(message.Text("test\n"), message.Text(r.Content.Best30List[0].SongID))
 	})
 }
