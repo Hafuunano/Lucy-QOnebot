@@ -24,14 +24,14 @@ import (
 	"github.com/FloatTech/gg"
 )
 
-// get marry login struct list.
+// MarryLogin get marry login struct list.
 type MarryLogin struct {
 	db   *sql.Sqlite
 	dbmu sync.RWMutex
 }
 
-// 结婚证信息
-type userinfo struct {
+// Userinfo 结婚证信息
+type Userinfo struct {
 	User       int64  // 用户身份证
 	Target     int64  // 对象身份证号
 	Username   string // 户主名称
@@ -71,7 +71,7 @@ func (sql *MarryLogin) reset(gid string) error {
 	if gid != "ALL" {
 		err := sql.db.Drop(gid)
 		if err != nil {
-			err = sql.db.Create(gid, &userinfo{})
+			err = sql.db.Create(gid, &Userinfo{})
 			return err
 		}
 		gidint, _ := strconv.ParseInt(gid, 10, 64)
@@ -127,7 +127,7 @@ func (sql *MarryLogin) ReMarried(gid, uid, target int64, username, targetname st
 	gidstr := strconv.FormatInt(gid, 10)
 	uidstr := strconv.FormatInt(uid, 10)
 	tagstr := strconv.FormatInt(target, 10)
-	var info userinfo
+	var info Userinfo
 	err := sql.db.Find(gidstr, &info, "where user = "+uidstr)
 	if err != nil {
 		err = sql.db.Find(gidstr, &info, "where user = "+tagstr)
@@ -151,7 +151,7 @@ func (sql *MarryLogin) MarriedList(gid int64) (list [][4]string, number int, err
 	sql.dbmu.Lock()
 	defer sql.dbmu.Unlock()
 	gidstr := strconv.FormatInt(gid, 10)
-	err = sql.db.Create(gidstr, &userinfo{})
+	err = sql.db.Create(gidstr, &Userinfo{})
 	if err != nil {
 		return
 	}
@@ -159,7 +159,7 @@ func (sql *MarryLogin) MarriedList(gid int64) (list [][4]string, number int, err
 	if err != nil || number <= 0 {
 		return
 	}
-	var info userinfo
+	var info Userinfo
 	list = make([][4]string, 0, number)
 	err = sql.db.FindFor(gidstr, &info, "GROUP BY user", func() error {
 		if info.Target == 0 {
@@ -200,13 +200,13 @@ func slicename(name string, canvas *gg.Context) (resultname string) {
 	return
 }
 
-func (sql *MarryLogin) CheckMarriedList(gid, uid int64) (info userinfo, status int, err error) {
+func (sql *MarryLogin) CheckMarriedList(gid, uid int64) (info Userinfo, status int, err error) {
 	sql.dbmu.Lock()
 	defer sql.dbmu.Unlock()
 	gidstr := strconv.FormatInt(gid, 10)
 	uidstr := strconv.FormatInt(uid, 10)
 	status = 3
-	if err = sql.db.Create(gidstr, &userinfo{}); err != nil {
+	if err = sql.db.Create(gidstr, &Userinfo{}); err != nil {
 		status = 2
 		return
 	}
@@ -227,13 +227,13 @@ func (sql *MarryLogin) GetLogined(gid, uid, target int64, username, targetname s
 	sql.dbmu.Lock()
 	defer sql.dbmu.Unlock()
 	gidstr := strconv.FormatInt(gid, 10)
-	err := sql.db.Create(gidstr, &userinfo{})
+	err := sql.db.Create(gidstr, &Userinfo{})
 	if err != nil {
 		return err
 	}
 	updatetime := time.Now().Format("2006/01/02")
 	// 填写夫妻信息
-	uidinfo := userinfo{
+	uidinfo := Userinfo{
 		User:       uid,
 		Username:   username,
 		Target:     target,
