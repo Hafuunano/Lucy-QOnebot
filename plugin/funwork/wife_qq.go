@@ -47,7 +47,7 @@ type updateinfo struct {
 
 }
 
-func (sql *MarryLogin) checkupdate(gid int64) (updatetime string, err error) {
+func (sql *MarryLogin) checkUpdate(gid int64) (updatetime string, err error) {
 	sql.dbmu.Lock()
 	defer sql.dbmu.Unlock()
 	err = sql.db.Create("updateinfo", &updateinfo{})
@@ -246,7 +246,6 @@ func (sql *MarryLogin) GetLogined(gid, uid, target int64, username, targetname s
 }
 
 var (
-	
 	mainList = &MarryLogin{
 		db: &sql.Sqlite{},
 	}
@@ -257,9 +256,9 @@ var (
 			"貌似很成功的一次尝试呢w~\n\n",
 		},
 		{ // 表白失败
-			"今天的运气有一点背哦~明天再试试叭",
-			"_(:з」∠)_下次还有机会 咱抱抱你w",
-			"今天失败了ama. 摸摸头~咱明天还有机会",
+			"今天的运气有一点背哦~这一次没有成功呢x",
+			"_(:з」∠)_下次还有机会 抱抱w",
+			"没关系哦，虽然失败了但还有机会呢x",
 		},
 		{ // ntr成功
 			"欸~成功了哦_(:з」∠)_w\n\n",
@@ -269,8 +268,8 @@ var (
 			"太坏了啦！不许！",
 		},
 		{ // 离婚成功
-			"好哦 貌似很顺利呢(",
-			"或许?成功了?OxO",
+			"好呢w 就这样呢(",
+			"已经成功了哦w",
 		},
 	}
 )
@@ -288,7 +287,7 @@ func init() {
 	engine.OnFullMatch("娶群友", zero.OnlyGroup, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {
 			gid := ctx.Event.GroupID
-			updatetime, err := mainList.checkupdate(gid)
+			updatetime, err := mainList.checkUpdate(gid)
 			switch {
 			case err != nil:
 				ctx.SendChain(message.Text("ERR:", err))
@@ -359,7 +358,7 @@ func init() {
 			// 随机抽娶
 			fiancee := qqgrouplist[rand.Intn(len(qqgrouplist))]
 			if fiancee == uid { // 如果是自己
-				ctx.SendChain(message.At(uid), message.Text("\n^^ 可能运气比较好呢~抽到了自己^^,Lucy再让你抽一下哦"))
+				ctx.SendChain(message.At(uid), message.Text("\n^^ 可能运气比较好呢~抽到了自己^^, Lucy再让你抽一下哦"))
 				return
 			}
 			// 去mainList办证
@@ -380,6 +379,54 @@ func init() {
 				),
 			)
 		})
+
+	engine.OnRegex(`^(娶|嫁)Lucy`, zero.OnlyGroup, getdb, checkdog).SetBlock(true).Limit(cdcheck, iscding).Handle(func(ctx *zero.Ctx) {
+		choice := ctx.State["regex_matched"].([]string)[1]
+		gid := ctx.Event.GroupID
+		uid := ctx.Event.UserID
+		randbook := rand.Intn(2)
+		fiancee := ctx.Event.SelfID
+		if rand.Intn(5) != 1 {
+			ctx.Send(message.Text("笨蛋！不准娶~ ama"))
+			return
+		}
+		ctx.Send("好嘛....就一次哦 哼ama")
+		randbook = 1
+		if randbook == 0 {
+			ctx.SendChain(message.Text(sendtext[1][rand.Intn(len(sendtext[1]))]))
+			return
+		}
+		// 去mainList登记
+		var choicetext string
+		switch choice {
+		case "娶":
+			err := mainList.GetLogined(gid, uid, fiancee, ctx.CardOrNickName(uid), ctx.CardOrNickName(fiancee))
+			if err != nil {
+				ctx.SendChain(message.Text("ERR:", err))
+				return
+			}
+			choicetext = "\n今天你的受是"
+		default:
+			err := mainList.GetLogined(gid, fiancee, uid, ctx.CardOrNickName(fiancee), ctx.CardOrNickName(uid))
+			if err != nil {
+				ctx.SendChain(message.Text("ERR:", err))
+				return
+			}
+			choicetext = "\n今天你的攻是"
+		}
+		// 请大家吃席
+		ctx.SendChain(
+			message.Text(sendtext[0][rand.Intn(len(sendtext[0]))]),
+			message.At(uid),
+			message.Text(choicetext),
+			message.Image("https://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(fiancee, 10)+"&s=640").Add("cache", 0),
+			message.Text(
+				"\n",
+				"[", ctx.CardOrNickName(fiancee), "]",
+				"(", fiancee, ")哒",
+			),
+		)
+	})
 	// 单身技能
 	engine.OnRegex(`^(娶|嫁)\[CQ:at,qq=(\d+)\]`, zero.OnlyGroup, getdb, checkdog).SetBlock(true).Limit(cdcheck, iscding).
 		Handle(func(ctx *zero.Ctx) {
@@ -388,14 +435,6 @@ func init() {
 			uid := ctx.Event.UserID
 			gid := ctx.Event.GroupID
 			randbook := rand.Intn(2)
-			if fiancee == 462637257 {
-				if rand.Intn(5) != 1 {
-					ctx.Send(message.Text("笨蛋！不准娶~ ama"))
-					return
-				}
-				ctx.Send("好嘛....就一次哦 哼ama")
-				randbook = 1
-			}
 			if uid == fiancee { // 如果是自己
 				switch rand.Intn(5) { // 5分之一概率浪费技能
 				case 1:
@@ -553,7 +592,7 @@ func init() {
 	engine.OnFullMatch("我要离婚", zero.OnlyToMe, zero.OnlyGroup, getdb).SetBlock(true).Limit(cdcheck, iscding2).
 		Handle(func(ctx *zero.Ctx) {
 			gid := ctx.Event.GroupID
-			updatetime, err := mainList.checkupdate(gid)
+			updatetime, err := mainList.checkUpdate(gid)
 			switch {
 			case err != nil:
 				ctx.SendChain(message.Text("ERR:", err))
@@ -613,7 +652,7 @@ func checkdog(ctx *zero.Ctx) bool {
 	}
 	// 判断是否需要重置
 	gid := ctx.Event.GroupID
-	updatetime, err := mainList.checkupdate(gid)
+	updatetime, err := mainList.checkUpdate(gid)
 	switch {
 	case err != nil:
 		ctx.SendChain(message.Text("ERR:", err))
@@ -660,7 +699,7 @@ func checkdog(ctx *zero.Ctx) bool {
 // 注入判断 是否满足小三的要求
 func checkcp(ctx *zero.Ctx) bool {
 	gid := ctx.Event.GroupID
-	updatetime, err := mainList.checkupdate(gid)
+	updatetime, err := mainList.checkUpdate(gid)
 	switch {
 	case err != nil:
 		ctx.SendChain(message.Text("ERR:", err))
