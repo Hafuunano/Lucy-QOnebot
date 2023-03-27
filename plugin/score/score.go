@@ -1,7 +1,9 @@
-package score // Package score
+// Package score 简单的积分系统
+package score
 
 import (
 	"encoding/base64"
+	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"math/rand"
 	"os"
 	"strconv"
@@ -27,6 +29,7 @@ const (
 )
 
 var (
+	rateLimit  = rate.NewManager[int64](time.Second*60, 12) // time setup
 	levelArray = [...]int{0, 1, 2, 5, 10, 20, 35, 55, 75, 100, 120, 180, 260, 360, 480, 600}
 	sdb        *scoredb
 	engine     = control.Register("score", &ctrl.Options[*zero.Ctx]{
@@ -40,7 +43,7 @@ func init() {
 	cachePath := engine.DataFolder() + "scorecache/"
 	engine.OnFullMatchGroup([]string{"签到", "打卡"}, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
-			if !RateLimit.Load(ctx.Event.GroupID).Acquire() {
+			if !rateLimit.Load(ctx.Event.GroupID).Acquire() {
 				return
 			}
 			uid := ctx.Event.UserID
@@ -61,7 +64,7 @@ func init() {
 			_ = sdb.InsertUserCoins(uid, si.Coins+coinsGet)
 			_ = sdb.InsertOrUpdateSignInCountByUID(uid, si.Count+1) // 柠檬片获取
 			score := sdb.GetScoreByUID(uid).Score
-			score += 1 //  每日+1
+			score++ //  每日+1
 			_ = sdb.InsertOrUpdateScoreByUID(uid, score)
 			CurrentCountTable := sdb.GetCurrentCount(today)
 			handledTodayNum := CurrentCountTable.Counttime + 1
@@ -116,7 +119,7 @@ func init() {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
 				}
-				os.WriteFile(pic, data, 0777)
+				err = os.WriteFile(pic, data, 0777)
 				ctx.SendChain(message.At(uid), message.Text("今日份图片\n"), message.Image("base64://"+base64.StdEncoding.EncodeToString(data)))
 			} else {
 				// nightVision

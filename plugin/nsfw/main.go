@@ -1,3 +1,4 @@
+// Package nsfw for nsfw (
 package nsfw
 
 import (

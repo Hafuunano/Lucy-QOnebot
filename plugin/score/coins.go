@@ -1,4 +1,5 @@
-package score // Package score
+// Package score 简单的积分系统
+package score
 
 import (
 	"encoding/json"
@@ -23,10 +24,9 @@ type partygame struct {
 
 var (
 	pgs          = make(pg, 256)
-	RateLimit    = rate.NewManager[int64](time.Second*60, 12) // time setup
-	CheckLimit   = rate.NewManager[int64](time.Minute*1, 5)   // time setup
-	CatchLimit   = rate.NewManager[int64](time.Hour*1, 9)     // time setup
-	processLimit = rate.NewManager[int64](time.Hour*1, 5)     // time setup
+	checkLimit   = rate.NewManager[int64](time.Minute*1, 5) // time setup
+	catchLimit   = rate.NewManager[int64](time.Hour*1, 9)   // time setup
+	processLimit = rate.NewManager[int64](time.Hour*1, 5)   // time setup
 )
 
 type pg = map[string]partygame
@@ -51,7 +51,7 @@ func init() {
 		ctx.SendChain(message.Text("您的柠檬片数量一共是: ", si.Coins))
 	})
 	engine.OnFullMatch("抽奖", loadFiles, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		if !CheckLimit.Load(ctx.Event.UserID).Acquire() {
+		if !checkLimit.Load(ctx.Event.UserID).Acquire() {
 			ctx.SendChain(message.Text("太贪心了哦~过会试试吧"))
 			return
 		}
@@ -87,7 +87,7 @@ func init() {
 	})
 	// 一次最多骗 200 柠檬片,失败概率较大,失败会被反吞柠檬片
 	engine.OnRegex(`^抢(\[CQ:at,qq=(\d+)\]\s?|(\d+))的柠檬片`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		if !CatchLimit.Load(ctx.Event.UserID).Acquire() {
+		if !catchLimit.Load(ctx.Event.UserID).Acquire() {
 			ctx.SendChain(message.Text("太贪心了哦~一小时后再来试试吧"))
 			return
 		}
@@ -122,7 +122,7 @@ func init() {
 	})
 
 	engine.OnRegex(`^骗\s?\[CQ:at,qq=(\d+)\]\s(\d+)个柠檬片$`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		if !CatchLimit.Load(ctx.Event.UserID).Acquire() {
+		if !catchLimit.Load(ctx.Event.UserID).Acquire() {
 			ctx.SendChain(message.Text("太贪心了哦~一小时后再来试试吧"))
 			return
 		}

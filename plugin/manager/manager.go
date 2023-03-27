@@ -524,14 +524,13 @@ func init() { // 插件主体
 			if zero.AdminPermission(ctx) {
 				ctx.Send(message.Text("怪哦 咱可不能禁言诶("))
 				return
-			} else {
-				ctx.SetGroupBan(
-					ctx.Event.GroupID,
-					ctx.Event.UserID,
-					8*3600,
-				)
-				ctx.SendChain(message.Text("一键提供优质睡眠服务~"))
 			}
+			ctx.SetGroupBan(
+				ctx.Event.GroupID,
+				ctx.Event.UserID,
+				8*3600,
+			)
+			ctx.SendChain(message.Text("一键提供优质睡眠服务~"))
 		})
 }
 

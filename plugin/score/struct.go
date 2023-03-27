@@ -1,3 +1,4 @@
+// Package score 简单的积分系统
 package score
 
 import (
@@ -188,9 +189,9 @@ func (sdb *scoredb) UpdateUserTime(counttime int, times string) (err error) {
 func checkUserCoins(coins int) bool { // 参与一次15个柠檬片
 	if coins-50 < 0 {
 		return false
-	} else {
-		return true
 	}
+	return true
+
 }
 
 func getHourWord(t time.Time) (reply string) {
