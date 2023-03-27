@@ -62,9 +62,6 @@ func init() { // 插件主体
 					texts := i.MessageString()
 					if texts != "" {
 						cancel()
-						continue
-					} else {
-						return
 					}
 				}
 			}
@@ -207,6 +204,8 @@ func init() { // 插件主体
 			ctx.SendChain(randImage("SNDNYSG004[GH[E%$PJ~VCT.jpg", "55D0B4A5E335FE55A924E71469F35AC7.png", "file_3492326.jpg"))
 		})
 }
+
+// RandText 随机文本
 func RandText(text ...string) message.MessageSegment {
 	return message.Text(text[rand.Intn(len(text))])
 }

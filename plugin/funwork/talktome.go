@@ -81,9 +81,6 @@ func init() {
 			texts := i.MessageString()
 			if texts != "" {
 				cancel()
-				continue
-			} else {
-				return
 			}
 		}
 		answerListInt := rand.Intn(268)

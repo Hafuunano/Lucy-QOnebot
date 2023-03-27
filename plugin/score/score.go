@@ -121,6 +121,10 @@ func init() {
 					return
 				}
 				err = os.WriteFile(pic, data, 0777)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
+				}
 				ctx.SendChain(message.At(uid), message.Text("今日份图片\n"), message.Image("base64://"+base64.StdEncoding.EncodeToString(data)))
 			} else {
 				// nightVision

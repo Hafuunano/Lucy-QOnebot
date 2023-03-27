@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
-	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -136,12 +135,7 @@ func init() {
 				avatarByteUni, _, _ := image.Decode(avatarByte.Body)
 				avatarFormat := imgfactory.Size(avatarByteUni, 100, 100)
 				mainContext.DrawImage(avatarFormat.Circle(0).Image(), 60, int(float64(mainContextHight-150)+25))
-				defer func(Body io.ReadCloser) {
-					err := Body.Close()
-					if err != nil {
-						panic(err)
-					}
-				}(avatarByte.Body)
+				defer avatarByte.Body.Close()
 				mainContext.SetRGBA255(255, 255, 255, 255)
 				mainContext.DrawString("User Info", 60, float64(mainContextHight-150)+10) // basic ui
 				mainContext.SetRGBA255(155, 121, 147, 255)

@@ -157,12 +157,7 @@ func netGet(url string, header http.Header) []byte {
 	if err != nil {
 		return nil
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(res.Body)
+	defer res.Body.Close()
 	result, _ := io.ReadAll(res.Body)
 	return result
 }

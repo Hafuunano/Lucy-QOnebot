@@ -1,4 +1,4 @@
-// Package funwork_saucenao P站ID/saucenao/ascii2d搜图
+// Package funwork saucenao P站ID/saucenao/ascii2d搜图
 package funwork
 
 import (
