@@ -17,7 +17,7 @@ import (
 
 var (
 	limit   = rate.NewManager[int64](time.Minute*10, 15)
-	LucyImg = "file:///root/Lucy_Project/memes/" // lucy的meme表情包地址
+	LucyImg = "file:///root/Lucy_Project/memes/" // LucyImg for Lucy的meme表情包地址
 )
 
 func init() {
