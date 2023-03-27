@@ -391,11 +391,11 @@ func init() {
 		updatetime, err := mainList.checkUpdate(gid)
 		switch {
 		case err != nil:
-			ctx.SendChain(message.Text("ERR:", err))
+			ctx.SendChain(message.Text("check mainList panic():", err))
 			return
 		case time.Now().Format("2006/01/02") != updatetime:
 			if err := mainList.reset(strconv.FormatInt(gid, 10)); err != nil {
-				ctx.SendChain(message.Text("ERR:", err))
+				ctx.SendChain(message.Text("check mainList panic():", err))
 				return
 			}
 		}
@@ -403,7 +403,7 @@ func init() {
 		_, uidstatus, err1 := mainList.CheckMarriedList(gid, uid)
 		_, fianceestatus, err2 := mainList.CheckMarriedList(gid, fiancee)
 		if err1 != nil || err2 != nil {
-			ctx.SendChain(message.Text("ERR:", err1, err2))
+			ctx.SendChain(message.Text("get user info list ERR:", err1, err2))
 			return
 		}
 		if uidstatus == 3 && fianceestatus == 3 {
