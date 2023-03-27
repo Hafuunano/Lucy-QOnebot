@@ -3,11 +3,12 @@ package score
 
 import (
 	"encoding/base64"
-	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"math/rand"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 
 	"github.com/FloatTech/AnimeAPI/bilibili"
 

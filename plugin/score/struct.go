@@ -191,7 +191,6 @@ func checkUserCoins(coins int) bool { // 参与一次15个柠檬片
 		return false
 	}
 	return true
-
 }
 
 func getHourWord(t time.Time) (reply string) {
