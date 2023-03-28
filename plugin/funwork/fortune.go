@@ -7,6 +7,7 @@ import (
 	"image"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"sync"
 	"time"
@@ -69,7 +70,16 @@ func init() {
 	engine.OnFullMatch("今日人品", getTarot).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			userPic := strconv.FormatInt(ctx.Event.UserID, 10) + time.Now().Format("20060102") + ".png"
-			randnum := strconv.Itoa(rand.Intn(4))
+			picDir, err := os.ReadDir(engine.DataFolder() + "randpic")
+			if err != nil {
+				ctx.SendChain(message.Text("ERROR:", err))
+				return
+			}
+			picDirNum := len(picDir)
+			usersRand := fcext.RandSenderPerDayN(ctx.Event.UserID, picDirNum)
+			picDirName := picDir[usersRand].Name()
+			reg := regexp.MustCompile(`[^.]+`)
+			list := reg.FindAllString(picDirName, -1)
 			var mutex sync.RWMutex // 添加读写锁以保证稳定性
 			mutex.Lock()
 			p := rand.Intn(2)
@@ -90,7 +100,7 @@ func init() {
 				signTF[si] = 1
 				result[user] = randEveryone
 				// background
-				img, err := gg.LoadJPG(engine.DataFolder() + "randpic/" + randnum + ".jpg")
+				img, err := gg.LoadJPG(engine.DataFolder() + "randpic" + "/" + list[0] + ".png")
 				if err != nil {
 					panic(err)
 				}
@@ -99,7 +109,7 @@ func init() {
 				mainContextWidth := mainContext.Width()
 				mainContextHight := mainContext.Height()
 				mainContext.DrawImage(bgFormat, 0, 0)
-				// draw roundretangle
+				// draw Round rectangle
 				err = mainContext.LoadFontFace(text.BoldFontFile, 50)
 				if err != nil {
 					ctx.SendChain(message.Text("Something wrong while rendering pic? font"))
@@ -187,14 +197,14 @@ func init() {
 				}
 				// output
 				mainContext.Stroke()
-				err = mainContext.SavePNG(engine.DataFolder() + userPic)
+				err = mainContext.SavePNG(engine.DataFolder() + "jrrp/" + userPic)
 				if err != nil {
 					ctx.SendChain(message.Text("Something wrong while rendering pic? save?", err))
 					return
 				}
-				ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + engine.DataFolder() + userPic))
+				ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + engine.DataFolder() + "jrrp/" + userPic))
 			} else {
-				ctx.SendChain(message.Text("今天已经测试过了哦w"), message.Image("file:///"+file.BOTPATH+"/"+engine.DataFolder()+userPic))
+				ctx.SendChain(message.Text("今天已经测试过了哦w"), message.Image("file:///"+file.BOTPATH+"/"+engine.DataFolder()+"jrrp/"+userPic))
 			}
 			mutex.Unlock()
 			// special time !
