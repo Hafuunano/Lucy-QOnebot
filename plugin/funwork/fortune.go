@@ -97,10 +97,9 @@ func init() {
 			randEveryone := fcext.RandSenderPerDayN(ctx.Event.UserID, 100)
 			var si = now + userS // 合成
 			if signTF[si] == 0 {
-				signTF[si] = 1
 				result[user] = randEveryone
 				// background
-				img, err := gg.LoadJPG(engine.DataFolder() + "randpic" + "/" + list[0] + ".png")
+				img, err := gg.LoadImage(engine.DataFolder() + "randpic" + "/" + list[0] + ".png")
 				if err != nil {
 					panic(err)
 				}
@@ -138,9 +137,10 @@ func init() {
 				}
 				mainContext.DrawRoundedRectangle(50, float64(mainContextHight-175), renderLength, 250, 20)
 				mainContext.Fill()
-				avatarByte, err := http.Get("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
+				avatarByte, err := http.Get("http://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
 				if err != nil {
-					panic(err)
+					ctx.SendChain(message.Text("Something wrong while rendering pic? avatar IO err."))
+					return
 				}
 				avatarByteUni, _, _ := image.Decode(avatarByte.Body)
 				avatarFormat := imgfactory.Size(avatarByteUni, 100, 100)
@@ -203,10 +203,11 @@ func init() {
 					return
 				}
 				ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + engine.DataFolder() + "jrrp/" + userPic))
+				signTF[si] = 1
 			} else {
 				ctx.SendChain(message.Text("今天已经测试过了哦w"), message.Image("file:///"+file.BOTPATH+"/"+engine.DataFolder()+"jrrp/"+userPic))
+				mutex.Unlock()
 			}
-			mutex.Unlock()
 			// special time !
 			m, ok := control.Lookup("nsfw")
 			if ok {
