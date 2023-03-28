@@ -178,7 +178,7 @@ func init() {
 				mainContext.DrawString("|", float64(mainContextWidth-40), 140)
 				mainContext.Stroke()
 				// throw tarot card
-				err = mainContext.LoadFontFace(text.BoldFontFile, 25)
+				err = mainContext.LoadFontFace(text.BoldFontFile, 20)
 				if err != nil {
 					ctx.SendChain(message.Text("Something wrong while rendering pic?"))
 					return

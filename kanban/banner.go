@@ -7,7 +7,7 @@ import (
 
 var (
 	info = [...]string{
-		"* OneBot + Zerobot + Nonebot2 with ZeroBot-Plugin Project.",
+		"* OneBot + Zerobot + Nonebot2 with Zerobot-Plugin Project.",
 		"* Hosted On Tencent LightCloudServer in Nanjing.",
 		"* Made By MoeMagicMango and FloatTech Project With ❤",
 		"* Project: https://github.com/FloatTech/ZeroBot-Plugin",
