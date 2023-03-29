@@ -3,6 +3,9 @@ package score
 
 import (
 	"encoding/json"
+	"github.com/FloatTech/floatbox/web"
+	"github.com/FloatTech/zbputils/control"
+	"github.com/tidwall/gjson"
 	"math/rand"
 	"os"
 	"strconv"
@@ -27,6 +30,7 @@ var (
 	checkLimit   = rate.NewManager[int64](time.Minute*1, 5) // time setup
 	catchLimit   = rate.NewManager[int64](time.Hour*1, 9)   // time setup
 	processLimit = rate.NewManager[int64](time.Hour*1, 5)   // time setup
+	payLimit     = rate.NewManager[int64](time.Hour*1, 10)  // time setup
 )
 
 type pg = map[string]partygame
@@ -65,13 +69,7 @@ func init() {
 			ctx.SendChain(message.Reply(uid), message.Text("本次参与的柠檬片不够哦~请多多打卡w"))
 			return
 		}
-		all := rand.Intn(59) // 一共59种可能性
-		if all == 58 {
-			num := rand.Intn(10)
-			if num != 10 {
-				all = rand.Intn(57)
-			}
-		}
+		all := rand.Intn(39) // 一共39种可能性
 		referpg := pgs[(strconv.Itoa(all))]
 		getName := referpg.Name
 		getCoinsStr := referpg.Coins
@@ -120,7 +118,6 @@ func init() {
 		_ = sdb.InsertUserCoins(siTargetUser.UID, siTargetUser.Coins-modifyCoins)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("试着去拿走 ", eventTargetName, " 的柠檬片时,成功了.\n所以 ", eventUserName, " 得到了 ", modifyCoins, " 个柠檬片\n\n同时 ", eventTargetName, " 失去了 ", modifyCoins, " 个柠檬片"))
 	})
-
 	engine.OnRegex(`^骗\s?\[CQ:at,qq=(\d+)\]\s(\d+)个柠檬片$`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
 		if !catchLimit.Load(ctx.Event.UserID).Acquire() {
 			ctx.SendChain(message.Text("太贪心了哦~一小时后再来试试吧"))
@@ -214,5 +211,40 @@ func init() {
 		hadModifyCoins := currentUserCoins - modifyCoins
 		_ = sdb.InsertUserCoins(handleUser.UID, hadModifyCoins)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经帮你扔掉了哦"))
+	})
+	engine.OnFullMatch("兑换涩图", zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
+		if !payLimit.Load(ctx.Event.UserID).Acquire() {
+			ctx.SendChain(message.Text("坏欸！为什么一个群有这么多人看涩图啊（晕"))
+			return
+		}
+		modified, ok := control.Lookup("nsfw")
+		if ok {
+			status := modified.IsEnabledIn(ctx.Event.GroupID)
+			if status == true {
+				var mutex sync.RWMutex // 添加读写锁以保证稳定性
+				mutex.Lock()
+				uid := ctx.Event.UserID
+				si := sdb.GetSignInByUID(uid) // 获取用户目前状况信息
+				userCurrentCoins := si.Coins  // loading coins status
+				if userCurrentCoins < 200 {
+					ctx.SendChain(message.Reply(uid), message.Text("本次参与的柠檬片不够哦~请多多打卡w，一次兑换最少需要200"))
+					return
+				}
+				img, err := web.GetData("https://api.lolicon.app/setu/v2?r18=1&num=1")
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
+				}
+				picURL := gjson.Get(string(img), "data.0.urls.original").String()
+				messageID := ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(picURL)).ID()
+				if messageID != 0 { // 保证成功后才扣除
+					_ = sdb.InsertUserCoins(si.UID, userCurrentCoins-200)
+				}
+			} else {
+				ctx.SendChain(message.Text("本群并没有开启nsfw哦，不允许使用此功能哦x"))
+				return
+			}
+		}
+
 	})
 }

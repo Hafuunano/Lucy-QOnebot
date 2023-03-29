@@ -21,9 +21,6 @@ import (
 	"math/rand"
 
 	fcext "github.com/FloatTech/floatbox/ctxext"
-	"github.com/FloatTech/floatbox/web"
-	"github.com/FloatTech/zbputils/control"
-	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
@@ -44,15 +41,12 @@ var (
 	cardMap  = make(cardset, 256)
 	position = []string{"正位", "逆位"}
 	result   map[int64]int
-	egg      map[string]int
 	signTF   map[string]int
 )
 
 func init() {
 	signTF = make(map[string]int)
-	egg = make(map[string]int)
 	result = make(map[int64]int)
-
 	getTarot := fcext.DoOnceOnSuccess(
 		func(ctx *zero.Ctx) bool { // 检查 塔罗牌文件是否存在
 			data, err := os.ReadFile(engine.DataFolder() + "tarots.json")
@@ -137,7 +131,7 @@ func init() {
 				}
 				mainContext.DrawRoundedRectangle(50, float64(mainContextHight-175), renderLength, 250, 20)
 				mainContext.Fill()
-				avatarByte, err := http.Get("http://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
+				avatarByte, err := http.Get("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
 				if err != nil {
 					ctx.SendChain(message.Text("Something wrong while rendering pic? avatar IO err."))
 					return
@@ -166,7 +160,7 @@ func init() {
 				formatTimeWeek := time.Now().Weekday().String()
 				mainContext.DrawString(formatTimeCurrent, float64(mainContextWidth-10)-formatTimeLength, 50)
 				mainContext.DrawString(formatTimeDate, float64(mainContextWidth-50)-formatTimeLength, 90)
-				mainContext.DrawString(formatTimeWeek, float64(mainContextWidth-10)-formatTimeLength, 130)
+				mainContext.DrawStringWrapped(formatTimeWeek, float64(mainContextWidth+70)-formatTimeLength, 110, 0, 0, 25, 0, gg.AlignRight)
 				mainContext.Stroke()
 				mainContext.SetRGBA255(152, 127, 176, 255)
 				err = mainContext.LoadFontFace(text.BoldFontFile, 150)
@@ -190,8 +184,9 @@ func init() {
 				mainContext.SetLineWidth(3)
 				mainContext.DrawString("今日塔罗牌", float64(mainContextWidth-300)+10, float64(mainContextHight-350)+30)
 				mainContext.SetRGBA255(155, 121, 147, 255)
-				mainContext.DrawString(fmt.Sprintf("%s - %s", card.Name, position[p]), float64(mainContextWidth-300)+10, float64(mainContextHight-350)+60)
-				placedList := splitChineseString(info, 35)
+				mainContext.DrawString(fmt.Sprintf("%s", card.Name), float64(mainContextWidth-300)+10, float64(mainContextHight-350)+60)
+				mainContext.DrawString(fmt.Sprintf("- %s", position[p]), float64(mainContextWidth-300)+10, float64(mainContextHight-350)+280)
+				placedList := splitChineseString(info, 44)
 				for i, v := range placedList {
 					mainContext.DrawString(v, float64(mainContextWidth-300)+10, float64(mainContextHight-350)+90+float64(i*30))
 				}
@@ -206,30 +201,9 @@ func init() {
 				signTF[si] = 1
 			} else {
 				ctx.SendChain(message.Text("今天已经测试过了哦w"), message.Image("file:///"+file.BOTPATH+"/"+engine.DataFolder()+"jrrp/"+userPic))
-				mutex.Unlock()
-			}
-			// special time !
-			m, ok := control.Lookup("nsfw")
-			if ok {
-				if m.IsEnabledIn(ctx.Event.GroupID) {
-					if result[user] >= 90 && result[user] < 100 && egg[si] == 0 {
-						egg[si] = 1
-						img, err := web.GetData("https://api.lolicon.app/setu/v2?r18=1&num=1")
-						if err != nil {
-							ctx.SendChain(message.Text("ERROR:", err))
-							return
-						}
-						picURL := gjson.Get(string(img), "data.0.urls.original").String()
-						time.Sleep(time.Second * 3)
-						deleteme := ctx.SendChain(message.At(user), message.Text("\n这是今日奖励哦"), message.Text(picURL))
-						time.Sleep(time.Second * 20)
-						ctx.DeleteMessage(deleteme)
-					}
-				}
 			}
 		})
 }
-
 func splitChineseString(s string, length int) []string {
 	result := make([]string, 0)
 	runes := []rune(s)
