@@ -178,5 +178,4 @@ func init() {
 				ctx.SendChain(message.At(uid), message.Text("今日份图片\n"), message.Image("base64://"+base64.StdEncoding.EncodeToString(data)))
 			}
 		})
-
 }

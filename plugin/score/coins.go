@@ -3,14 +3,15 @@ package score
 
 import (
 	"encoding/json"
-	"github.com/FloatTech/floatbox/web"
-	"github.com/FloatTech/zbputils/control"
-	"github.com/tidwall/gjson"
 	"math/rand"
 	"os"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/FloatTech/floatbox/web"
+	"github.com/FloatTech/zbputils/control"
+	"github.com/tidwall/gjson"
 
 	fcext "github.com/FloatTech/floatbox/ctxext"
 	"github.com/FloatTech/zbputils/ctxext"
@@ -245,6 +246,5 @@ func init() {
 				return
 			}
 		}
-
 	})
 }
