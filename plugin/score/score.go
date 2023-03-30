@@ -48,8 +48,7 @@ func init() {
 				return
 			}
 			uid := ctx.Event.UserID
-			now := time.Now()
-			today := now.Format("20060102")
+			today := time.Now().Format("20060102")
 			si := sdb.GetSignInByUID(uid)
 			pic := "file:///" + file.BOTPATH + "/" + cachePath + strconv.FormatInt(uid, 10) + today + ".png"
 			drawedFile := cachePath + strconv.FormatInt(uid, 10) + today + "signin.png"
@@ -70,7 +69,7 @@ func init() {
 			CurrentCountTable := sdb.GetCurrentCount(today)
 			handledTodayNum := CurrentCountTable.Counttime + 1
 			_ = sdb.UpdateUserTime(handledTodayNum, today) // 总体计算 隔日清零
-			if now.Hour() > 6 && now.Hour() < 19 {
+			if time.Now().Hour() > 6 && time.Now().Hour() < 19 {
 				// package for test draw.
 				getTimeReplyMsg := getHourWord(time.Now()) // get time and msg
 				currentTime := time.Now().Format("2006-01-02 15:04:05")

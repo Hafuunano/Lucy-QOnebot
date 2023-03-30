@@ -186,7 +186,7 @@ func (sdb *scoredb) UpdateUserTime(counttime int, times string) (err error) {
 	return err
 }
 
-func checkUserCoins(coins int) bool { // 参与一次15个柠檬片
+func checkUserCoins(coins int) bool { // 参与一次50个柠檬片
 	return coins-50 >= 0
 }
 
