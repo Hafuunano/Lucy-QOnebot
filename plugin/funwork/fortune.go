@@ -184,7 +184,7 @@ func init() {
 				mainContext.SetLineWidth(3)
 				mainContext.DrawString("今日塔罗牌", float64(mainContextWidth-300)+10, float64(mainContextHight-350)+30)
 				mainContext.SetRGBA255(155, 121, 147, 255)
-				mainContext.DrawString(fmt.Sprintf("%s", card.Name), float64(mainContextWidth-300)+10, float64(mainContextHight-350)+60)
+				mainContext.DrawString(card.Name, float64(mainContextWidth-300)+10, float64(mainContextHight-350)+60)
 				mainContext.DrawString(fmt.Sprintf("- %s", position[p]), float64(mainContextWidth-300)+10, float64(mainContextHight-350)+280)
 				placedList := splitChineseString(info, 44)
 				for i, v := range placedList {

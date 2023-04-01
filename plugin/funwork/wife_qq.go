@@ -385,7 +385,8 @@ func init() {
 		choice := ctx.State["regex_matched"].([]string)[1]
 		gid := ctx.Event.GroupID
 		uid := ctx.Event.UserID
-		randbook := rand.Intn(2)
+		var randbook int
+		randbook = rand.Intn(2)
 		fiancee := ctx.Event.SelfID
 		// first of all , judge if it is a dog
 		updatetime, err := mainList.checkUpdate(gid)

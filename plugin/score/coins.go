@@ -221,7 +221,7 @@ func init() {
 		modified, ok := control.Lookup("nsfw")
 		if ok {
 			status := modified.IsEnabledIn(ctx.Event.GroupID)
-			if status == true {
+			if status {
 				var mutex sync.RWMutex // 添加读写锁以保证稳定性
 				mutex.Lock()
 				uid := ctx.Event.UserID

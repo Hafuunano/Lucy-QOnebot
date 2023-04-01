@@ -3,7 +3,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -29,7 +28,6 @@ import (
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/chat" // 回复
 
 	"github.com/FloatTech/floatbox/process"
-	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/driver"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -50,9 +48,6 @@ func init() {
 	}
 	// make it easy to write config rather than change the source code.
 	sus := make([]int64, 0, 16)
-	d := flag.Bool("d", false, "Enable debug level log and higher.")
-	w := flag.Bool("w", false, "Enable warning level log and higher.")
-	h := flag.Bool("h", false, "Display this help.")
 	// 直接写死 AccessToken 时，请更改下面第二个参数
 	token := flag.String("t", "", "Set AccessToken of WSClient.")
 	// 直接写死 URL 时，请更改下面第二个参数
@@ -64,19 +59,6 @@ func init() {
 	rsz := flag.Uint("r", 4096, "Receiving buffer ring size.")
 	maxpt := flag.Uint("x", 4, "Max process time (min).")
 	flag.Parse()
-
-	if *h {
-		fmt.Println("Usage:")
-		flag.PrintDefaults()
-		os.Exit(0)
-	} else {
-		if *d && !*w {
-			logrus.SetLevel(logrus.DebugLevel)
-		}
-		if *w {
-			logrus.SetLevel(logrus.WarnLevel)
-		}
-	}
 
 	for _, s := range flag.Args() {
 		i, err := strconv.ParseInt(s, 10, 64)
