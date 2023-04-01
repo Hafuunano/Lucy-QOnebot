@@ -3,16 +3,17 @@ package arc
 import (
 	"bytes"
 	"fmt"
-	"github.com/FloatTech/gg"
-	"github.com/FloatTech/imgfactory"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
 	"image"
 	"image/color"
 	"math"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/FloatTech/gg"
+	"github.com/FloatTech/imgfactory"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 )
 
 var (
