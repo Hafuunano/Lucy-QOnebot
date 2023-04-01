@@ -17,7 +17,10 @@ import (
 )
 
 var (
-	arcaeaRes = "/root/Lucy_Project/workon/Lucy/data/arcaea"
+	arcaeaRes   = "/root/Lucy_Project/workon/Lucy/data/arcaea"
+	diff        string
+	diffNum     int
+	getSongName string
 )
 
 // TODO:
@@ -214,7 +217,7 @@ func FormatTimeStamp(timeStamp int64) string {
 }
 
 // DrawScoreCard draw the detailed info of the score.
-func DrawScoreCard(songCover image.Image, songNum int, r arcaea) image.Image {
+func DrawScoreCard(songCover image.Image, songNum int, r arcaea, b40 bool) image.Image {
 	// can optimize this part, I just copy it from the original plugin(arcaeabot)
 	scRaw := gg.NewContextForImage(songCover)
 	sc := gg.NewContext(scRaw.W()*5/2, scRaw.H())
@@ -230,8 +233,11 @@ func DrawScoreCard(songCover image.Image, songNum int, r arcaea) image.Image {
 	sc.DrawRectangle(0, 0, float64(sc.W()), float64(sc.H()))
 	sc.Fill()
 	songCoverHandled := sc.Image()
-	diffNum := r.Content.Best30List[songNum].Difficulty
-	var diff string
+	if b40 {
+		diffNum = r.Content.Best30Overflow[songNum].Difficulty
+	} else {
+		diffNum = r.Content.Best30List[songNum].Difficulty
+	}
 	switch {
 	case diffNum == 0:
 		diff = "PST.png"
@@ -245,7 +251,11 @@ func DrawScoreCard(songCover image.Image, songNum int, r arcaea) image.Image {
 	fullDiffLink := arcaeaRes + "/resource/diff/" + diff
 	resizedDiffImage := FastResizeImage(fullDiffLink, 14, 58)
 	// check the song name's length.
-	getSongName := r.Content.Best30Songinfo[songNum].NameEn
+	if b40 {
+		getSongName = r.Content.Best30OverflowSonginfo[songNum].NameEn
+	} else {
+		getSongName = r.Content.Best30Songinfo[songNum].NameEn
+	}
 	if len(getSongName) >= 19 {
 		getSongName = getSongName[:18] + "..."
 	}
@@ -281,7 +291,11 @@ func DrawScoreCard(songCover image.Image, songNum int, r arcaea) image.Image {
 	mainPicHandler.DrawString("#"+strconv.Itoa(songNum+1), 580, 45) // Write nums
 	mainPicHandler.FillPreserve()
 	mainPicHandler.SetFontFace(exoMidFace)
-	mainPicHandler.DrawString(FormatNumber(r.Content.Best30List[songNum].Score), 45, 100) // draw score.
+	if b40 {
+		mainPicHandler.DrawString(FormatNumber(r.Content.Best30Overflow[songNum].Score), 45, 100) // draw score.
+	} else {
+		mainPicHandler.DrawString(FormatNumber(r.Content.Best30List[songNum].Score), 45, 100) // draw score.
+	}
 	mainPicHandler.FillPreserve()
 	mainPicHandler.DrawImage(resizedDiffImage, 24, 24) // diff path
 	// origin plugin's code judge the bg's color and get average color again, but I think it's useless.(lmao)
@@ -302,22 +316,42 @@ func DrawScoreCard(songCover image.Image, songNum int, r arcaea) image.Image {
 	mainPicHandler.FillPreserve()
 	// draw json unmashalled data.
 	// draw size 30 font(P,F,L,etc.)
-	mainPicHandler.SetFontFace(kazeRegularFacel)
-	mainPicHandler.DrawString(strconv.Itoa(r.Content.Best30List[songNum].PerfectCount), 75, 142)
-	mainPicHandler.DrawString(strconv.Itoa(r.Content.Best30List[songNum].NearCount), 75, 187)
-	mainPicHandler.DrawString(strconv.Itoa(r.Content.Best30List[songNum].MissCount), 75, 232)
-	// format time
-	mainPicHandler.DrawString(FormatTimeStamp(r.Content.Best30List[songNum].TimePlayed), 250, 240)
-	mainPicHandler.FillPreserve()
-	// draw size 20 font(shiny count).
-	mainPicHandler.SetFontFace(kazeRegularFaceS)
-	mainPicHandler.DrawString("+"+strconv.Itoa(r.Content.Best30List[songNum].ShinyPerfectCount), 153, 140)
-	mainPicHandler.FillPreserve()
-	// draw ptt.
-	mainPicHandler.SetFontFace(kazeRegularFaceSl)
-	mainPicHandler.DrawString(strconv.FormatFloat(float64(r.Content.Best30Songinfo[songNum].Rating)/10, 'f', 1, 64), 250, 162)
-	mainPicHandler.DrawString(strconv.FormatFloat(r.Content.Best30List[songNum].Rating, 'f', 3, 64), 360, 155)
-	mainPicHandler.Fill()
+	if b40 {
+		mainPicHandler.SetFontFace(kazeRegularFacel)
+		mainPicHandler.DrawString(strconv.Itoa(r.Content.Best30Overflow[songNum].PerfectCount), 75, 142)
+		mainPicHandler.DrawString(strconv.Itoa(r.Content.Best30Overflow[songNum].NearCount), 75, 187)
+		mainPicHandler.DrawString(strconv.Itoa(r.Content.Best30Overflow[songNum].MissCount), 75, 232)
+		// format time
+		mainPicHandler.DrawString(FormatTimeStamp(r.Content.Best30Overflow[songNum].TimePlayed), 250, 240)
+		mainPicHandler.FillPreserve()
+		// draw size 20 font(shiny count).
+		mainPicHandler.SetFontFace(kazeRegularFaceS)
+		mainPicHandler.DrawString("+"+strconv.Itoa(r.Content.Best30Overflow[songNum].ShinyPerfectCount), 153, 140)
+		mainPicHandler.FillPreserve()
+		// draw ptt.
+		mainPicHandler.SetFontFace(kazeRegularFaceSl)
+		mainPicHandler.DrawString(strconv.FormatFloat(float64(r.Content.Best30OverflowSonginfo[songNum].Rating)/10, 'f', 1, 64), 250, 162)
+		mainPicHandler.DrawString(strconv.FormatFloat(r.Content.Best30Overflow[songNum].Rating, 'f', 3, 64), 360, 155)
+		mainPicHandler.Fill()
+	} else {
+		mainPicHandler.SetFontFace(kazeRegularFacel)
+		mainPicHandler.DrawString(strconv.Itoa(r.Content.Best30List[songNum].PerfectCount), 75, 142)
+		mainPicHandler.DrawString(strconv.Itoa(r.Content.Best30List[songNum].NearCount), 75, 187)
+		mainPicHandler.DrawString(strconv.Itoa(r.Content.Best30List[songNum].MissCount), 75, 232)
+		// format time
+		mainPicHandler.DrawString(FormatTimeStamp(r.Content.Best30List[songNum].TimePlayed), 250, 240)
+		mainPicHandler.FillPreserve()
+		// draw size 20 font(shiny count).
+		mainPicHandler.SetFontFace(kazeRegularFaceS)
+		mainPicHandler.DrawString("+"+strconv.Itoa(r.Content.Best30List[songNum].ShinyPerfectCount), 153, 140)
+		mainPicHandler.FillPreserve()
+		// draw ptt.
+		mainPicHandler.SetFontFace(kazeRegularFaceSl)
+		mainPicHandler.DrawString(strconv.FormatFloat(float64(r.Content.Best30Songinfo[songNum].Rating)/10, 'f', 1, 64), 250, 162)
+		mainPicHandler.DrawString(strconv.FormatFloat(r.Content.Best30List[songNum].Rating, 'f', 3, 64), 360, 155)
+		mainPicHandler.Fill()
+	}
+
 	return mainPicHandler.Image()
 }
 
@@ -417,7 +451,7 @@ func FinishedFullB30(mainB30 image.Image, r arcaea) image.Image {
 			panic(err)
 		}
 		bgDecode, _, _ := image.Decode(bytes.NewReader(bgReader))
-		mainB30Handler.DrawImage(imgfactory.Size(DrawScoreCard(imgfactory.Limit(bgDecode, 270, 270), i, r), 560, 256).Image(), initWidth, initHighth)
+		mainB30Handler.DrawImage(imgfactory.Size(DrawScoreCard(imgfactory.Limit(bgDecode, 270, 270), i, r, false), 560, 256).Image(), initWidth, initHighth)
 		mainB30Handler.Fill()
 		initWidth += 60 + 560
 		if initWidth >= 1860 {
@@ -425,7 +459,7 @@ func FinishedFullB30(mainB30 image.Image, r arcaea) image.Image {
 			initHighth += 60 + 224
 		}
 	}
-	if len(r.Content.Best30List) >= 30 {
+	if len(r.Content.Best30Overflow) > 0 {
 		divider := FastResizeImage(arcaeaRes+"/resource/b30/Divider.png", 2000, 500)
 		mainB30Handler.DrawImage(divider, 300, 3540)
 		for i := 0; i < 9; i++ {
@@ -437,7 +471,7 @@ func FinishedFullB30(mainB30 image.Image, r arcaea) image.Image {
 			}
 			bgDecode, _, _ := image.Decode(bytes.NewReader(bgReader))
 			initB10Length := initHighth + 180
-			mainB30Handler.DrawImage(imgfactory.Size(DrawScoreCard(imgfactory.Limit(bgDecode, 270, 270), i, r), 560, 256).Image(), initWidth, initB10Length)
+			mainB30Handler.DrawImage(imgfactory.Size(DrawScoreCard(imgfactory.Limit(bgDecode, 270, 270), i, r, true), 560, 256).Image(), initWidth, initB10Length)
 			mainB30Handler.Fill()
 			initWidth += 60 + 560
 			if initWidth >= 1860 {
