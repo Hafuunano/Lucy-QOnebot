@@ -140,7 +140,6 @@ func GetSongCurrentLocation(r arcaea, idLocated int, b40 bool) (currentSonglocat
 	} else {
 		currentSonglocation = arcaeaRes + "/assets/song/" + songID + "/base.jpg"
 	}
-
 	return currentSonglocation
 }
 
@@ -216,11 +215,25 @@ func FormatTimeStamp(timeStamp int64) string {
 // DrawScoreCard draw the detailed info of the score.
 func DrawScoreCard(songCover image.Image, songNum int, r arcaea) image.Image {
 	// can optimize this part, I just copy it from the original plugin(arcaeabot)
-	var diffs = make(map[int]string)
+	var diffs int
+	var diff string
 	diffs[0] = "PST.png"
-	diffs[1] = "PRS.png"
+	diffs[1] = ""
 	diffs[2] = "FTR.png"
 	diffs[3] = "BYD.png"
+	switch {
+	case diffs == 0:
+		diff = "PST.png"
+	case diffs == 1:
+		diff = "PST.png"
+
+	case diffs == 2:
+		diff = "FTR.png"
+
+	case diffs == 3:
+		diff = "BYD.png"
+
+	}
 	scRaw := gg.NewContextForImage(songCover)
 	sc := gg.NewContext(scRaw.W()*5/2, scRaw.H())
 	sc.DrawRoundedRectangle(0, 0, float64(sc.W()), float64(sc.H()), 32)
