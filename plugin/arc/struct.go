@@ -216,25 +216,6 @@ func FormatTimeStamp(timeStamp int64) string {
 // DrawScoreCard draw the detailed info of the score.
 func DrawScoreCard(songCover image.Image, songNum int, r arcaea) image.Image {
 	// can optimize this part, I just copy it from the original plugin(arcaeabot)
-	var diffs int
-	var diff string
-	diffs[0] = "PST.png"
-	diffs[1] = ""
-	diffs[2] = "FTR.png"
-	diffs[3] = "BYD.png"
-	switch {
-	case diffs == 0:
-		diff = "PST.png"
-	case diffs == 1:
-		diff = "PST.png"
-
-	case diffs == 2:
-		diff = "FTR.png"
-
-	case diffs == 3:
-		diff = "BYD.png"
-
-	}
 	scRaw := gg.NewContextForImage(songCover)
 	sc := gg.NewContext(scRaw.W()*5/2, scRaw.H())
 	sc.DrawRoundedRectangle(0, 0, float64(sc.W()), float64(sc.H()), 32)
@@ -250,7 +231,17 @@ func DrawScoreCard(songCover image.Image, songNum int, r arcaea) image.Image {
 	sc.Fill()
 	songCoverHandled := sc.Image()
 	diffNum := r.Content.Best30List[songNum].Difficulty
-	diff := diffs[diffNum]
+	var diff string
+	switch {
+	case diffNum == 0:
+		diff = "PST.png"
+	case diffNum == 1:
+		diff = "PRS.png"
+	case diffNum == 2:
+		diff = "FTR.png"
+	case diffNum == 3:
+		diff = "BYD.png"
+	}
 	fullDiffLink := arcaeaRes + "/resource/diff/" + diff
 	resizedDiffImage := FastResizeImage(fullDiffLink, 14, 58)
 	// check the song name's length.
@@ -288,10 +279,10 @@ func DrawScoreCard(songCover image.Image, songNum int, r arcaea) image.Image {
 	}
 	mainPicHandler.DrawString(getSongName, 45, 52)                  // Write song name.
 	mainPicHandler.DrawString("#"+strconv.Itoa(songNum+1), 580, 45) // Write nums
-	mainPicHandler.Fill()
+	mainPicHandler.FillPreserve()
 	mainPicHandler.SetFontFace(exoMidFace)
 	mainPicHandler.DrawString(FormatNumber(r.Content.Best30List[songNum].Score), 45, 100) // draw score.
-	mainPicHandler.Fill()
+	mainPicHandler.FillPreserve()
 	mainPicHandler.DrawImage(resizedDiffImage, 24, 24) // diff path
 	// origin plugin's code judge the bg's color and get average color again, but I think it's useless.(lmao)
 	// draw andrea style.
@@ -300,39 +291,30 @@ func DrawScoreCard(songCover image.Image, songNum int, r arcaea) image.Image {
 	mainPicHandler.DrawImage(tableImageResized, 0, -10)
 	// draw p,f,l,etc.
 	mainPicHandler.SetFontFace(exoSmallFace)
-	mainPicHandler.SetColor(setMainColor)
 	mainPicHandler.DrawString("P", 48, 144)
 	mainPicHandler.DrawString("F", 48, 189)
 	mainPicHandler.DrawString("L", 48, 234)
-	mainPicHandler.Fill()
-	// draw ptt,date,etc.
-	mainPicHandler.SetFontFace(exoSmallFace)
-	mainPicHandler.SetColor(setMainColor)
 	mainPicHandler.DrawString("PTT", 250, 130)
 	mainPicHandler.DrawString("DATE", 250, 200)
-	mainPicHandler.Fill()
+	mainPicHandler.FillPreserve()
 	mainPicHandler.SetFontFace(AndrealFaceLl)
-	mainPicHandler.SetColor(setMainColor)
 	mainPicHandler.DrawString(">", 330, 160)
-	mainPicHandler.Fill()
+	mainPicHandler.FillPreserve()
 	// draw json unmashalled data.
 	// draw size 30 font(P,F,L,etc.)
 	mainPicHandler.SetFontFace(kazeRegularFacel)
-	mainPicHandler.SetColor(setMainColor)
 	mainPicHandler.DrawString(strconv.Itoa(r.Content.Best30List[songNum].PerfectCount), 75, 142)
 	mainPicHandler.DrawString(strconv.Itoa(r.Content.Best30List[songNum].NearCount), 75, 187)
 	mainPicHandler.DrawString(strconv.Itoa(r.Content.Best30List[songNum].MissCount), 75, 232)
 	// format time
 	mainPicHandler.DrawString(FormatTimeStamp(r.Content.Best30List[songNum].TimePlayed), 250, 240)
-	mainPicHandler.Fill()
+	mainPicHandler.FillPreserve()
 	// draw size 20 font(shiny count).
 	mainPicHandler.SetFontFace(kazeRegularFaceS)
-	mainPicHandler.SetColor(setMainColor)
 	mainPicHandler.DrawString("+"+strconv.Itoa(r.Content.Best30List[songNum].ShinyPerfectCount), 153, 140)
-	mainPicHandler.Fill()
+	mainPicHandler.FillPreserve()
 	// draw ptt.
 	mainPicHandler.SetFontFace(kazeRegularFaceSl)
-	mainPicHandler.SetColor(setMainColor)
 	mainPicHandler.DrawString(strconv.FormatFloat(float64(r.Content.Best30Songinfo[songNum].Rating)/10, 'f', 1, 64), 250, 162)
 	mainPicHandler.DrawString(strconv.FormatFloat(r.Content.Best30List[songNum].Rating, 'f', 3, 64), 360, 155)
 	mainPicHandler.Fill()
