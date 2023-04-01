@@ -2,18 +2,13 @@
 package score
 
 import (
-	"encoding/base64"
 	"math/rand"
-	"os"
 	"strconv"
 	"time"
 
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 
-	"github.com/FloatTech/AnimeAPI/bilibili"
-
 	"github.com/FloatTech/floatbox/file"
-	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/fogleman/gg"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -25,8 +20,7 @@ import (
 )
 
 const (
-	backgroundURL = "https://iw233.cn/api.php?sort=iw233"
-	signinMax     = 1
+	signinMax = 1
 )
 
 var (
@@ -35,7 +29,7 @@ var (
 	sdb        *scoredb
 	engine     = control.Register("score", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
-		Help:              "Hi NekoPachi!\n说明书: https://manual-lucy.himoyo.cn",
+		Help:              "Hi NekoPachi!\n说明书: https://lucy.impart.icu",
 		PrivateDataFolder: "score",
 	})
 )
@@ -50,7 +44,6 @@ func init() {
 			uid := ctx.Event.UserID
 			today := time.Now().Format("20060102")
 			si := sdb.GetSignInByUID(uid)
-			pic := "file:///" + file.BOTPATH + "/" + cachePath + strconv.FormatInt(uid, 10) + today + ".png"
 			drawedFile := cachePath + strconv.FormatInt(uid, 10) + today + "signin.png"
 			siUpdateTimeStr := si.UpdatedAt.Format("20060102")
 			if si.Count >= signinMax && siUpdateTimeStr == today {
@@ -110,21 +103,6 @@ func init() {
 				dayGround.DrawString(strconv.Itoa(currentNextGoalMeasure)+"/"+strconv.Itoa(measureGoalsLens), 710, 610)
 				_ = dayGround.SavePNG(drawedFile)
 				ctx.SendChain(message.At(uid), message.Text("[HiMoYoBot]签到成功\n"), message.Image("file:///"+file.BOTPATH+"/"+drawedFile))
-				realLink, err := bilibili.GetRealURL(backgroundURL)
-				if err != nil {
-					return
-				}
-				data, err := web.RequestDataWith(web.NewDefaultClient(), realLink, "GET", "https://sina.com", web.RandUA(), nil)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
-					return
-				}
-				err = os.WriteFile(pic, data, 0777)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
-					return
-				}
-				ctx.SendChain(message.At(uid), message.Text("今日份图片\n"), message.Image("base64://"+base64.StdEncoding.EncodeToString(data)))
 			} else {
 				// nightVision
 				// package for test draw.
@@ -165,16 +143,6 @@ func init() {
 				nightGround.DrawString(strconv.Itoa(currentNextGoalMeasure)+"/"+strconv.Itoa(measureGoalsLens), 710, 610)
 				_ = nightGround.SavePNG(drawedFile)
 				ctx.SendChain(message.At(uid), message.Text("[HiMoYoBot]签到成功\n"), message.Image("file:///"+file.BOTPATH+"/"+drawedFile))
-				realLink, err := bilibili.GetRealURL(backgroundURL)
-				if err != nil {
-					return
-				}
-				data, err := web.RequestDataWith(web.NewDefaultClient(), realLink, "GET", "https://sina.com", web.RandUA(), nil)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
-					return
-				}
-				ctx.SendChain(message.At(uid), message.Text("今日份图片\n"), message.Image("base64://"+base64.StdEncoding.EncodeToString(data)))
 			}
 		})
 }

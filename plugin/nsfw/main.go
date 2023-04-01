@@ -5,6 +5,7 @@ import (
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
 var (
@@ -13,3 +14,9 @@ var (
 		Help:             "Hi NekoPachi!\n",
 	})
 )
+
+func init() {
+	engine.OnFullMatch("Hello", zero.OnlyToMe).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("World!"))
+	})
+}

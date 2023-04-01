@@ -78,7 +78,7 @@ func init() {
 		getDesc := referpg.Desc
 		addNewCoins := si.Coins + getCoinsInt - 200
 		_ = sdb.InsertUserCoins(uid, addNewCoins)
-		msgid := ctx.SendChain(message.At(uid), message.Text(" 嗯哼~来玩抽奖了哦w 看看能抽到什么呢w"))
+		msgid := ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(" 嗯哼~来玩抽奖了哦w 看看能抽到什么呢w"))
 		time.Sleep(time.Second * 3)
 		ctx.SendChain(message.Reply(msgid), message.Text("呼呼~让咱看看你抽到了什么东西ww\n"),
 			message.Text("你抽到的是~ ", getName, "\n", "获得了积分 ", getCoinsInt, "\n", getDesc, "\n目前的柠檬片总数为：", addNewCoins))

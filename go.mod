@@ -22,6 +22,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/tidwall/gjson v1.14.4
 	github.com/wdvxdr1123/ZeroBot v1.6.9
+	golang.org/x/image v0.3.0
 )
 
 require (
@@ -50,7 +51,6 @@ require (
 	github.com/tklauser/numcpus v0.6.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/crypto v0.4.0 // indirect
-	golang.org/x/image v0.3.0 // indirect
 	golang.org/x/sys v0.4.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
 	modernc.org/libc v1.21.5 // indirect
