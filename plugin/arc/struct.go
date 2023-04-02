@@ -17,14 +17,23 @@ import (
 )
 
 var (
-	arcaeaRes   = "/root/Lucy_Project/workon/Lucy/data/arcaea"
-	diff        string
-	diffNum     int
-	getSongName string
+	arcaeaRes         = "/root/Lucy_Project/workon/Lucy/data/arcaea"
+	diff              string
+	diffNum           int
+	getSongName       string
+	sans              font.Face
+	exoMidFaces       font.Face
+	exoSmallFace      font.Face
+	AndrealFaceLl     font.Face
+	kazeRegularFacel  font.Face
+	kazeRegularFaceSl font.Face
+	kazeRegularFaceS  font.Face
+	exoMidFace        font.Face
+	exoMidFaceLs      font.Face
+	exoMidFaceLL      font.Face
 )
 
 // TODO:
-// 1. optimize code(load font before running.)
 // 2. run faster(go func)
 // 3. minimize memory usage
 // 4. SQL database support.
@@ -124,6 +133,21 @@ type arcaea struct {
 			AudioOverride  bool    `json:"audio_override"`
 		} `json:"best30_overflow_songinfo"`
 	} `json:"content"`
+}
+
+func init() {
+	// main pg user b30
+	// Handle font (should deal it before the function runs.)
+	sans = LoadFontFace(arcaeaRes+"/resource/font/NotoSansCJKsc-Regular.otf", 30, 72) // sans-serif regular font
+	exoMidFaces = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 40, 72)
+	exoSmallFace = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 25, 80)
+	AndrealFaceLl = LoadFontFace(arcaeaRes+"/resource/font/Andrea.ttf", 50, 80)
+	kazeRegularFacel = LoadFontFace(arcaeaRes+"/resource/font/Kazesawa-Regular.ttf", 30, 72)
+	kazeRegularFaceSl = LoadFontFace(arcaeaRes+"/resource/font/Kazesawa-Regular.ttf", 25, 72)
+	kazeRegularFaceS = LoadFontFace(arcaeaRes+"/resource/font/Kazesawa-Regular.ttf", 20, 72)
+	exoMidFace = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 45, 72)
+	exoMidFaceLs = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 60, 72)
+	exoMidFaceLL = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 100, 72)
 }
 
 // GetSongCurrentLocation Get Location (Needs to change the main location due to it uses different location when using other platform.)
@@ -261,21 +285,6 @@ func DrawScoreCard(songCover image.Image, songNum int, r arcaea, b40 bool) image
 	}
 	mainPicHandler := gg.NewContextForImage(songCoverHandled)
 	// Handle font (should deal it before the function runs.)
-	fontByteRaw, _ := os.ReadFile(arcaeaRes + "/resource/font/NotoSansCJKsc-Regular.otf")
-	exoMid, _ := os.ReadFile(arcaeaRes + "/resource/font/Exo-Medium.ttf")
-	kazeRegular, _ := os.ReadFile(arcaeaRes + "/resource/font/Kazesawa-Regular.ttf")
-	andrealFont, _ := os.ReadFile(arcaeaRes + "/resource/font/Andrea.ttf")
-	fontExact, _ := opentype.Parse(fontByteRaw) // sans-serif regular font
-	exoMidExact, _ := opentype.Parse(exoMid)
-	kazeRegularExact, _ := opentype.Parse(kazeRegular)
-	andrealFontExact, _ := opentype.Parse(andrealFont)
-	sans, _ := opentype.NewFace(fontExact, &opentype.FaceOptions{Size: 30, DPI: 72, Hinting: font.HintingFull}) // sans-serif regular font
-	exoMidFace, _ := opentype.NewFace(exoMidExact, &opentype.FaceOptions{Size: 40, DPI: 72, Hinting: font.HintingFull})
-	exoSmallFace, _ := opentype.NewFace(exoMidExact, &opentype.FaceOptions{Size: 25, DPI: 80, Hinting: font.HintingFull})
-	AndrealFaceLl, _ := opentype.NewFace(andrealFontExact, &opentype.FaceOptions{Size: 50, DPI: 80, Hinting: font.HintingFull})
-	kazeRegularFacel, _ := opentype.NewFace(kazeRegularExact, &opentype.FaceOptions{Size: 30, DPI: 72, Hinting: font.HintingFull})
-	kazeRegularFaceSl, _ := opentype.NewFace(kazeRegularExact, &opentype.FaceOptions{Size: 25, DPI: 72, Hinting: font.HintingFull})
-	kazeRegularFaceS, _ := opentype.NewFace(kazeRegularExact, &opentype.FaceOptions{Size: 20, DPI: 72, Hinting: font.HintingFull})
 	// font part end.
 	mainPicHandler.SetFontFace(sans)
 	// check the bg is dark? if false, use black color font, else use white color font.
@@ -290,7 +299,7 @@ func DrawScoreCard(songCover image.Image, songNum int, r arcaea, b40 bool) image
 	mainPicHandler.DrawString(getSongName, 45, 52)                  // Write song name.
 	mainPicHandler.DrawString("#"+strconv.Itoa(songNum+1), 580, 45) // Write nums
 	mainPicHandler.FillPreserve()
-	mainPicHandler.SetFontFace(exoMidFace)
+	mainPicHandler.SetFontFace(exoMidFaces)
 	if b40 {
 		mainPicHandler.DrawString(FormatNumber(r.Content.Best30Overflow[songNum].Score), 45, 100) // draw score.
 	} else {
@@ -351,7 +360,6 @@ func DrawScoreCard(songCover image.Image, songNum int, r arcaea, b40 bool) image
 		mainPicHandler.DrawString(strconv.FormatFloat(r.Content.Best30List[songNum].Rating, 'f', 3, 64), 360, 155)
 		mainPicHandler.Fill()
 	}
-
 	return mainPicHandler.Image()
 }
 
@@ -376,7 +384,7 @@ func GetAvatar(r arcaea) (avatarByte image.Image) {
 }
 
 // ChoicePttBackground choice ptt background.
-func choicePttBackground(ptt float64) string {
+func ChoicePttBackground(ptt float64) string {
 	if ptt == -1 {
 		return "rating_off.png"
 	}
@@ -404,26 +412,21 @@ func choicePttBackground(ptt float64) string {
 // DrawMainUserB30 draw main user b30.
 func DrawMainUserB30(mainBg image.Image, r arcaea) image.Image {
 	// main pg user b30
-	exoMid, _ := os.ReadFile(arcaeaRes + "/resource/font/Exo-Medium.ttf")
-	exoMidExact, _ := opentype.Parse(exoMid)
 	mainBGHandler := gg.NewContextForImage(mainBg)
 	// draw avatar
 	mainBGHandler.DrawImage(GetAvatar(r), 75, 130)
 	// draw name
-	exoMidFaceLL, _ := opentype.NewFace(exoMidExact, &opentype.FaceOptions{Size: 100, DPI: 72, Hinting: font.HintingFull})
 	mainBGHandler.SetFontFace(exoMidFaceLL)
 	mainBGHandler.SetColor(color.NRGBA{R: uint8(255), G: uint8(255), B: uint8(255), A: 255})
 	mainBGHandler.DrawString(r.Content.AccountInfo.Name, 355, 250)
 	mainBGHandler.FillPreserve()
 	// draw userId
-	exoMidFaceLs, _ := opentype.NewFace(exoMidExact, &opentype.FaceOptions{Size: 60, DPI: 72, Hinting: font.HintingFull})
 	mainBGHandler.SetFontFace(exoMidFaceLs)
 	mainBGHandler.DrawString("ID:"+r.Content.AccountInfo.Code, 380, 364)
 	mainBGHandler.FillPreserve()
 	// draw ptt.
-	pttImage, _ := os.ReadFile(arcaeaRes + "/resource/ptt/" + choicePttBackground(float64(r.Content.AccountInfo.Rating)))
+	pttImage, _ := os.ReadFile(arcaeaRes + "/resource/ptt/" + ChoicePttBackground(float64(r.Content.AccountInfo.Rating)))
 	pttImageFormat, _, _ := image.Decode(bytes.NewReader(pttImage))
-	exoMidFace, _ := opentype.NewFace(exoMidExact, &opentype.FaceOptions{Size: 45, DPI: 72, Hinting: font.HintingFull})
 	mainBGHandler.SetFontFace(exoMidFace)
 	mainBGHandler.DrawImage(imgfactory.Size(pttImageFormat, 150, 150).Image(), 195, 295)
 	mainBGHandler.SetColor(color.NRGBA{R: uint8(255), G: uint8(255), B: uint8(255), A: 255})
@@ -443,6 +446,7 @@ func FinishedFullB30(mainB30 image.Image, r arcaea) image.Image {
 	// draw b30
 	initWidth := 100
 	initHighth := 640
+	// TODO: Maybe I can try to not use resize for the Scorecards?
 	for i := 0; i < len(r.Content.Best30List); i++ {
 		getSongLocation := GetSongCurrentLocation(r, i, false)
 		// get song's average color
@@ -481,4 +485,12 @@ func FinishedFullB30(mainB30 image.Image, r arcaea) image.Image {
 		}
 	}
 	return mainB30Handler.Image()
+}
+
+// LoadFontFace load font face once before running, to work it quickly and save memory.
+func LoadFontFace(filePath string, size float64, dpi float64) font.Face {
+	fontFile, _ := os.ReadFile(filePath)
+	fontFileParse, _ := opentype.Parse(fontFile)
+	fontFace, _ := opentype.NewFace(fontFileParse, &opentype.FaceOptions{Size: size, DPI: dpi, Hinting: font.HintingFull})
+	return fontFace
 }
