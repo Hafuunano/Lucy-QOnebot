@@ -18,6 +18,6 @@ Lucy's Ver.1.61 Designed with Zerobot-Plugin Project.
 
 其 背景(Background) 和 Header 设计来源于 [雨笙Hikari](https://space.bilibili.com/441390256)
 
-本项目跟随主线使用 GPL3.0 开源协议
+本项目跟随主线使用 AGPL3.0 开源协议
 
 
