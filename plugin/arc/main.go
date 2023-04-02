@@ -67,7 +67,7 @@ func init() {
 		}
 		checkTheContextIsNum := isNumericOrAlphanumeric(getBindInfo)
 		if checkTheContextIsNum == true {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("检查到传入数值为纯数字，请选择\n1. Arcaea用户名(e.g:MoeMagicMango)\n2. ArcaeaID(e.g:594698109)"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("检查到传入数值为纯数字，请选择\n1. Arcaea用户名 (e.g:MoeMagicMango)\n2. ArcaeaID (e.g:594698109)"))
 			nextstep := ctx.FutureEvent("message", ctx.CheckSession())
 			recv, _ := nextstep.Repeat()
 			for i := range recv {
@@ -84,7 +84,7 @@ func init() {
 					}
 					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", getBindInfo, "` binded. "))
 				case texts == "2":
-					err := FormatInfo(ctx.Event.UserID, userinfo.Content.AccountInfo.Code).BindUserArcaeaInfo(arcAcc)
+					err := FormatInfo(ctx.Event.UserID, getBindInfo).BindUserArcaeaInfo(arcAcc)
 					if err != nil {
 						ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误."))
 						return
@@ -109,9 +109,9 @@ func init() {
 	})
 
 	engine.OnFullMatch("!test arc b30").SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		id, err := GetUserInfo(arcAcc, ctx)
+		id, err := GetUserArcaeaInfo(arcAcc, ctx)
 		if err != nil || id == "" {
-			ctx.SendChain(message.Text("cannot get user info."))
+			ctx.SendChain(message.Text("cannot get user bind info."))
 			return
 		}
 		// get player info

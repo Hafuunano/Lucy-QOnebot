@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-// Arcinfosql use nonebot-arcaeabot's config.
-type Arcinfosql struct {
+// arcinfosql use nonebot-arcaeabot's config.
+type arcinfosql struct {
 	QQ    int64  `db:"user_qq"`   // qq nums
 	Arcid string `db:"arcaea_id"` // arcid nums
 }
@@ -30,12 +30,12 @@ func init() {
 }
 
 // FormatInfo FormatUserInfo and prepare to send it to sql.
-func FormatInfo(qqnum int64, arcid string) *Arcinfosql {
-	return &Arcinfosql{Arcid: arcid, QQ: qqnum}
+func FormatInfo(qqnum int64, arcid string) *arcinfosql {
+	return &arcinfosql{Arcid: arcid, QQ: qqnum}
 }
 
 // BindUserArcaeaInfo Bind user's acc.
-func (info *Arcinfosql) BindUserArcaeaInfo(db *sql.Sqlite) error {
+func (info *arcinfosql) BindUserArcaeaInfo(db *sql.Sqlite) error {
 	arcLocker.Lock()
 	defer arcLocker.Unlock()
 	return db.Insert("userinfo", info)
@@ -45,15 +45,15 @@ func (info *Arcinfosql) BindUserArcaeaInfo(db *sql.Sqlite) error {
 func InitalizeSqlite(db *sql.Sqlite) error {
 	arcLocker.Lock()
 	defer arcLocker.Unlock()
-	return db.Create("userinfo", &Arcinfosql{})
+	return db.Create("userinfo", &arcinfosql{})
 }
 
-// GetUserInfo check user info.
-func GetUserInfo(db *sql.Sqlite, ctx *zero.Ctx) (account string, err error) {
+// GetUserArcaeaInfo check user info.
+func GetUserArcaeaInfo(db *sql.Sqlite, ctx *zero.Ctx) (account string, err error) {
 	arcLocker.Lock()
 	defer arcLocker.Unlock()
 	uidStr := strconv.FormatInt(ctx.Event.UserID, 10)
-	var infosql Arcinfosql
+	var infosql arcinfosql
 	err = db.Find("userinfo", &infosql, "where user_qq is "+uidStr)
 	if err != nil {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(err))

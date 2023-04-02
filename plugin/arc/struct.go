@@ -22,6 +22,7 @@ var (
 	diff              string
 	diffNum           int
 	getSongName       string
+	rating            string
 	sans              font.Face
 	exoMidFaces       font.Face
 	exoSmallFace      font.Face
@@ -487,7 +488,12 @@ func DrawMainUserB30(mainBg image.Image, r arcaea) image.Image {
 	mainBGHandler.SetFontFace(exoMidFace)
 	mainBGHandler.DrawImage(imgfactory.Size(pttImageFormat, 150, 150).Image(), 195, 295)
 	mainBGHandler.SetColor(color.NRGBA{R: uint8(255), G: uint8(255), B: uint8(255), A: 255})
-	mainBGHandler.DrawStringAnchored(strconv.FormatFloat(float64(r.Content.AccountInfo.Rating)/100, 'f', 2, 64), 270, 365, 0.5, 0.5)
+	if r.Content.AccountInfo.Rating == -1 {
+		rating = "--"
+	} else {
+		rating = strconv.FormatFloat(float64(r.Content.AccountInfo.Rating)/100, 'f', 2, 64)
+	}
+	mainBGHandler.DrawStringAnchored(rating, 270, 365, 0.5, 0.5)
 	mainBGHandler.FillPreserve()
 	mainBGHandler.SetFontFace(exoMidFaceLL)
 	mainBGHandler.DrawString("Best 30:"+strconv.FormatFloat(r.Content.Best30Avg, 'f', 3, 64), 200, 560)
