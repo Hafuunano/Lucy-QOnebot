@@ -379,7 +379,6 @@ func init() {
 				),
 			)
 		})
-
 	engine.OnRegex(`^(娶|嫁)Lucy`, zero.OnlyGroup, getdb).SetBlock(true).Limit(cdcheck, iscding).Handle(func(ctx *zero.Ctx) {
 		// not work with checkdog, so it is useless and need to be rewritten.
 		choice := ctx.State["regex_matched"].([]string)[1]
@@ -628,7 +627,6 @@ func init() {
 			data, _ := imgfactory.ToBytes(canvas.Image())
 			ctx.SendChain(message.ImageBytes(data))
 		})
-
 	engine.OnFullMatch("我要离婚", zero.OnlyToMe, zero.OnlyGroup, getdb).SetBlock(true).Limit(cdcheck, iscding2).
 		Handle(func(ctx *zero.Ctx) {
 			gid := ctx.Event.GroupID
@@ -645,7 +643,6 @@ func init() {
 				ctx.SendChain(message.Text("很奇怪a~不存在对象~这样发送的意义是什么呢"))
 				return
 			}
-
 			// 获取用户信息
 			uid := ctx.Event.UserID
 			info, uidstatus, err := mainList.CheckMarriedList(gid, uid)
@@ -678,7 +675,6 @@ func cdcheck(ctx *zero.Ctx) *rate.Limiter {
 	limitID := strconv.FormatInt(ctx.Event.GroupID, 10) + strconv.FormatInt(ctx.Event.UserID, 10)
 	return skillCD.Load(limitID)
 }
-
 func iscding(ctx *zero.Ctx) {
 	ctx.SendChain(message.Text("还在cd哦~请24小时后再来"))
 }

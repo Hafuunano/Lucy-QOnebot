@@ -83,7 +83,6 @@ func init() {
 						return
 					}
 					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", getBindInfo, "` binded. "))
-					return
 				case texts == "2":
 					err := FormatInfo(ctx.Event.UserID, userinfo.Content.AccountInfo.Code).BindUserArcaeaInfo(arcAcc)
 					if err != nil {
@@ -91,28 +90,27 @@ func init() {
 						return
 					}
 					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", getBindInfo, "` binded. "))
-					return
 				default:
 					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("返回非法！"))
 					return
 				}
-
 			}
+		} else {
+			data, err := aua.GetUserInfo(os.Getenv("aualink"), os.Getenv("auakey"), getBindInfo)
+			dataBytes := helper.StringToBytes(data)
+			err = json.Unmarshal(dataBytes, &userinfo)
+			err = FormatInfo(ctx.Event.UserID, userinfo.Content.AccountInfo.Code).BindUserArcaeaInfo(arcAcc)
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误."))
+				return
+			}
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", getBindInfo, "` binded. "))
 		}
-		data, err := aua.GetUserInfo(os.Getenv("aualink"), os.Getenv("auakey"), getBindInfo)
-		dataBytes := helper.StringToBytes(data)
-		err = json.Unmarshal(dataBytes, &userinfo)
-		err = FormatInfo(ctx.Event.UserID, userinfo.Content.AccountInfo.Code).BindUserArcaeaInfo(arcAcc)
-		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误."))
-			return
-		}
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", getBindInfo, "` binded. "))
 	})
 
 	engine.OnFullMatch("!test arc b30").SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		id, err := GetUserInfo(arcAcc, ctx)
-		if err != nil {
+		if err != nil || id == "" {
 			ctx.SendChain(message.Text("cannot get user info."))
 			return
 		}

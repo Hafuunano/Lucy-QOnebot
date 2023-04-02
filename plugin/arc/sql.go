@@ -17,7 +17,7 @@ type Arcinfosql struct {
 
 var (
 	arcAcc    = &sql.Sqlite{}
-	arcLocker = sync.RWMutex{}
+	arcLocker = sync.Mutex{}
 )
 
 func init() {
