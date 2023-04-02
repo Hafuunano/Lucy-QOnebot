@@ -22,13 +22,6 @@ const (
 )
 
 func init() { // 插件主体
-	/* engine := control.Register("realcugan", &ctrl.Options[*zero.Ctx]{
-		DisableOnDefault:  false,
-		Brief:             "Real-CUGAN清晰术",
-		Help:              "- waifu2x(双重吟唱|三重吟唱|四重吟唱)(强力术式|中等术式|弱术式|不变式|原式)[图片]",
-		PrivateDataFolder: "realcugan",
-	}) */
-
 	engine.OnPrefix("waifu2x", zero.MustProvidePicture).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(message.Text("Lucy正在操作w...."))

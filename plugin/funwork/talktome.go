@@ -64,11 +64,6 @@ func init() {
 			}
 			ctx.SendChain(message.Text(helper.BytesToString(data)))
 		})
-	engine.OnFullMatch("舔狗日记").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		index, _ := web.GetData("https://ovooa.com/API/tgrj/api.php")
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(helper.BytesToString(index)))
-	})
-
 	engine.OnFullMatch("答案之书").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
 		data, err := os.ReadFile(engine.DataFolder() + "answers.json")
 		if err != nil {

@@ -5,12 +5,14 @@ import (
 	"github.com/FloatTech/zbputils/ctxext"
 	aua "github.com/MoYoez/Go-ArcaeaUnlimitedAPI"
 	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 	"math/rand"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type randsong struct {
@@ -54,6 +56,7 @@ var (
 	randgpt     arcGPT
 	arcrandsong randsong
 	getArcName  string
+	randLimit   = rate.NewManager[int64](time.Minute*5, 45) // 限制并发
 )
 
 func init() {
@@ -62,35 +65,40 @@ func init() {
 		panic(err)
 	}
 	engine.OnFullMatch("!test arc randgpt").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Sending response to ArcGPT...Hold on("))
-		auaRandSong, err := aua.GetSongRandom(os.Getenv("aualink"), os.Getenv("auakey"), strconv.Itoa(0), strconv.Itoa(12))
-		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Cannot get message from arcgpt(", err))
-			return
+		switch {
+		case randLimit.Load(ctx.Event.GroupID).AcquireN(6):
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Sending response to ArcGPT...Hold on("))
+			auaRandSong, err := aua.GetSongRandom(os.Getenv("aualink"), os.Getenv("auakey"), strconv.Itoa(0), strconv.Itoa(12))
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Cannot get message from arcgpt(", err))
+				return
+			}
+			auaRandSongBytes := helper.StringToBytes(auaRandSong)
+			err = json.Unmarshal(arcGPTJson, &randgpt)
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Cannot get message from arcgpt(", err))
+				return
+			}
+			err = json.Unmarshal(auaRandSongBytes, &arcrandsong)
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Cannot get message from arcgpt(", err))
+				return
+			}
+			// get length.
+			getGPTNums := rand.Intn(len(randgpt.ZhHans))
+			// first check the jp name, if not, use eng name.
+			getArcName = arcrandsong.Content.Songinfo.NameJp
+			getSongArtist := arcrandsong.Content.Songinfo.Artist
+			if getArcName == "" {
+				getArcName = arcrandsong.Content.Songinfo.NameEn
+			}
+			// handle texts.
+			handledSongGPTtextDone := strings.ReplaceAll(randgpt.ZhHans[getGPTNums], "歌曲名称", getArcName)
+			handledSongGPTtext := strings.ReplaceAll(handledSongGPTtextDone, "作曲家", getSongArtist)
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(handledSongGPTtext))
+		case randLimit.Load(ctx.Event.GroupID).Acquire():
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("暂时无法处理更多请求。\n"))
+		default:
 		}
-		auaRandSongBytes := helper.StringToBytes(auaRandSong)
-		err = json.Unmarshal(arcGPTJson, &randgpt)
-		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Cannot get message from arcgpt(", err))
-			return
-		}
-		err = json.Unmarshal(auaRandSongBytes, &arcrandsong)
-		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Cannot get message from arcgpt(", err))
-			return
-		}
-		// get length.
-		getGPTNums := rand.Intn(len(randgpt.ZhHans))
-		// first check the jp name, if not, use eng name.
-		getArcName = arcrandsong.Content.Songinfo.NameJp
-		getSongArtist := arcrandsong.Content.Songinfo.Artist
-		if getArcName == "" {
-			getArcName = arcrandsong.Content.Songinfo.NameEn
-		}
-		// handle texts.
-		handledSongGPTtextDone := strings.ReplaceAll(randgpt.ZhHans[getGPTNums], "歌曲名称", getArcName)
-		handledSongGPTtext := strings.ReplaceAll(handledSongGPTtextDone, "作曲家", getSongArtist)
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(handledSongGPTtext))
 	})
-
 }

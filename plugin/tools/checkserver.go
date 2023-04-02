@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/FloatTech/zbputils/control"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/mem"
@@ -27,25 +26,6 @@ func init() { // 插件主体
 			),
 			)
 		})
-
-	// 作为信息推送工具使用
-	engine.OnRegex(`^【PUSH】.*`, zero.SuperUserPermission).SetBlock(false).
-		Handle(func(ctx *zero.Ctx) {
-			m, ok := control.Lookup("tools")
-			if ok {
-				msg := ctx.Event.Message
-				zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
-					for _, g := range ctx.GetGroupList().Array() {
-						gid := g.Get("group_id").Int()
-						if m.IsEnabledIn(gid) {
-							ctx.SendGroupMessage(gid, msg)
-						}
-					}
-					return true
-				})
-			}
-		})
-
 	engine.OnRegex(`给夹子留话.*?(.*)`, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			su := zero.BotConfig.SuperUsers[0]
