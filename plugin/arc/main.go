@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"image"
-	"image/png"
+	"image/jpeg"
 	"os"
 
 	ctrl "github.com/FloatTech/zbpctrl"
@@ -48,10 +48,16 @@ func init() {
 		mainBGDecoded, _, _ := image.Decode(bytes.NewReader(mainBG))
 		basicBG := DrawMainUserB30(mainBGDecoded, r)
 		tureResult := FinishedFullB30(basicBG, r)
-		buffer := new(bytes.Buffer)
-		err = png.Encode(buffer, tureResult)
-		// output score bg
-		base64img := base64.StdEncoding.EncodeToString(buffer.Bytes())
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64img))
+		var buf bytes.Buffer
+		err = jpeg.Encode(&buf, tureResult, nil)
+		if err != nil {
+			panic(err)
+		}
+		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
+	})
+
+	engine.OnRegex(`!test\sarc\sbind\s(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+
 	})
 }

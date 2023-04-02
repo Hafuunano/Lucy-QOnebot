@@ -34,10 +34,10 @@ var (
 )
 
 // TODO:
+// 1. SQL database support.
 // 2. run faster(go func)
 // 3. minimize memory usage
-// 4. SQL database support.
-// 5. beautify b30.
+// 4. beautify b30.
 
 type arcaea struct {
 	Status  int `json:"status"`
