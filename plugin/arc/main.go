@@ -83,6 +83,7 @@ func init() {
 						return
 					}
 					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", getBindInfo, "` binded. "))
+					return
 				case texts == "2":
 					err := FormatInfo(ctx.Event.UserID, getBindInfo).BindUserArcaeaInfo(arcAcc)
 					if err != nil {
@@ -90,6 +91,7 @@ func init() {
 						return
 					}
 					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", getBindInfo, "` binded. "))
+					return
 				default:
 					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("返回非法！"))
 					return
