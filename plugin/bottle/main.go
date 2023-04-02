@@ -43,12 +43,12 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-
 	_ = CreateChannel(seaSide)
 	engine.OnFullMatch("pick", zero.OnlyToMe, zero.OnlyGroup).Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		be, err := fetchBottle(seaSide)
 		if err != nil {
 			ctx.SendChain(message.Text("ERR:", err))
+			return
 		}
 		IDStr := strconv.Itoa(int(be.ID))
 		QQStr := strconv.Itoa(int(be.QQ))

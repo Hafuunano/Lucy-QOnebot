@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"unicode"
 
 	"github.com/FloatTech/gg"
 	"github.com/FloatTech/imgfactory"
@@ -38,6 +39,62 @@ var (
 // 2. run faster(go func)
 // 3. minimize memory usage
 // 4. beautify b30.
+
+type user struct {
+	Status  int `json:"status"`
+	Content struct {
+		AccountInfo struct {
+			Code                   string `json:"code"`
+			Name                   string `json:"name"`
+			UserId                 int    `json:"user_id"`
+			IsMutual               bool   `json:"is_mutual"`
+			IsCharUncappedOverride bool   `json:"is_char_uncapped_override"`
+			IsCharUncapped         bool   `json:"is_char_uncapped"`
+			IsSkillSealed          bool   `json:"is_skill_sealed"`
+			Rating                 int    `json:"rating"`
+			JoinDate               int64  `json:"join_date"`
+			Character              int    `json:"character"`
+		} `json:"account_info"`
+		RecentScore []struct {
+			Score             int     `json:"score"`
+			Health            int     `json:"health"`
+			Rating            float64 `json:"rating"`
+			SongId            string  `json:"song_id"`
+			Modifier          int     `json:"modifier"`
+			Difficulty        int     `json:"difficulty"`
+			ClearType         int     `json:"clear_type"`
+			BestClearType     int     `json:"best_clear_type"`
+			TimePlayed        int64   `json:"time_played"`
+			NearCount         int     `json:"near_count"`
+			MissCount         int     `json:"miss_count"`
+			PerfectCount      int     `json:"perfect_count"`
+			ShinyPerfectCount int     `json:"shiny_perfect_count"`
+		} `json:"recent_score"`
+		Songinfo []struct {
+			NameEn         string  `json:"name_en"`
+			NameJp         string  `json:"name_jp"`
+			Artist         string  `json:"artist"`
+			Bpm            string  `json:"bpm"`
+			BpmBase        float64 `json:"bpm_base"`
+			Set            string  `json:"set"`
+			SetFriendly    string  `json:"set_friendly"`
+			Time           int     `json:"time"`
+			Side           int     `json:"side"`
+			WorldUnlock    bool    `json:"world_unlock"`
+			RemoteDownload bool    `json:"remote_download"`
+			Bg             string  `json:"bg"`
+			Date           int     `json:"date"`
+			Version        string  `json:"version"`
+			Difficulty     int     `json:"difficulty"`
+			Rating         int     `json:"rating"`
+			Note           int     `json:"note"`
+			ChartDesigner  string  `json:"chart_designer"`
+			JacketDesigner string  `json:"jacket_designer"`
+			JacketOverride bool    `json:"jacket_override"`
+			AudioOverride  bool    `json:"audio_override"`
+		} `json:"songinfo"`
+	} `json:"content"`
+}
 
 type arcaea struct {
 	Status  int `json:"status"`
@@ -493,4 +550,23 @@ func LoadFontFace(filePath string, size float64, dpi float64) font.Face {
 	fontFileParse, _ := opentype.Parse(fontFile)
 	fontFace, _ := opentype.NewFace(fontFileParse, &opentype.FaceOptions{Size: size, DPI: dpi, Hinting: font.HintingFull})
 	return fontFace
+}
+
+// isAlphanumeric Check the context is num or english.
+func isAlphanumeric(s string) bool {
+	for _, c := range s {
+		if !unicode.IsDigit(c) && !unicode.IsLetter(c) {
+			return false
+		}
+	}
+	return true
+}
+
+// isNumericOrAlphanumeric user ParseInt to check if the context is num?
+func isNumericOrAlphanumeric(s string) bool {
+	if !isAlphanumeric(s) {
+		return false
+	}
+	_, err := strconv.ParseInt(s, 10, 64)
+	return err == nil
 }

@@ -2,14 +2,17 @@ package arc
 
 import (
 	sql "github.com/FloatTech/sqlite"
+	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/message"
+	"strconv"
 	"sync"
 	"time"
 )
 
 // Arcinfosql use nonebot-arcaeabot's config.
 type Arcinfosql struct {
-	QQ    int64 `db:"user_qq"`   // qq nums
-	Arcid int64 `db:"arcaea_id"` // arcid nums
+	QQ    int64  `db:"user_qq"`   // qq nums
+	Arcid string `db:"arcaea_id"` // arcid nums
 }
 
 var (
@@ -27,7 +30,7 @@ func init() {
 }
 
 // FormatInfo FormatUserInfo and prepare to send it to sql.
-func FormatInfo(qqnum int64, arcid int64) *Arcinfosql {
+func FormatInfo(qqnum int64, arcid string) *Arcinfosql {
 	return &Arcinfosql{Arcid: arcid, QQ: qqnum}
 }
 
@@ -43,4 +46,18 @@ func InitalizeSqlite(db *sql.Sqlite) error {
 	arcLocker.Lock()
 	defer arcLocker.Unlock()
 	return db.Create("userinfo", &Arcinfosql{})
+}
+
+// GetUserInfo check user info.
+func GetUserInfo(db *sql.Sqlite, ctx *zero.Ctx) (account string, err error) {
+	arcLocker.Lock()
+	defer arcLocker.Unlock()
+	uidStr := strconv.FormatInt(ctx.Event.UserID, 10)
+	var infosql Arcinfosql
+	err = db.Find("userinfo", &infosql, "where user_qq is "+uidStr)
+	if err != nil {
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(err))
+		return "", nil
+	}
+	return infosql.Arcid, err
 }
