@@ -3,7 +3,6 @@ package arc
 import (
 	sql "github.com/FloatTech/sqlite"
 	zero "github.com/wdvxdr1123/ZeroBot"
-	"github.com/wdvxdr1123/ZeroBot/message"
 	"strconv"
 	"sync"
 	"time"
@@ -56,7 +55,6 @@ func GetUserArcaeaInfo(db *sql.Sqlite, ctx *zero.Ctx) (account string, err error
 	var infosql arcinfosql
 	err = db.Find("userinfo", &infosql, "where user_qq is "+uidStr)
 	if err != nil {
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(err))
 		return "", nil
 	}
 	return infosql.Arcid, err
