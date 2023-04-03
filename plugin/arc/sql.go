@@ -12,7 +12,7 @@ import (
 type Arcinfosql struct {
 	QQ    int64  `db:"user_qq"`   // qq nums
 	Arcid string `db:"arcaea_id"` // arcid nums
-	name  string `db:"arcname"`   // arcname
+	Name  string `db:"arcname"`   // arcname
 }
 
 var (
@@ -31,7 +31,7 @@ func init() {
 
 // FormatInfo FormatUserInfo and prepare to send it to sql.
 func FormatInfo(qqnum int64, arcid string, getArcUserName string) *Arcinfosql {
-	return &Arcinfosql{Arcid: arcid, QQ: qqnum, name: getArcUserName}
+	return &Arcinfosql{Arcid: arcid, QQ: qqnum, Name: getArcUserName}
 }
 
 // BindUserArcaeaInfo Bind user's acc.

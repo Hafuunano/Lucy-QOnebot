@@ -143,7 +143,7 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
 
-	engine.OnFullMatch(`!test\sarc\schart\s([^\]]+)\s+([^\]]+)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`!test\sarc\schart\s([^\]]+)\s+([^\]]+)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		songName := ctx.State["regex_matched"].([]string)[1]
 		songDiff := ctx.State["regex_matched"].([]string)[2]
 		if songDiff == "" {
@@ -152,6 +152,10 @@ func init() {
 		resultPreview, err := aua.GetSongPreview(os.Getenv("aualink"), os.Getenv("auakey"), songName, songDiff)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Unknown ERR:", err))
+			return
+		}
+		if resultPreview == "" {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Reply sent, but cannot find ", songName, " ("))
 			return
 		}
 		var buf bytes.Buffer
