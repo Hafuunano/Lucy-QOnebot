@@ -9,8 +9,8 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 
 	"github.com/FloatTech/floatbox/file"
+	"github.com/FloatTech/gg"
 	"github.com/FloatTech/zbputils/ctxext"
-	"github.com/fogleman/gg"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
 	_ "github.com/FloatTech/sqlite" // import sql

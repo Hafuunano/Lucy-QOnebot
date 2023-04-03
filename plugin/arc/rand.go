@@ -3,11 +3,10 @@ package arc
 import (
 	"encoding/json"
 	"github.com/FloatTech/zbputils/ctxext"
-	aua "github.com/MoYoez/Go-ArcaeaUnlimitedAPI"
+	aua "github.com/MoYoez/Arcaea_auaAPI"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"github.com/wdvxdr1123/ZeroBot/message"
-	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 	"math/rand"
 	"os"
 	"strconv"
@@ -68,12 +67,11 @@ func init() {
 		switch {
 		case randLimit.Load(ctx.Event.GroupID).AcquireN(6):
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Sending response to ArcGPT...Hold on("))
-			auaRandSong, err := aua.GetSongRandom(os.Getenv("aualink"), os.Getenv("auakey"), strconv.Itoa(0), strconv.Itoa(12))
+			auaRandSongBytes, err := aua.GetSongRandom(os.Getenv("aualink"), os.Getenv("auakey"), strconv.Itoa(0), strconv.Itoa(12))
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Cannot get message from arcgpt(", err))
 				return
 			}
-			auaRandSongBytes := helper.StringToBytes(auaRandSong)
 			err = json.Unmarshal(arcGPTJson, &randGPT)
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Cannot get message from arcgpt(", err))

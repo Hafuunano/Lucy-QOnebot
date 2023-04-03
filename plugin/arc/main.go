@@ -8,10 +8,9 @@ import (
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/ctxext"
-	aua "github.com/MoYoez/Go-ArcaeaUnlimitedAPI"
+	aua "github.com/MoYoez/Arcaea_auaAPI"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
-	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 	"image"
 	"image/jpeg"
 	"os"
@@ -31,12 +30,11 @@ func init() {
 	// arc b30 is still in test(
 	engine.OnRegex(`^!test arc\s*(\d+)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		id := ctx.State["regex_matched"].([]string)[1]
-		playerdata, err := aua.Best30(os.Getenv("aualink"), os.Getenv("auakey"), id)
+		playerdataByte, err := aua.Best30(os.Getenv("aualink"), os.Getenv("auakey"), id)
 		if err != nil {
 			ctx.SendChain(message.Text("cannot get user data."))
 			return
 		}
-		playerdataByte := helper.StringToBytes(playerdata)
 		_ = json.Unmarshal(playerdataByte, &r)
 		checkStatus := r.Status
 		if checkStatus != 0 {
@@ -65,8 +63,7 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("返回数据非法！"))
 			return
 		}
-		data, err := aua.GetUserInfo(os.Getenv("aualink"), os.Getenv("auakey"), getBindInfo)
-		dataBytes := helper.StringToBytes(data)
+		dataBytes, err := aua.GetUserInfo(os.Getenv("aualink"), os.Getenv("auakey"), getBindInfo)
 		err = json.Unmarshal(dataBytes, &userinfo)
 		err = FormatInfo(ctx.Event.UserID, userinfo.Content.AccountInfo.Code, userinfo.Content.AccountInfo.Name).BindUserArcaeaInfo(arcAcc)
 		if err != nil {
@@ -84,12 +81,11 @@ func init() {
 		}
 		// get player info
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Ok, trying to get "+id+" data."))
-		playerdata, err := aua.Best30(os.Getenv("aualink"), os.Getenv("auakey"), id)
+		playerdataByte, err := aua.Best30(os.Getenv("aualink"), os.Getenv("auakey"), id)
 		if err != nil {
 			ctx.SendChain(message.Text("cannot get user data."))
 			return
 		}
-		playerdataByte := helper.StringToBytes(playerdata)
 		_ = json.Unmarshal(playerdataByte, &r)
 		checkStatus := r.Status
 		if checkStatus != 0 {
@@ -116,16 +112,11 @@ func init() {
 		}
 		resultPreview, err := aua.GetSongPreview(os.Getenv("aualink"), os.Getenv("auakey"), songName, songDiff)
 		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Unknown ERR:", err))
-			return
-		}
-		if resultPreview == "" {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Reply sent, but cannot find ", songName, " ("))
 			return
 		}
 		var buf bytes.Buffer
-		resultEncodingToImage, _, _ := image.Decode(bytes.NewReader(helper.StringToBytes(resultPreview)))
-		err = jpeg.Encode(&buf, resultEncodingToImage, nil)
+		err = jpeg.Encode(&buf, resultPreview, nil)
 		if err != nil {
 			panic(err)
 		}
