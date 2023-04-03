@@ -355,7 +355,7 @@ func DrawScoreCard(songCover image.Image, songNum int, r arcaea, b40 bool) image
 		mainPicHandler.SetColor(setMainColor)
 	}
 	mainPicHandler.DrawString(getSongName, 45, 52)                  // Write song name.
-	mainPicHandler.DrawString("#"+strconv.Itoa(songNum+1), 580, 45) // Write nums
+	mainPicHandler.DrawString("#"+strconv.Itoa(songNum+1), 590, 45) // Write nums
 	mainPicHandler.FillPreserve()
 	mainPicHandler.SetFontFace(exoMidFaces)
 	if b40 {

@@ -53,10 +53,10 @@ type arcGPT struct {
 }
 
 var (
-	randgpt     arcGPT
-	arcrandsong randsong
-	getArcName  string
-	randLimit   = rate.NewManager[int64](time.Minute*5, 45) // 限制并发
+	randGPT        arcGPT
+	arcRandSong    randsong
+	getArcSongName string
+	randLimit      = rate.NewManager[int64](time.Minute*5, 45) // 限制并发
 )
 
 func init() {
@@ -64,7 +64,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	engine.OnFullMatch("!test arc randgpt").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnFullMatch("!test arc randGPT").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		switch {
 		case randLimit.Load(ctx.Event.GroupID).AcquireN(6):
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Sending response to ArcGPT...Hold on("))
@@ -74,26 +74,26 @@ func init() {
 				return
 			}
 			auaRandSongBytes := helper.StringToBytes(auaRandSong)
-			err = json.Unmarshal(arcGPTJson, &randgpt)
+			err = json.Unmarshal(arcGPTJson, &randGPT)
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Cannot get message from arcgpt(", err))
 				return
 			}
-			err = json.Unmarshal(auaRandSongBytes, &arcrandsong)
+			err = json.Unmarshal(auaRandSongBytes, &arcRandSong)
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Cannot get message from arcgpt(", err))
 				return
 			}
 			// get length.
-			getGPTNums := rand.Intn(len(randgpt.ZhHans))
+			getGPTNums := rand.Intn(len(randGPT.ZhHans))
 			// first check the jp name, if not, use eng name.
-			getArcName = arcrandsong.Content.Songinfo.NameJp
-			getSongArtist := arcrandsong.Content.Songinfo.Artist
-			if getArcName == "" {
-				getArcName = arcrandsong.Content.Songinfo.NameEn
+			getArcSongName = arcRandSong.Content.Songinfo.NameJp
+			getSongArtist := arcRandSong.Content.Songinfo.Artist
+			if getArcSongName == "" {
+				getArcSongName = arcRandSong.Content.Songinfo.NameEn
 			}
 			// handle texts.
-			handledSongGPTtextDone := strings.ReplaceAll(randgpt.ZhHans[getGPTNums], "歌曲名称", getArcName)
+			handledSongGPTtextDone := strings.ReplaceAll(randGPT.ZhHans[getGPTNums], "歌曲名称", getArcSongName)
 			handledSongGPTtext := strings.ReplaceAll(handledSongGPTtextDone, "作曲家", getSongArtist)
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(handledSongGPTtext))
 		case randLimit.Load(ctx.Event.GroupID).Acquire():
