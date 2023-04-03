@@ -65,50 +65,15 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("返回数据非法！"))
 			return
 		}
-		checkTheContextIsNum := isNumericOrAlphanumeric(getBindInfo)
-		if checkTheContextIsNum {
-			// I don't know why I do this? useless(
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("检查到传入数值为纯数字，请选择\n1. Arcaea用户名 (e.g:MoeMagicMango)\n2. ArcaeaID (e.g:594698109)"))
-			nextstep := ctx.FutureEvent("message", ctx.CheckSession())
-			recv, _ := nextstep.Repeat()
-			for i := range recv {
-				texts := i.MessageString()
-				switch {
-				case texts == "1":
-					data, err := aua.GetUserInfo(os.Getenv("aualink"), os.Getenv("auakey"), getBindInfo)
-					dataBytes := helper.StringToBytes(data)
-					err = json.Unmarshal(dataBytes, &userinfo)
-					err = FormatInfo(ctx.Event.UserID, userinfo.Content.AccountInfo.Code, getBindInfo).BindUserArcaeaInfo(arcAcc)
-					if err != nil {
-						ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误."))
-						return
-					}
-					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", getBindInfo, "` binded, id: ", userinfo.Content.AccountInfo.Code))
-				case texts == "2":
-					data, err := aua.GetUserInfo(os.Getenv("aualink"), os.Getenv("auakey"), getBindInfo)
-					dataBytes := helper.StringToBytes(data)
-					err = json.Unmarshal(dataBytes, &userinfo)
-					err = FormatInfo(ctx.Event.UserID, getBindInfo, userinfo.Content.AccountInfo.Name).BindUserArcaeaInfo(arcAcc)
-					if err != nil {
-						ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误."))
-						return
-					}
-					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", getBindInfo, "` binded, id: ", userinfo.Content.AccountInfo.Code))
-				default:
-					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("返回非法！"))
-				}
-			}
-		} else {
-			data, err := aua.GetUserInfo(os.Getenv("aualink"), os.Getenv("auakey"), getBindInfo)
-			dataBytes := helper.StringToBytes(data)
-			err = json.Unmarshal(dataBytes, &userinfo)
-			err = FormatInfo(ctx.Event.UserID, userinfo.Content.AccountInfo.Code, getBindInfo).BindUserArcaeaInfo(arcAcc)
-			if err != nil {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误."))
-				return
-			}
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", getBindInfo, "` binded, id: ", userinfo.Content.AccountInfo.Code))
+		data, err := aua.GetUserInfo(os.Getenv("aualink"), os.Getenv("auakey"), getBindInfo)
+		dataBytes := helper.StringToBytes(data)
+		err = json.Unmarshal(dataBytes, &userinfo)
+		err = FormatInfo(ctx.Event.UserID, userinfo.Content.AccountInfo.Code, userinfo.Content.AccountInfo.Name).BindUserArcaeaInfo(arcAcc)
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误."))
+			return
 		}
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", userinfo.Content.AccountInfo.Name, "` binded, id: ", userinfo.Content.AccountInfo.Code))
 	})
 
 	engine.OnFullMatch("!test arc b30").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {

@@ -567,12 +567,3 @@ func isAlphanumeric(s string) bool {
 	}
 	return true
 }
-
-// isNumericOrAlphanumeric user ParseInt to check if the context is num?
-func isNumericOrAlphanumeric(s string) bool {
-	if !isAlphanumeric(s) {
-		return false
-	}
-	_, err := strconv.ParseInt(s, 10, 64)
-	return err == nil
-}
