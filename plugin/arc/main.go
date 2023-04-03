@@ -83,7 +83,7 @@ func init() {
 						ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误."))
 						return
 					}
-					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: \"", getBindInfo, "\" binded. "))
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", getBindInfo, "` binded, id: ", userinfo.Content.AccountInfo.Code))
 				case texts == "2":
 					data, err := aua.GetUserInfo(os.Getenv("aualink"), os.Getenv("auakey"), getBindInfo)
 					dataBytes := helper.StringToBytes(data)
@@ -93,7 +93,7 @@ func init() {
 						ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误."))
 						return
 					}
-					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: \"", userinfo.Content.AccountInfo.Name, "\" binded. "))
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", getBindInfo, "` binded, id: ", userinfo.Content.AccountInfo.Code))
 				default:
 					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("返回非法！"))
 				}
@@ -107,7 +107,7 @@ func init() {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误."))
 				return
 			}
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", getBindInfo, "` binded. "))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", getBindInfo, "` binded, id: ", userinfo.Content.AccountInfo.Code))
 		}
 	})
 
