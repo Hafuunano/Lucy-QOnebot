@@ -3,6 +3,8 @@ package arc
 import (
 	"bytes"
 	"fmt"
+	"github.com/MoYoez/img_toolbox/FrostedGlassLike"
+	"github.com/MoYoez/img_toolbox/imgCutter"
 	"image"
 	"image/color"
 	"math"
@@ -36,10 +38,9 @@ var (
 )
 
 // TODO:
-// 1. SQL database support.
-// 2. run faster(go func)
-// 3. minimize memory usage
-// 4. beautify b30.
+// 1. run faster(go func)
+// 2. minimize memory usage
+// 3. beautify b30.
 
 type user struct {
 	Status  int `json:"status"`
@@ -208,7 +209,7 @@ func init() {
 	exoMidFaceLL = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 100, 72)
 }
 
-// GetSongCurrentLocation Get Location (Needs to change the main location due to it uses different location when using other platform.)
+// GetSongCurrentLocation Get Location (Needs to change the main location due to it uses different location when using other platform.) , you need to Unmarshal json file first.
 func GetSongCurrentLocation(r arcaea, idLocated int, b40 bool) (currentSonglocation string) {
 	// get the song downloaded status
 	var dl bool
@@ -221,6 +222,20 @@ func GetSongCurrentLocation(r arcaea, idLocated int, b40 bool) (currentSonglocat
 		songID = r.Content.Best30List[idLocated].SongId
 	}
 	// get song's current location.
+	if dl {
+		currentSonglocation = arcaeaRes + "/assets/song/dl_" + songID + "/base.jpg"
+	} else {
+		currentSonglocation = arcaeaRes + "/assets/song/" + songID + "/base.jpg"
+	}
+	return currentSonglocation
+}
+
+// GetB30RecentSongLocation find recent song location, you need to Unmarshal json file first.
+func GetB30RecentSongLocation(userinfo user) (currentSonglocation string) {
+	var dl bool
+	var songID string
+	songID = userinfo.Content.RecentScore[0].SongId
+	dl = userinfo.Content.Songinfo[0].RemoteDownload
 	if dl {
 		currentSonglocation = arcaeaRes + "/assets/song/dl_" + songID + "/base.jpg"
 	} else {
@@ -566,4 +581,19 @@ func isAlphanumeric(s string) bool {
 		}
 	}
 	return true
+}
+
+// RenderUserRecentLog render user recent log.
+func RenderUserRecentLog(userinfo user) image.Image {
+	// first of all, get raw and format it.
+	dataRawResize := FastResizeImage(arcaeaRes+"/resource/recent/RawV3Bg_0.png", 480, 694)
+	// frostlike bg
+	bgLocation, err := os.ReadFile(GetB30RecentSongLocation(userinfo))
+	imageBgLocation, _, _ := image.Decode(bytes.NewReader(bgLocation))
+	resultimg := FrostedGlassLike.FrostedGlassLike(imageBgLocation, 5, err)
+	handledImg := imgCutter.CropImage(resultimg, 600, 867)
+	mainBG := gg.NewContextForImage(handledImg)
+	mainBG.DrawImage(dataRawResize, 0, 0)
+	mainBG.Fill()
+	return mainBG.Image()
 }

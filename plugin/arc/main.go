@@ -123,5 +123,5 @@ func init() {
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
-	// TODO: arcaea single song check (
+	// TODO: arcaea single song check ( finished a little(
 }
