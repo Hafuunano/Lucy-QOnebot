@@ -58,7 +58,7 @@ func init() {
 
 	engine.OnRegex(`!test\sarc\sbind\s(.*)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		getBindInfo := ctx.State["regex_matched"].([]string)[1]
-		context := isAlphanumeric(getBindInfo)
+		context := IsAlphanumeric(getBindInfo)
 		var userinfo user
 		if context == false {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("返回数据非法！"))
@@ -81,7 +81,7 @@ func init() {
 			return
 		}
 		// get player info
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Ok, trying to get "+id+" data."))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("好哦~已经拿到请求要求了，咱正在帮你作画哦w"))
 		playerdataByte, err := aua.Best30(os.Getenv("aualink"), os.Getenv("auakey"), id)
 		if err != nil {
 			ctx.SendChain(message.Text("cannot get user data."))

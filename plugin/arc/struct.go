@@ -215,6 +215,17 @@ func init() {
 	exoSemiBoldFace = LoadFontFace(arcaeaRes+"/resource/font/Exo-SemiBold.ttf", 20, 72)
 }
 
+// StrokeStringWithOtherColor make the text shade?
+func StrokeStringWithOtherColor(text string, color color.Color, h float64, w float64, bg *gg.Context) {
+	// maybe it works?
+	bg.SetColor(color)
+	for i := 1; i < 3; i++ {
+		for j := 1; j < 3; j++ {
+			bg.DrawString(text, h-float64(i), w-float64(j))
+		}
+	}
+}
+
 // GetAvatarForGetUserInfo and resize it to 90x90.
 func GetAvatarForGetUserInfo(userinfo user) (avatarByte image.Image) {
 	getUncappedStatus := userinfo.Content.AccountInfo.IsCharUncapped
@@ -284,14 +295,14 @@ func GetAverageColor(image image.Image) (int, int, int) {
 			BList = append(BList, int(b>>8))
 		}
 	}
-	RAverage := int(average(RList))
-	GAverage := int(average(GList))
-	BAverage := int(average(BList))
+	RAverage := int(Average(RList))
+	GAverage := int(Average(GList))
+	BAverage := int(Average(BList))
 	return RAverage, GAverage, BAverage
 }
 
-// average sum all the numbers and divide by the length of the list.
-func average(numbers []int) float64 {
+// Average sum all the numbers and divide by the length of the list.
+func Average(numbers []int) float64 {
 	var sum float64
 	for _, num := range numbers {
 		sum += float64(num)
@@ -386,6 +397,9 @@ func DrawScoreCard(songCover image.Image, songNum int, r arcaea, b40 bool) image
 	// Handle font (should deal it before the function runs.)
 	// font part end.
 	mainPicHandler.SetFontFace(sans)
+	StrokeStringWithOtherColor("#"+strconv.Itoa(songNum+1), color.Black, 590, 45, mainPicHandler)
+	mainPicHandler.SetColor(color.White)
+	mainPicHandler.DrawString("#"+strconv.Itoa(songNum+1), 590, 45) // Write nums
 	// check the bg is dark? if false, use black color font, else use white color font.
 	var setMainColor color.NRGBA
 	if IsDark(color.RGBA{R: uint8(R), G: uint8(G), B: uint8(B), A: 255}) {
@@ -406,7 +420,7 @@ func DrawScoreCard(songCover image.Image, songNum int, r arcaea, b40 bool) image
 	}
 	mainPicHandler.FillPreserve()
 	mainPicHandler.DrawImage(resizedDiffImage, 24, 24) // diff path
-	// origin plugin's code judge the bg's color and get average color again, but I think it's useless.(lmao)
+	// origin plugin's code judge the bg's color and get Average color again, but I think it's useless.(lmao)
 	// draw andrea style.
 	tableImage, _ := os.ReadFile(arcaeaRes + "/resource/b30/table.png")
 	tableImageResized, _, _ := image.Decode(bytes.NewReader(tableImage)) // that's origin lmao
@@ -528,13 +542,14 @@ func DrawMainUserB30(mainBg image.Image, r arcaea) image.Image {
 	pttImageFormat, _, _ := image.Decode(bytes.NewReader(pttImage))
 	mainBGHandler.SetFontFace(exoMidFace)
 	mainBGHandler.DrawImage(imgfactory.Size(pttImageFormat, 150, 150).Image(), 195, 295)
-	mainBGHandler.SetColor(color.NRGBA{R: uint8(255), G: uint8(255), B: uint8(255), A: 255})
 	if r.Content.AccountInfo.Rating == -1 {
 		rating = "--"
 	} else {
 		rating = strconv.FormatFloat(float64(r.Content.AccountInfo.Rating)/100, 'f', 2, 64)
 	}
-	mainBGHandler.DrawStringAnchored(rating, 270, 365, 0.5, 0.5)
+	StrokeStringWithOtherColor(rating, color.Black, 215, 385, mainBGHandler)
+	mainBGHandler.SetColor(color.NRGBA{R: uint8(255), G: uint8(255), B: uint8(255), A: 255})
+	mainBGHandler.DrawString(rating, 215, 385)
 	mainBGHandler.FillPreserve()
 	mainBGHandler.SetFontFace(exoMidFaceLL)
 	mainBGHandler.DrawString("Best 30:"+strconv.FormatFloat(r.Content.Best30Avg, 'f', 3, 64), 200, 560)
@@ -553,7 +568,7 @@ func FinishedFullB30(mainB30 image.Image, r arcaea) image.Image {
 	// TODO: Maybe I can try to not use resize for the Scorecards?
 	for i := 0; i < len(r.Content.Best30List); i++ {
 		getSongLocation := GetSongCurrentLocation(r, i, false)
-		// get song's average color
+		// get song's Average color
 		bgReader, err := os.ReadFile(getSongLocation)
 		if err != nil {
 			panic(err)
@@ -572,7 +587,7 @@ func FinishedFullB30(mainB30 image.Image, r arcaea) image.Image {
 		mainB30Handler.DrawImage(divider, 300, 3540)
 		for i := 0; i < 9; i++ {
 			getSongLocation := GetSongCurrentLocation(r, i, true)
-			// get song's average color
+			// get song's Average color
 			bgReader, err := os.ReadFile(getSongLocation)
 			if err != nil {
 				panic(err)
@@ -599,8 +614,8 @@ func LoadFontFace(filePath string, size float64, dpi float64) font.Face {
 	return fontFace
 }
 
-// isAlphanumeric Check the context is num or english.
-func isAlphanumeric(s string) bool {
+// IsAlphanumeric Check the context is num or english.
+func IsAlphanumeric(s string) bool {
 	for _, c := range s {
 		if !unicode.IsDigit(c) && !unicode.IsLetter(c) {
 			return false
@@ -638,15 +653,15 @@ func RenderUserRecentLog(userinfo user) image.Image {
 		rating = strconv.FormatFloat(float64(userinfo.Content.AccountInfo.Rating)/100, 'f', 2, 64)
 	}
 	mainBG.SetFontFace(exoSemiBoldFace)
-	mainBG.SetRGBA255(255, 255, 255, 255)
+	// draw black, then draw white.
+	StrokeStringWithOtherColor(rating, color.Black, 270, 252, mainBG)
+	mainBG.SetColor(color.White)
 	mainBG.DrawString(rating, 270, 252)
-	mainBG.SetRGBA255(0, 0, 0, 255)
+	mainBG.SetColor(color.Black)
 	mainBG.DrawString("ArcID: "+userinfo.Content.AccountInfo.Code, 330, 240)
 	mainBG.SetFontFace(sans)
-	mainBG.SetRGBA255(0, 0, 0, 255)
 	mainBG.DrawString(userinfo.Content.AccountInfo.Name, 330, 210)
 	mainBG.DrawImage(imgfactory.Limit(imageBgLocation, 230, 230), 315, 306)
-	mainBG.SetRGBA255(0, 0, 0, 255)
 	mainBG.SetFontFace(AndrealFaceL)
 	var userRecentSongName string
 	userRecentSongName = userinfo.Content.Songinfo[0].NameJp
