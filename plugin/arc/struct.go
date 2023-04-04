@@ -409,8 +409,7 @@ func DrawScoreCard(songCover image.Image, songNum int, r arcaea, b40 bool) image
 		setMainColor = color.NRGBA{R: uint8(0), G: uint8(0), B: uint8(0), A: 205}
 		mainPicHandler.SetColor(setMainColor)
 	}
-	mainPicHandler.DrawString(getSongName, 45, 52)                  // Write song name.
-	mainPicHandler.DrawString("#"+strconv.Itoa(songNum+1), 590, 45) // Write nums
+	mainPicHandler.DrawString(getSongName, 45, 52) // Write song name.
 	mainPicHandler.FillPreserve()
 	mainPicHandler.SetFontFace(exoMidFaces)
 	if b40 {
