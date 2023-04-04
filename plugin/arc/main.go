@@ -17,8 +17,9 @@ import (
 )
 
 var (
-	r      arcaea
-	engine = control.Register("arcaea", &ctrl.Options[*zero.Ctx]{
+	userinfo user
+	r        arcaea
+	engine   = control.Register("arcaea", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
 		Help:              "Hi NekoPachi!\n说明书: https://lucy.impart.icu",
 		PrivateDataFolder: "arcaea",
@@ -123,5 +124,29 @@ func init() {
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
-	// TODO: arcaea single song check ( finished a little(
+
+	engine.OnFullMatch("!test arc").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+		// get info.
+		id, err := GetUserArcaeaInfo(arcAcc, ctx)
+		if err != nil || id == "" {
+			ctx.SendChain(message.Text("cannot get user bind info."))
+			return
+		}
+		// get player info
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("好哦~正在帮你抓取最近游玩记录"))
+		playerdataByte, err := aua.GetUserInfo(os.Getenv("aualink"), os.Getenv("auakey"), id)
+		if err != nil {
+			ctx.SendChain(message.Text("cannot get user data."))
+			return
+		}
+		_ = json.Unmarshal(playerdataByte, &userinfo)
+		replyImage := RenderUserRecentLog(userinfo)
+		var buf bytes.Buffer
+		err = jpeg.Encode(&buf, replyImage, nil)
+		if err != nil {
+			panic(err)
+		}
+		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
+	})
 }

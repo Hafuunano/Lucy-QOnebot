@@ -29,12 +29,15 @@ var (
 	exoMidFaces       font.Face
 	exoSmallFace      font.Face
 	AndrealFaceLl     font.Face
+	AndrealFaceL      font.Face
 	kazeRegularFacel  font.Face
 	kazeRegularFaceSl font.Face
 	kazeRegularFaceS  font.Face
 	exoMidFace        font.Face
 	exoMidFaceLs      font.Face
 	exoMidFaceLL      font.Face
+	exoSemiBoldFace   font.Face
+	exoSmallFaceSS    font.Face
 )
 
 // TODO:
@@ -200,16 +203,39 @@ func init() {
 	sans = LoadFontFace(arcaeaRes+"/resource/font/NotoSansCJKsc-Regular.otf", 30, 72) // sans-serif regular font
 	exoMidFaces = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 40, 72)
 	exoSmallFace = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 25, 80)
+	exoSmallFaceSS = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 15, 72)
 	AndrealFaceLl = LoadFontFace(arcaeaRes+"/resource/font/Andrea.ttf", 50, 80)
+	AndrealFaceL = LoadFontFace(arcaeaRes+"/resource/font/Andrea.ttf", 30, 80)
 	kazeRegularFacel = LoadFontFace(arcaeaRes+"/resource/font/Kazesawa-Regular.ttf", 30, 72)
 	kazeRegularFaceSl = LoadFontFace(arcaeaRes+"/resource/font/Kazesawa-Regular.ttf", 25, 72)
 	kazeRegularFaceS = LoadFontFace(arcaeaRes+"/resource/font/Kazesawa-Regular.ttf", 20, 72)
 	exoMidFace = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 45, 72)
 	exoMidFaceLs = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 60, 72)
 	exoMidFaceLL = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 100, 72)
+	exoSemiBoldFace = LoadFontFace(arcaeaRes+"/resource/font/Exo-SemiBold.ttf", 20, 72)
 }
 
-// GetSongCurrentLocation Get Location (Needs to change the main location due to it uses different location when using other platform.) , you need to Unmarshal json file first.
+// GetAvatarForGetUserInfo and resize it to 90x90.
+func GetAvatarForGetUserInfo(userinfo user) (avatarByte image.Image) {
+	getUncappedStatus := userinfo.Content.AccountInfo.IsCharUncapped
+	getUncappedOverrideStatus := userinfo.Content.AccountInfo.IsCharUncappedOverride
+	getCharacterNum := userinfo.Content.AccountInfo.Character
+	// get avatar
+	if getUncappedStatus != getUncappedOverrideStatus {
+		// uncapped
+		avatarLocation, _ := os.ReadFile(arcaeaRes + "/assets/char/" + strconv.Itoa(getCharacterNum) + "u_icon.png")
+		avatarBytes, _, _ := image.Decode(bytes.NewReader(avatarLocation))
+		avatarByte = imgfactory.Size(avatarBytes, 90, 90).Image()
+		return
+	} else {
+		avatarLocation, _ := os.ReadFile(arcaeaRes + "/assets/char/" + strconv.Itoa(getCharacterNum) + "_icon.png")
+		avatarBytes, _, _ := image.Decode(bytes.NewReader(avatarLocation))
+		avatarByte = imgfactory.Size(avatarBytes, 90, 90).Image()
+		return
+	}
+}
+
+// GetSongCurrentLocation Get Location (Needs to change the main location due to it uses different location when using other platform.)  you need to Unmarshal json file first.
 func GetSongCurrentLocation(r arcaea, idLocated int, b40 bool) (currentSonglocation string) {
 	// get the song downloaded status
 	var dl bool
@@ -586,14 +612,104 @@ func isAlphanumeric(s string) bool {
 // RenderUserRecentLog render user recent log.
 func RenderUserRecentLog(userinfo user) image.Image {
 	// first of all, get raw and format it.
-	dataRawResize := FastResizeImage(arcaeaRes+"/resource/recent/RawV3Bg_0.png", 480, 694)
+	var rawFormatUserPic string
+	if userinfo.Content.Songinfo[0].Side == 0 {
+		rawFormatUserPic = arcaeaRes + "/resource/recent/RawV3Bg_0.png"
+	} else {
+		rawFormatUserPic = arcaeaRes + "/resource/recent/RawV3Bg_1.png"
+	}
+	dataRawResize := FastResizeImage(rawFormatUserPic, 540, 781)
 	// frostlike bg
-	bgLocation, err := os.ReadFile(GetB30RecentSongLocation(userinfo))
-	imageBgLocation, _, _ := image.Decode(bytes.NewReader(bgLocation))
-	resultimg := FrostedGlassLike.FrostedGlassLike(imageBgLocation, 5, err)
+	bgLocation, err := os.ReadFile(GetB30RecentSongLocation(userinfo)) // get pic and render it as frost like(Blur.)
+	imageBgLocation, _, _ := image.Decode(bytes.NewReader(bgLocation)) // decode it.
+	resultimg := FrostedGlassLike.FrostedGlassLike(imageBgLocation, 10, err)
 	handledImg := imgCutter.CropImage(resultimg, 600, 867)
 	mainBG := gg.NewContextForImage(handledImg)
-	mainBG.DrawImage(dataRawResize, 0, 0)
+	mainBG.DrawImage(dataRawResize, 160, 86)
+	// render image(e.g. Track Lost,ACC,so on.)
+	avatarimg := GetAvatarForGetUserInfo(userinfo)
+	mainBG.DrawImage(avatarimg, 220, 170)
+	pttImage, _ := os.ReadFile(arcaeaRes + "/resource/ptt/" + ChoicePttBackground(float64(userinfo.Content.AccountInfo.Rating)))
+	pttImageFormat, _, _ := image.Decode(bytes.NewReader(pttImage))
+	mainBG.DrawImage(imgfactory.Size(pttImageFormat, 70, 70).Image(), 260, 210)
+	if userinfo.Content.AccountInfo.Rating == -1 {
+		rating = "--"
+	} else {
+		rating = strconv.FormatFloat(float64(userinfo.Content.AccountInfo.Rating)/100, 'f', 2, 64)
+	}
+	mainBG.SetFontFace(exoSemiBoldFace)
+	mainBG.SetRGBA255(255, 255, 255, 255)
+	mainBG.DrawString(rating, 270, 252)
+	mainBG.SetRGBA255(0, 0, 0, 255)
+	mainBG.DrawString("ArcID: "+userinfo.Content.AccountInfo.Code, 330, 240)
+	mainBG.SetFontFace(sans)
+	mainBG.SetRGBA255(0, 0, 0, 255)
+	mainBG.DrawString(userinfo.Content.AccountInfo.Name, 330, 210)
+	mainBG.DrawImage(imgfactory.Limit(imageBgLocation, 230, 230), 315, 306)
+	mainBG.SetRGBA255(0, 0, 0, 255)
+	mainBG.SetFontFace(AndrealFaceL)
+	var userRecentSongName string
+	userRecentSongName = userinfo.Content.Songinfo[0].NameJp
+	if userRecentSongName == "" {
+		userRecentSongName = userinfo.Content.Songinfo[0].NameEn
+	}
+	mainBG.DrawStringAnchored(userRecentSongName, 435, 555, 0.5, 0.5)
+	getRecentDiffStatus := userinfo.Content.RecentScore[0].Difficulty
+	var replyRecentDiffStatus string
+	var replyRecentDIffStatusColor color.Color
+	switch {
+	case getRecentDiffStatus == 0:
+		replyRecentDiffStatus = "Past"
+		replyRecentDIffStatusColor = color.NRGBA{R: uint8(20), G: uint8(165), B: uint8(215), A: uint8(255)}
+	case getRecentDiffStatus == 1:
+		replyRecentDiffStatus = "Present"
+		replyRecentDIffStatusColor = color.NRGBA{R: uint8(120), G: uint8(155), B: uint8(80), A: uint8(255)}
+	case getRecentDiffStatus == 2:
+		replyRecentDiffStatus = "Future"
+		replyRecentDIffStatusColor = color.NRGBA{R: uint8(115), G: uint8(35), B: uint8(100), A: uint8(255)}
+	case getRecentDiffStatus == 3:
+		replyRecentDiffStatus = "Beyond"
+		replyRecentDIffStatusColor = color.NRGBA{R: uint8(166), G: uint8(20), B: uint8(49), A: uint8(255)}
+	}
+	mainBG.SetFontFace(kazeRegularFaceSl)
+	mainBG.SetColor(replyRecentDIffStatusColor)
+	mainBG.DrawStringAnchored(fmt.Sprintf("%s | %s", replyRecentDiffStatus, strconv.FormatFloat(float64(userinfo.Content.Songinfo[0].Rating)/10, 'f', 1, 64)), 435, 590, 0.5, 0.5)
+	var getClearType map[int]string
+	var getClearTypeNum int
+	var getTypeLocation string
+	getClearType = map[int]string{
+		0: "TL",
+		1: "NC",
+		2: "FR",
+		3: "PM",
+		4: "EC",
+		5: "HC",
+	}
+	getClearTypeNum = userinfo.Content.RecentScore[0].ClearType
+	switch {
+	case getClearTypeNum == 1 || getClearTypeNum == 4 || getClearTypeNum == 5:
+		getTypeLocation = arcaeaRes + "/resource/recent/clear_normal.png"
+	case getClearTypeNum == 2:
+		getTypeLocation = arcaeaRes + "/resource/recent/clear_full.png"
+	case getClearTypeNum == 3:
+		getTypeLocation = arcaeaRes + "/resource/recent/clear_pure.png"
+	case getClearTypeNum == 0:
+		getTypeLocation = arcaeaRes + "/resource/recent/clear_fail.png"
+	}
+	typeCovert2Image := FastResizeImage(getTypeLocation, 400, 37)
+	mainBG.DrawImage(typeCovert2Image, 240, 635)
+	mainBG.SetFontFace(exoMidFaces)
+	mainBG.SetColor(color.Black)
+	mainBG.DrawStringAnchored(fmt.Sprintf("%s [%s]", FormatNumber(userinfo.Content.RecentScore[0].Score), getClearType[getClearTypeNum]), 440, 700, 0.5, 0.5)
+	// draw rest of them, fuck.
+	mainBG.SetFontFace(exoSmallFaceSS)
+	mainBG.DrawStringAnchored(fmt.Sprintf("Play PTT: %s", strconv.FormatFloat(userinfo.Content.RecentScore[0].Rating, 'f', 1, 64)), 220, 800, 0, 0)
+	mainBG.DrawStringAnchored(fmt.Sprintf("Play Time: %s", FormatTimeStamp(userinfo.Content.RecentScore[0].TimePlayed)), 220, 830, 0, 0)
+	// status.
+	mainBG.SetFontFace(exoSemiBoldFace)
+	mainBG.DrawStringAnchored(fmt.Sprintf("Pure:  %d(+%d)", userinfo.Content.RecentScore[0].PerfectCount, userinfo.Content.RecentScore[0].ShinyPerfectCount), 500, 780, 0, 0)
+	mainBG.DrawStringAnchored(fmt.Sprintf("Far:  %d", userinfo.Content.RecentScore[0].NearCount), 500, 810, 0, 0)
+	mainBG.DrawStringAnchored(fmt.Sprintf("Lost:  %d", userinfo.Content.RecentScore[0].MissCount), 500, 840, 0, 0)
 	mainBG.Fill()
 	return mainBG.Image()
 }
