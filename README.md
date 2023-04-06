@@ -10,6 +10,10 @@ Lucy's Ver.1.61 Designed with Zerobot-Plugin Project.
 
 如果需要运行这个版本的话，需要咱提供部分缺少的文件
 
+**Made By MoeMagicMango with ❤**
+
+**Copyright © 2021-2023 FloatTech. All Rights Reserved.**
+
 ## 关于 Arcaea B30 设计
 
 本项目其中包含的 Arcaea 插件 数据来源于 ArcaeaUnlimitedAPI(AUA)
