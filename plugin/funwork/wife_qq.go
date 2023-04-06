@@ -400,7 +400,6 @@ func init() {
 		// 获取用户信息
 		uidtarget, uidstatus, err1 := mainList.CheckMarriedList(gid, uid)
 		fianceeinfo, fianceestatus, err2 := mainList.CheckMarriedList(gid, fiancee)
-		randbook := rand.Intn(2)
 		switch {
 		case uidstatus == 2 || fianceestatus == 2:
 			ctx.SendChain(message.Text("ERR:", err1, "\n", err2))
@@ -429,11 +428,6 @@ func init() {
 			return
 		}
 		ctx.Send("好嘛....就一次哦 哼ama")
-		randbook = 1
-		if randbook == 0 {
-			ctx.SendChain(message.Text(sendtext[1][rand.Intn(len(sendtext[1]))]))
-			return
-		}
 		// 去mainList登记
 		var choicetext string
 		switch choice {
