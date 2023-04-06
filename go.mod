@@ -1,6 +1,6 @@
 module github.com/FloatTech/ZeroBot-Plugin
 
-go 1.19
+go 1.20
 
 require (
 	github.com/FloatTech/AnimeAPI v1.6.1-0.20230207081411-573533b18194
