@@ -8,7 +8,7 @@ Lucy's Ver.1.61 Designed with Zerobot-Plugin Project.
 
 对于原版有依赖文件缺少问题，代码部分参考了很多别家的代码设计,~~没有创新力了属于是~~
 
-如果需要运行这个版本的话，需要咱提供部分缺少的文件
+如果需要运行这个版本的话，需要咱提供部分缺少的文件~
 
 **Made By MoeMagicMango with ❤**
 
