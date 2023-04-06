@@ -268,8 +268,10 @@ func GetSongCurrentLocation(r arcaea, idLocated int, b40 bool) (currentSonglocat
 
 // GetB30RecentSongLocation find recent song location, you need to Unmarshal json file first.
 func GetB30RecentSongLocation(userinfo user) (currentSonglocation string) {
-	var dl bool
-	var songID string
+	var (
+		songID string
+		dl     bool
+	)
 	songID = userinfo.Content.RecentScore[0].SongId
 	dl = userinfo.Content.Songinfo[0].RemoteDownload
 	if dl {

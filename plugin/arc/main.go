@@ -60,12 +60,20 @@ func init() {
 		getBindInfo := ctx.State["regex_matched"].([]string)[1]
 		context := IsAlphanumeric(getBindInfo)
 		var userinfo user
-		if context == false {
+		if !context {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("返回数据非法！"))
 			return
 		}
 		dataBytes, err := aua.GetUserInfo(os.Getenv("aualink"), os.Getenv("auakey"), getBindInfo)
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误."))
+			return
+		}
 		err = json.Unmarshal(dataBytes, &userinfo)
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误."))
+			return
+		}
 		err = FormatInfo(ctx.Event.UserID, userinfo.Content.AccountInfo.Code, userinfo.Content.AccountInfo.Name).BindUserArcaeaInfo(arcAcc)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误."))
