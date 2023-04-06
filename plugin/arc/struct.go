@@ -217,7 +217,6 @@ func init() {
 
 // StrokeStringWithOtherColor make the text shade?
 func StrokeStringWithOtherColor(text string, color color.Color, h float64, w float64, bg *gg.Context) {
-	// maybe it works?
 	bg.SetColor(color)
 	for i := 1; i < 3; i++ {
 		for j := 1; j < 3; j++ {
@@ -710,20 +709,26 @@ func RenderUserRecentLog(userinfo user) image.Image {
 	case getClearTypeNum == 0:
 		getTypeLocation = arcaeaRes + "/resource/recent/clear_fail.png"
 	}
-	typeCovert2Image := FastResizeImage(getTypeLocation, 400, 37)
+	typeFileByte, err := os.ReadFile(getTypeLocation)
+	if err != nil {
+		panic(err)
+	}
+	typeFileByteImage, _, _ := image.Decode(bytes.NewReader(typeFileByte))
+	typeFileByteImageContext := gg.NewContextForImage(typeFileByteImage)
+	typeCovert2Image := imgfactory.Size(typeFileByteImage, 400, 400/typeFileByteImageContext.W()/typeFileByteImageContext.H()).Image()
 	mainBG.DrawImage(typeCovert2Image, 240, 635)
 	mainBG.SetFontFace(exoMidFaces)
 	mainBG.SetColor(color.Black)
 	mainBG.DrawStringAnchored(fmt.Sprintf("%s [%s]", FormatNumber(userinfo.Content.RecentScore[0].Score), getClearType[getClearTypeNum]), 440, 700, 0.5, 0.5)
 	// draw rest of them, fuck.
 	mainBG.SetFontFace(exoSmallFaceSS)
-	mainBG.DrawStringAnchored(fmt.Sprintf("Play PTT: %s", strconv.FormatFloat(userinfo.Content.RecentScore[0].Rating, 'f', 1, 64)), 220, 800, 0, 0)
+	mainBG.DrawStringAnchored(fmt.Sprintf("Play PTT:  %s", strconv.FormatFloat(userinfo.Content.RecentScore[0].Rating, 'f', 1, 64)), 220, 800, 0, 0)
 	mainBG.DrawStringAnchored(fmt.Sprintf("Play Time: %s", FormatTimeStamp(userinfo.Content.RecentScore[0].TimePlayed)), 220, 830, 0, 0)
 	// status.
 	mainBG.SetFontFace(exoSemiBoldFace)
-	mainBG.DrawStringAnchored(fmt.Sprintf("Pure:  %d(+%d)", userinfo.Content.RecentScore[0].PerfectCount, userinfo.Content.RecentScore[0].ShinyPerfectCount), 500, 780, 0, 0)
-	mainBG.DrawStringAnchored(fmt.Sprintf("Far:  %d", userinfo.Content.RecentScore[0].NearCount), 500, 810, 0, 0)
-	mainBG.DrawStringAnchored(fmt.Sprintf("Lost:  %d", userinfo.Content.RecentScore[0].MissCount), 500, 840, 0, 0)
+	mainBG.DrawStringAnchored(fmt.Sprintf("Pure:  %d(+%d)", userinfo.Content.RecentScore[0].PerfectCount, userinfo.Content.RecentScore[0].ShinyPerfectCount), 490, 780, 0, 0)
+	mainBG.DrawStringAnchored(fmt.Sprintf("Far:  %d", userinfo.Content.RecentScore[0].NearCount), 490, 810, 0, 0)
+	mainBG.DrawStringAnchored(fmt.Sprintf("Lost:  %d", userinfo.Content.RecentScore[0].MissCount), 490, 840, 0, 0)
 	mainBG.Fill()
 	return mainBG.Image()
 }
