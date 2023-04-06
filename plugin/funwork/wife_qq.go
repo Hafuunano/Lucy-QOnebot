@@ -384,7 +384,6 @@ func init() {
 		choice := ctx.State["regex_matched"].([]string)[1]
 		gid := ctx.Event.GroupID
 		uid := ctx.Event.UserID
-		randbook := rand.Intn(2)
 		fiancee := ctx.Event.SelfID
 		// first of all , judge if it is a dog
 		updatetime, err := mainList.checkUpdate(gid)
@@ -401,6 +400,7 @@ func init() {
 		// 获取用户信息
 		uidtarget, uidstatus, err1 := mainList.CheckMarriedList(gid, uid)
 		fianceeinfo, fianceestatus, err2 := mainList.CheckMarriedList(gid, fiancee)
+		randbook := rand.Intn(2)
 		switch {
 		case uidstatus == 2 || fianceestatus == 2:
 			ctx.SendChain(message.Text("ERR:", err1, "\n", err2))
