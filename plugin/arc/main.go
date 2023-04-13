@@ -50,7 +50,8 @@ func init() {
 		var buf bytes.Buffer
 		err = jpeg.Encode(&buf, tureResult, nil)
 		if err != nil {
-			panic(err)
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			return
 		}
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
@@ -107,27 +108,27 @@ func init() {
 		var buf bytes.Buffer
 		err = jpeg.Encode(&buf, tureResult, nil)
 		if err != nil {
-			panic(err)
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			return
 		}
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
 
-	engine.OnRegex(`!test\sarc\schart\s([^\]]+)\s+([^\]]+)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`!test\sarc\schart\s([^\]]+)\s+([^\]] +)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		songName := ctx.State["regex_matched"].([]string)[1]
 		songDiff := ctx.State["regex_matched"].([]string)[2]
-		if songDiff == "" {
-			songDiff = "ftr"
-		}
 		resultPreview, err := aua.GetSongPreview(os.Getenv("aualink"), os.Getenv("auakey"), songName, songDiff)
 		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Reply sent, but cannot find ", songName, " ("))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Reply sent, but cannot find ", songName, " (", err))
 			return
 		}
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请等待一会哦~已经拿到图片请求了x"))
 		var buf bytes.Buffer
 		err = jpeg.Encode(&buf, resultPreview, nil)
 		if err != nil {
-			panic(err)
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			return
 		}
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
@@ -152,7 +153,8 @@ func init() {
 		var buf bytes.Buffer
 		err = jpeg.Encode(&buf, replyImage, nil)
 		if err != nil {
-			panic(err)
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			return
 		}
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))

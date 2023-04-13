@@ -24,7 +24,7 @@ func init() {
 		if !limit.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
-		realLink, _ := bilibili.GetRealURL("https://mirlkoi.ifast3.vipnps.vip/api.php?sort=random")
+		realLink, _ := bilibili.GetRealURL("https://img.moehu.org/pic.php?id=img1")
 		data, err := web.RequestDataWith(web.NewDefaultClient(), realLink, "GET", "https://sina.com", ua, nil)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR:", err))
@@ -39,7 +39,7 @@ func init() {
 		if !limit.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
-		realLink, _ := bilibili.GetRealURL("https://mirlkoi.ifast3.vipnps.vip/api.php?sort=xing")
+		realLink, _ := bilibili.GetRealURL("https://img.moehu.org/pic.php?id=xingk")
 		data, err := web.RequestDataWith(web.NewDefaultClient(), realLink, "GET", "https://sina.com", ua, nil)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR:", err))
@@ -52,7 +52,7 @@ func init() {
 		if !limit.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
-		realLink, _ := bilibili.GetRealURL("https://mirlkoi.ifast3.vipnps.vip/api.php?sort=cat")
+		realLink, _ := bilibili.GetRealURL("https://img.moehu.org/pic.php?id=kemonomimi")
 		data, err := web.RequestDataWith(web.NewDefaultClient(), realLink, "GET", "https://sina.com", ua, nil)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR:", err))
@@ -67,7 +67,7 @@ func init() {
 		if !limit.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
-		realLink, _ := bilibili.GetRealURL("https://mirlkoi.ifast3.vipnps.vip/api.php?sort=yin")
+		realLink, _ := bilibili.GetRealURL("https://img.moehu.org/pic.php?id=yin")
 		data, err := web.RequestDataWith(web.NewDefaultClient(), realLink, "GET", "https://sina.com", ua, nil)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR:", err))
