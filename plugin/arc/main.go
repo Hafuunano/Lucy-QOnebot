@@ -29,7 +29,7 @@ var (
 func init() {
 	mainBG, _ := os.ReadFile(arcaeaRes + "/resource/b30/B30.png")
 	// arc b30 is still in test(
-	engine.OnRegex(`^!test arc\s*(\d+)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^[！!]arc\s*(\d+)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		id := ctx.State["regex_matched"].([]string)[1]
 		playerdataByte, err := aua.Best30(os.Getenv("aualink"), os.Getenv("auakey"), id)
 		if err != nil {
@@ -39,7 +39,7 @@ func init() {
 		_ = json.Unmarshal(playerdataByte, &r)
 		checkStatus := r.Status
 		if checkStatus != 0 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Status code is not valid."))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常，可能是接口出现问题"))
 			return
 		}
 		// get player info
@@ -57,7 +57,7 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
 
-	engine.OnRegex(`!test\sarc\sbind\s(.*)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`[！!]arc\sbind\s(.*)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		getBindInfo := ctx.State["regex_matched"].([]string)[1]
 		context := IsAlphanumeric(getBindInfo)
 		var userinfo user
@@ -70,9 +70,10 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误."))
 			return
 		}
-		err = json.Unmarshal(dataBytes, &userinfo)
-		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误."))
+		_ = json.Unmarshal(dataBytes, &userinfo)
+		checkStatus := userinfo.Status
+		if checkStatus != 0 {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常，可能是接口出现问题"))
 			return
 		}
 		err = FormatInfo(ctx.Event.UserID, userinfo.Content.AccountInfo.Code, userinfo.Content.AccountInfo.Name).BindUserArcaeaInfo(arcAcc)
@@ -83,7 +84,7 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", userinfo.Content.AccountInfo.Name, "` binded, id: ", userinfo.Content.AccountInfo.Code))
 	})
 
-	engine.OnFullMatch("!test arc b30").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`[！!]arc\sb30$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		id, err := GetUserArcaeaInfo(arcAcc, ctx)
 		if err != nil || id == "" {
 			ctx.SendChain(message.Text("cannot get user bind info."))
@@ -99,7 +100,7 @@ func init() {
 		_ = json.Unmarshal(playerdataByte, &r)
 		checkStatus := r.Status
 		if checkStatus != 0 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Status code is not valid."))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常，可能是接口出现问题"))
 			return
 		}
 		mainBGDecoded, _, _ := image.Decode(bytes.NewReader(mainBG))
@@ -115,7 +116,7 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
 
-	engine.OnRegex(`!test\sarc\schart\s([^\]]+)\s+([^\]] +)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`[！!]arc\schart\s([^\]]+)\s+([^\]] +)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		songName := ctx.State["regex_matched"].([]string)[1]
 		songDiff := ctx.State["regex_matched"].([]string)[2]
 		resultPreview, err := aua.GetSongPreview(os.Getenv("aualink"), os.Getenv("auakey"), songName, songDiff)
@@ -134,7 +135,7 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
 
-	engine.OnFullMatch("!test arc").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`[！!]arc$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		// get info.
 		id, err := GetUserArcaeaInfo(arcAcc, ctx)
 		if err != nil || id == "" {
@@ -149,6 +150,11 @@ func init() {
 			return
 		}
 		_ = json.Unmarshal(playerdataByte, &userinfo)
+		checkStatus := userinfo.Status
+		if checkStatus != 0 {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常，可能是接口出现问题"))
+			return
+		}
 		replyImage := RenderUserRecentLog(userinfo)
 		var buf bytes.Buffer
 		err = jpeg.Encode(&buf, replyImage, nil)

@@ -63,7 +63,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	engine.OnFullMatch("!test arc randGPT").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`[！!]arc\srandGPT`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		switch {
 		case randLimit.Load(ctx.Event.GroupID).AcquireN(6):
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Sending response to ArcGPT...Hold on("))
