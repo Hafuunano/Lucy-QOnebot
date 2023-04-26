@@ -33,6 +33,6 @@ func init() {
 	})
 
 	engine.OnFullMatch("今日早报").Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		ctx.Send(message.Image("https://api.03c3.cn/zb/"))
+		ctx.Send(message.Image("https://xvfr.com/60s.php"))
 	})
 }
