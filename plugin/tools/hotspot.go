@@ -2,6 +2,7 @@
 package tools
 
 import (
+	"github.com/FloatTech/AnimeAPI/bilibili"
 	"strconv"
 
 	"github.com/FloatTech/floatbox/binary"
@@ -33,6 +34,11 @@ func init() {
 	})
 
 	engine.OnFullMatch("今日早报").Limit(ctxext.LimitByGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		ctx.Send(message.Image("https://xvfr.com/60s.php"))
+		getRealLink, err := bilibili.GetRealURL("https://xvfr.com/60s.php")
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR:", err))
+			return
+		}
+		ctx.Send(message.Image(getRealLink))
 	})
 }
