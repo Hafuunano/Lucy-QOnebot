@@ -56,6 +56,12 @@ func init() {
 		si := sdb.GetSignInByUID(uid)
 		ctx.SendChain(message.Text("您的柠檬片数量一共是: ", si.Coins))
 	})
+	engine.OnRegex(`^查询(\[CQ:at,qq=(\d+)\]\s?|(\d+))的柠檬片`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
+		TargetInt, _ := strconv.ParseInt(ctx.State["regex_matched"].([]string)[2], 10, 64)
+		siTargetUser := sdb.GetSignInByUID(TargetInt)
+		getTargetName := ctx.CardOrNickName(TargetInt)
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("这位 ( ", getTargetName, ") 的柠檬片为", siTargetUser.Coins, "个"))
+	})
 	engine.OnFullMatch("抽奖", loadFiles, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
 		if !checkLimit.Load(ctx.Event.UserID).Acquire() {
 			ctx.SendChain(message.Text("太贪心了哦~过会试试吧"))
