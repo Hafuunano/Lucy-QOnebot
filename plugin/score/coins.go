@@ -231,7 +231,7 @@ func init() {
 				si := sdb.GetSignInByUID(uid) // 获取用户目前状况信息
 				userCurrentCoins := si.Coins  // loading coins status
 				if userCurrentCoins < 400 {
-					ctx.SendChain(message.Reply(uid), message.Text("本次参与的柠檬片不够哦~请多多打卡w，一次兑换最少需要200"))
+					ctx.SendChain(message.Reply(uid), message.Text("本次参与的柠檬片不够哦~请多多打卡w，一次兑换最少需要400"))
 					return
 				}
 				img, err := web.GetData("https://api.lolicon.app/setu/v2?r18=1&num=1")
