@@ -100,10 +100,10 @@ func init() {
 		siEventUser := sdb.GetSignInByUID(uid)        // 获取主用户目前状况信息
 		siTargetUser := sdb.GetSignInByUID(TargetInt) // 获得被抢用户目前情况信息
 		switch {
-		case siEventUser.Coins < 200:
+		case siEventUser.Coins < 500:
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("貌似没有足够的柠檬片去准备哦~请多多打卡w"))
 			return
-		case siTargetUser.Coins < 200:
+		case siTargetUser.Coins < 500:
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("太坏了~试图的对象貌似没有足够多的柠檬片~"))
 			return
 		}
