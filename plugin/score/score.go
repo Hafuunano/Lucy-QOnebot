@@ -53,7 +53,7 @@ func init() {
 				}
 				return
 			}
-			coinsGet := 200 + rand.Intn(200)
+			coinsGet := 300 + rand.Intn(200)
 			_ = sdb.InsertUserCoins(uid, si.Coins+coinsGet)
 			_ = sdb.InsertOrUpdateSignInCountByUID(uid, si.Count+1) // 柠檬片获取
 			score := sdb.GetScoreByUID(uid).Score
@@ -72,7 +72,6 @@ func init() {
 				dayGround.DrawImage(dayTimeImg, 0, 0)
 				_ = dayGround.LoadFontFace(engine.DataFolder()+"dyh.ttf", 60)
 				dayGround.SetRGB(0, 0, 0)
-
 				// draw something with cautions Only (
 				dayGround.DrawString(currentTime, 1270, 950)            // draw time
 				dayGround.DrawString(getTimeReplyMsg, 50, 930)          // draw text.

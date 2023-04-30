@@ -70,8 +70,8 @@ func init() {
 				return
 			}
 			picDirNum := len(picDir)
-			usersRand := fcext.RandSenderPerDayN(ctx.Event.UserID, picDirNum)
-			picDirName := picDir[usersRand].Name()
+			usersRandPic := fcext.RandSenderPerDayN(ctx.Event.UserID, picDirNum)
+			picDirName := picDir[usersRandPic].Name()
 			reg := regexp.MustCompile(`[^.]+`)
 			list := reg.FindAllString(picDirName, -1)
 			var mutex sync.RWMutex // 添加读写锁以保证稳定性
@@ -88,10 +88,11 @@ func init() {
 			user := ctx.Event.UserID
 			userS := strconv.FormatInt(user, 10)
 			now := time.Now().Format("20060102")
-			randEveryone := fcext.RandSenderPerDayN(ctx.Event.UserID, 100)
+			// modify this possibility to 40-100, don't be to low.
+			randEveryone := fcext.RandSenderPerDayN(ctx.Event.UserID, 60)
 			var si = now + userS // 合成
 			if signTF[si] == 0 {
-				result[user] = randEveryone
+				result[user] = randEveryone + 40
 				// background
 				img, err := gg.LoadImage(engine.DataFolder() + "randpic" + "/" + list[0] + ".png")
 				if err != nil {
@@ -144,7 +145,7 @@ func init() {
 				mainContext.DrawString("User Info", 60, float64(mainContextHight-150)+10) // basic ui
 				mainContext.SetRGBA255(155, 121, 147, 255)
 				mainContext.DrawString(ctx.CardOrNickName(ctx.Event.UserID), 180, float64(mainContextHight-150)+50)
-				mainContext.DrawString(fmt.Sprintf("今日人品值: %d", randEveryone), 180, float64(mainContextHight-150)+100)
+				mainContext.DrawString(fmt.Sprintf("今日人品值: %d", randEveryone+40), 180, float64(mainContextHight-150)+100)
 				mainContext.Fill()
 				// AOSP time and date
 				mainContext.SetRGBA255(226, 184, 255, 255)

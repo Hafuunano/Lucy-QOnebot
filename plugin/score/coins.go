@@ -3,6 +3,7 @@ package score
 
 import (
 	"encoding/json"
+	"math"
 	"math/rand"
 	"os"
 	"strconv"
@@ -29,7 +30,7 @@ type partygame struct {
 var (
 	pgs          = make(pg, 256)
 	checkLimit   = rate.NewManager[int64](time.Minute*1, 5) // time setup
-	catchLimit   = rate.NewManager[int64](time.Hour*1, 9)   // time setup
+	catchLimit   = rate.NewManager[int64](time.Hour*1, 7)   // time setup
 	processLimit = rate.NewManager[int64](time.Hour*1, 5)   // time setup
 	payLimit     = rate.NewManager[int64](time.Hour*1, 10)  // time setup
 )
@@ -84,7 +85,7 @@ func init() {
 			message.Text("你抽到的是~ ", getName, "\n", "获得了积分 ", getCoinsInt, "\n", getDesc, "\n目前的柠檬片总数为：", addNewCoins))
 		mutex.Unlock()
 	})
-	// 一次最多骗 200 柠檬片,失败概率较大,失败会被反吞柠檬片
+	// 一次最多骗 500 柠檬片,失败概率较大,失败会被反吞柠檬片
 	engine.OnRegex(`^抢(\[CQ:at,qq=(\d+)\]\s?|(\d+))的柠檬片`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
 		if !catchLimit.Load(ctx.Event.UserID).Acquire() {
 			ctx.SendChain(message.Text("太贪心了哦~一小时后再来试试吧"))
@@ -108,7 +109,8 @@ func init() {
 		}
 		eventUserName := ctx.CardOrNickName(uid)
 		eventTargetName := ctx.CardOrNickName(TargetInt)
-		modifyCoins := rand.Intn(200)
+		modifyCoins := rand.Intn(500)
+
 		if rand.Intn(10)/8 != 0 { // 7成失败概率
 			_ = sdb.InsertUserCoins(siEventUser.UID, siEventUser.Coins-modifyCoins)
 			_ = sdb.InsertUserCoins(siTargetUser.UID, siTargetUser.Coins+modifyCoins)
@@ -131,10 +133,10 @@ func init() {
 			return
 		}
 		switch {
-		case modifyCoins <= 0:
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("貌似你是想倒贴别人来着嘛?"))
+		case modifyCoins <= 50:
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("貌似你是想倒贴别人来着嘛?可以试试多骗一点哦，既然都骗了那就多点吧x"))
 			return
-		case modifyCoins > 6000:
+		case modifyCoins > 2000:
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("不要太贪心了啦！太坏了 "))
 			return
 		}
@@ -151,8 +153,10 @@ func init() {
 		}
 		eventUserName := ctx.CardOrNickName(uid)
 		eventTargetName := ctx.CardOrNickName(TargetInt)
-
-		if rand.Intn(12)/4 != 0 { // failed
+		// get random numbers.
+		getTargetChanceToDealRaw := math.Round(float64(modifyCoins / 20)) // the total is 0-100，however I don't allow to get 0 chance. lmao. max is 100 if modify is 2000
+		getTargetChanceToDealPossibilityKey := rand.Intn(101)
+		if getTargetChanceToDealPossibilityKey < int(getTargetChanceToDealRaw) { // failed
 			doubledModifyNum := modifyCoins * 2
 			if doubledModifyNum > siEventUser.Coins {
 				doubledModifyNum = siEventUser.Coins
@@ -161,7 +165,6 @@ func init() {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("试着去骗走 ", eventTargetName, " 的柠檬片时,被 ", eventTargetName, " 发现了.\n本该失去 ", modifyCoins*2, "\n但因为 ", eventUserName, " 的柠檬片过少，所以 ", eventUserName, " 失去了 ", doubledModifyNum, " 个柠檬片\n\n同时 ", eventTargetName, " 得到了 ", doubledModifyNum, " 个柠檬片"))
 				return
 			}
-
 			_ = sdb.InsertUserCoins(siEventUser.UID, siEventUser.Coins-doubledModifyNum)
 			_ = sdb.InsertUserCoins(siTargetUser.UID, siTargetUser.Coins+doubledModifyNum)
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("试着去骗走 ", eventTargetName, " 的柠檬片时,被 ", eventTargetName, " 发现了.\n所以 ", eventUserName, " 失去了 ", doubledModifyNum, " 个柠檬片\n\n同时 ", eventTargetName, " 得到了 ", doubledModifyNum, " 个柠檬片"))
@@ -201,7 +204,7 @@ func init() {
 		_ = sdb.InsertUserCoins(TargetInt, unModifyCoins+modifyCoins)
 		ctx.Send("Handle Coins Successfully.\n")
 	})
-	engine.OnRegex(`^扔掉(\d+)个柠檬片$`).SetBlock(true).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^丢弃(\d+)个柠檬片$`).SetBlock(true).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
 		modifyCoins, _ := strconv.Atoi(ctx.State["regex_matched"].([]string)[1])
 		handleUser := sdb.GetSignInByUID(ctx.Event.UserID)
 		currentUserCoins := handleUser.Coins
@@ -227,7 +230,7 @@ func init() {
 				uid := ctx.Event.UserID
 				si := sdb.GetSignInByUID(uid) // 获取用户目前状况信息
 				userCurrentCoins := si.Coins  // loading coins status
-				if userCurrentCoins < 200 {
+				if userCurrentCoins < 400 {
 					ctx.SendChain(message.Reply(uid), message.Text("本次参与的柠檬片不够哦~请多多打卡w，一次兑换最少需要200"))
 					return
 				}
@@ -239,7 +242,7 @@ func init() {
 				picURL := gjson.Get(string(img), "data.0.urls.original").String()
 				messageID := ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(picURL)).ID()
 				if messageID != 0 { // 保证成功后才扣除
-					_ = sdb.InsertUserCoins(si.UID, userCurrentCoins-200)
+					_ = sdb.InsertUserCoins(si.UID, userCurrentCoins-400)
 				}
 			} else {
 				ctx.SendChain(message.Text("本群并没有开启nsfw哦，不允许使用此功能哦x"))
