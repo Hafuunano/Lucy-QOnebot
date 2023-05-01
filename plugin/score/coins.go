@@ -285,6 +285,10 @@ func init() {
 			return
 		}
 	})
+
+	engine.OnFullMatch("CheckTicket").SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		ctx.SendChain(message.Text(RobOrCatchLimitManager(ctx)))
+	})
 }
 
 func RobOrCatchLimitManager(ctx *zero.Ctx) (ticket int) {
