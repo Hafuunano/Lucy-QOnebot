@@ -288,7 +288,7 @@ func init() {
 
 func RobOrCatchLimitManager(ctx *zero.Ctx) (ticket int) {
 	// use limitManager to reduce the chance of true.
-	RobTimeManager := rate.NewManager[int64](time.Minute*70, 162)
+	RobTimeManager := rate.NewManager[int64](time.Minute*70, 163)
 	// 33 * 4 + 6 * 5 + null key (4 time tired.)
 	/*
 		first time to get full chance to win.
@@ -303,6 +303,6 @@ func RobOrCatchLimitManager(ctx *zero.Ctx) (ticket int) {
 	case RobTimeManager.Load(ctx.Event.UserID).Acquire():
 		return 3
 	default:
-		return 1
+		return 3
 	}
 }
