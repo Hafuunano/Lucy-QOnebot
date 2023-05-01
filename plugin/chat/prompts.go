@@ -22,7 +22,7 @@ func init() {
 		panic(err)
 	}
 	_ = json.Unmarshal(getPromptsJson, &chatGPTPrompts)
-	engine.OnRegex(`!test\schatgpt\sact\s(.*)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`!\schatgpt\sact\s(.*)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		getAct := ctx.State["regex_matched"].([]string)[1]
 		getLength := len(chatGPTPrompts)
 		for i := 0; i < getLength; i++ {

@@ -175,10 +175,9 @@ func (sdb *scoredb) UpdateUserTime(counttime int, times string) (err error) {
 	}
 	if err = db.Debug().Model(&globaltable{}).First(&si, "times = ?", times).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			db.Debug().Model(&globaltable{}).Create(&si) // judge if the table remain.
+			db.Debug().Model(&globaltable{}).Create(&si)
 		}
 	} else {
-		// do your favor
 		err = db.Debug().Model(&globaltable{}).Where("times = ?", times).Update(map[string]interface{}{
 			"counttime": counttime,
 		}).Error

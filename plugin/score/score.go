@@ -4,6 +4,7 @@ package score
 import (
 	"math/rand"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
@@ -17,10 +18,6 @@ import (
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	zero "github.com/wdvxdr1123/ZeroBot"
-)
-
-const (
-	signinMax = 1
 )
 
 var (
@@ -41,12 +38,13 @@ func init() {
 			if !rateLimit.Load(ctx.Event.GroupID).Acquire() {
 				return
 			}
+			var mutex sync.RWMutex // 添加读写锁以保证稳定性
+			mutex.Lock()
 			uid := ctx.Event.UserID
 			today := time.Now().Format("20060102")
 			si := sdb.GetSignInByUID(uid)
 			drawedFile := cachePath + strconv.FormatInt(uid, 10) + today + "signin.png"
-			siUpdateTimeStr := si.UpdatedAt.Format("20060102")
-			if si.Count >= signinMax && siUpdateTimeStr == today {
+			if si.UpdatedAt.Format("20060102") == today {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("酱~ 你今天已经签到过了哦w"))
 				if file.IsExist(drawedFile) {
 					ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
@@ -62,6 +60,7 @@ func init() {
 			CurrentCountTable := sdb.GetCurrentCount(today)
 			handledTodayNum := CurrentCountTable.Counttime + 1
 			_ = sdb.UpdateUserTime(handledTodayNum, today) // 总体计算 隔日清零
+
 			if time.Now().Hour() > 6 && time.Now().Hour() < 19 {
 				// package for test draw.
 				getTimeReplyMsg := getHourWord(time.Now()) // get time and msg
@@ -143,5 +142,6 @@ func init() {
 				_ = nightGround.SavePNG(drawedFile)
 				ctx.SendChain(message.At(uid), message.Text("[HiMoYoBot]签到成功\n"), message.Image("file:///"+file.BOTPATH+"/"+drawedFile))
 			}
+			mutex.Unlock()
 		})
 }
