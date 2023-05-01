@@ -28,11 +28,12 @@ type partygame struct {
 }
 
 var (
-	pgs          = make(pg, 256)
-	checkLimit   = rate.NewManager[int64](time.Minute*1, 5) // time setup
-	catchLimit   = rate.NewManager[int64](time.Hour*1, 9)   // time setup
-	processLimit = rate.NewManager[int64](time.Hour*1, 5)   // time setup
-	payLimit     = rate.NewManager[int64](time.Hour*1, 10)  // time setup
+	pgs            = make(pg, 256)
+	RobTimeManager = rate.NewManager[int64](time.Minute*70, 163)
+	checkLimit     = rate.NewManager[int64](time.Minute*1, 5) // time setup
+	catchLimit     = rate.NewManager[int64](time.Hour*1, 9)   // time setup
+	processLimit   = rate.NewManager[int64](time.Hour*1, 5)   // time setup
+	payLimit       = rate.NewManager[int64](time.Hour*1, 10)  // time setup
 )
 
 type pg = map[string]partygame
@@ -288,21 +289,23 @@ func init() {
 
 func RobOrCatchLimitManager(ctx *zero.Ctx) (ticket int) {
 	// use limitManager to reduce the chance of true.
-	RobTimeManager := rate.NewManager[int64](time.Minute*70, 163)
 	// 33 * 4 + 6 * 5 + null key (4 time tired.)
 	/*
 		first time to get full chance to win.
 		second time reduce it to 50 % chance to win
 		last time is null , you are tired and reduce it to 33% chance to win.
 	*/
+	setDefaultNum := 1
 	switch {
 	case RobTimeManager.Load(ctx.Event.UserID).AcquireN(33):
-		return 1
+		return setDefaultNum
 	case RobTimeManager.Load(ctx.Event.UserID).AcquireN(6):
-		return 2
+		setDefaultNum = 2
+		return setDefaultNum
 	case RobTimeManager.Load(ctx.Event.UserID).Acquire():
-		return 3
+		setDefaultNum = 3
+		return setDefaultNum
 	default:
-		return 3
+		return setDefaultNum
 	}
 }
