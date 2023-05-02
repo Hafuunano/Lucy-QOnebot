@@ -16,7 +16,6 @@ import (
 )
 
 const (
-	proxyURL           = "https://openai.impart.icu/"
 	modelGPT3Dot5Turbo = "gpt-3.5-turbo"
 )
 
@@ -75,6 +74,7 @@ func completions(messages []chatMessage, apiKey string) (*chatGPTResponseBody, e
 	if err != nil {
 		return nil, err
 	}
+	proxyURL := os.Getenv("gptweb")
 	req, err := http.NewRequest(http.MethodPost, proxyURL+"chat/completions", bytes.NewReader(body))
 	if err != nil {
 		return nil, err

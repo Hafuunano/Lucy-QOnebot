@@ -46,7 +46,8 @@ var (
 // 3. beautify b30.
 
 type user struct {
-	Status  int `json:"status"`
+	Status  int    `json:"status"`
+	Message string `json:"message"`
 	Content struct {
 		AccountInfo struct {
 			Code                   string `json:"code"`
@@ -102,7 +103,8 @@ type user struct {
 }
 
 type arcaea struct {
-	Status  int `json:"status"`
+	Status  int    `json:"status"`
+	Message string `json:"message"`
 	Content struct {
 		Best30Avg   float64 `json:"best30_avg"`
 		Recent10Avg float64 `json:"recent10_avg"`

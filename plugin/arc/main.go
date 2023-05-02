@@ -39,7 +39,7 @@ func init() {
 		_ = json.Unmarshal(playerdataByte, &r)
 		checkStatus := r.Status
 		if checkStatus != 0 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常，可能是接口出现问题"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常，可能是接口出现问题\n", r.Status, " ", r.Message))
 			return
 		}
 		// get player info
