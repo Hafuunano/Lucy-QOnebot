@@ -226,12 +226,8 @@ func init() {
 			return
 		}
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("转账成功了哦~\n", ctx.CardOrNickName(siEventUser.UID), " 变化为 ", siEventUser.Coins, " - ", modifyCoins, "= ", siEventUser.Coins-modifyCoins, "\n", ctx.CardOrNickName(siTargetUser.UID), " 变化为: ", siTargetUser.Coins, " + ", modifyCoins, "= ", siTargetUser.Coins+modifyCoins))
-		err := sdb.InsertUserCoins(siEventUser.UID, siEventUser.Coins-modifyCoins)
-		err = sdb.InsertUserCoins(siTargetUser.UID, siTargetUser.Coins+modifyCoins)
-		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR:", err))
-			return
-		}
+		_ = sdb.InsertUserCoins(siEventUser.UID, siEventUser.Coins-modifyCoins)
+		_ = sdb.InsertUserCoins(siTargetUser.UID, siTargetUser.Coins+modifyCoins)
 	})
 	engine.OnRegex(`^HandleCoins\s?\[CQ:at,qq=(\d+)\]\s(\d+)$`, zero.SuperUserPermission).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		TargetInt, _ := strconv.ParseInt(ctx.State["regex_matched"].([]string)[1], 10, 64)
@@ -285,10 +281,6 @@ func init() {
 			return
 		}
 	})
-
-	engine.OnFullMatch("CheckTicket").SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		ctx.SendChain(message.Text(RobOrCatchLimitManager(ctx)))
-	})
 }
 
 func RobOrCatchLimitManager(ctx *zero.Ctx) (ticket int) {
@@ -299,17 +291,14 @@ func RobOrCatchLimitManager(ctx *zero.Ctx) (ticket int) {
 		second time reduce it to 50 % chance to win
 		last time is null , you are tired and reduce it to 33% chance to win.
 	*/
-	setDefaultNum := 1
 	switch {
 	case RobTimeManager.Load(ctx.Event.UserID).AcquireN(33):
-		return setDefaultNum
+		return 1
 	case RobTimeManager.Load(ctx.Event.UserID).AcquireN(6):
-		setDefaultNum = 2
-		return setDefaultNum
+		return 2
 	case RobTimeManager.Load(ctx.Event.UserID).Acquire():
-		setDefaultNum = 3
-		return setDefaultNum
+		return 3
 	default:
-		return setDefaultNum
+		return 3
 	}
 }
