@@ -18,6 +18,8 @@ github.com/FloatTech/zbputils v1.6.2-0.20230207084008-8c14cb9fcacb h1:kykXPttDCb
 github.com/FloatTech/zbputils v1.6.2-0.20230207084008-8c14cb9fcacb/go.mod h1:Ekq++wMLm0jy9YcdCvQ7JbpypyIL1GGCvLIxPbEwqlE=
 github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230403123758-2b7aba395359 h1:MwTh5qrVnUH1AMenPSRW9AQ11P4JRspQTI3/P0IFQj8=
 github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230403123758-2b7aba395359/go.mod h1:0zfIgZzZ5QnD2a+iHN/qbRlHHAueSHxriekkLokR3Fo=
+github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230504141427-e44e13d6a895 h1:TvuDTrKJ385T0zsitSZL6g1jZ7uRbqdK/KzQZgOvVJw=
+github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230504141427-e44e13d6a895/go.mod h1:YAZFt7N5J2CV9RqpMqjmbKBbOwmK6Dm0OA9V7/hZ97E=
 github.com/MoYoez/img_toolbox v0.0.0-20230403161424-c9a9cb5b3880 h1:MwCGFzrgCnTimPY1znUEFY+xwdYXCygZm3eWECQ4oLA=
 github.com/MoYoez/img_toolbox v0.0.0-20230403161424-c9a9cb5b3880/go.mod h1:7LJKaGNBDii5p7Ez60ywQt84Mf/CyYysC5ehzP8sFWU=
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
@@ -113,6 +115,8 @@ github.com/tidwall/match v1.1.1 h1:+Ho715JplO36QYgwN9PGYNhgZvoUSc9X2c80KVTi+GA=
 github.com/tidwall/match v1.1.1/go.mod h1:eRSPERbgtNPcGhD8UCthc6PmLEQXEWd3PRB5JTxsfmM=
 github.com/tidwall/pretty v1.2.0 h1:RWIZEg2iJ8/g6fDDYzMpobmaoGh5OLl4AXtGUGPcqCs=
 github.com/tidwall/pretty v1.2.0/go.mod h1:ITEVvHYasfjBbM0u2Pg8T2nJnzm8xPwvNhhsoaGGjNU=
+github.com/tidwall/pretty v1.2.1 h1:qjsOFOWWQl+N3RsoF5/ssm1pHmJJwhjlSbZ51I6wMl4=
+github.com/tidwall/pretty v1.2.1/go.mod h1:ITEVvHYasfjBbM0u2Pg8T2nJnzm8xPwvNhhsoaGGjNU=
 github.com/tklauser/go-sysconf v0.3.11 h1:89WgdJhk5SNwJfu+GKyYveZ4IaJ7xAkecBo+KdJV0CM=
 github.com/tklauser/go-sysconf v0.3.11/go.mod h1:GqXfhXY3kiPa0nAXPDIQIWzJbMCB7AmcWpGR8lSZfqI=
 github.com/tklauser/numcpus v0.6.0 h1:kebhY2Qt+3U6RNK7UqpYNA+tJ23IBEGKkB7JQBfDYms=

@@ -31,30 +31,26 @@ func init() {
 	// arc b30 is still in test(
 	engine.OnRegex(`^[！!]arc\s*(\d+)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		id := ctx.State["regex_matched"].([]string)[1]
-		playerdataByte, err := aua.Best30(os.Getenv("aualink"), os.Getenv("auakey"), id)
-		if err != nil {
-			ctx.SendChain(message.Text("cannot get user data."))
+		sessionKey, sessionKeyInfo := aua.GetSessionQuery(os.Getenv("aualink"), os.Getenv("auakey"), id)
+		playerdataByte, playerDataByteReturnMsg := aua.GetB30BySession(os.Getenv("aualink"), os.Getenv("auakey"), sessionKey)
+		if playerDataByteReturnMsg != "" {
+			ctx.SendChain(message.Text("SessionQuery: ", playerDataByteReturnMsg, "\nSession查询列队中，请过一段时间重新尝试呢～"))
 			return
 		}
 		_ = json.Unmarshal(playerdataByte, &r)
-		checkStatus := r.Status
-		if checkStatus != 0 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常，可能是接口出现问题\n", r.Status, " ", r.Message))
-			return
-		}
 		// get player info
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Ok, trying to render \""+r.Content.AccountInfo.Name+"\" data."))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Get b30 data ~ trying to render \""+r.Content.AccountInfo.Name+"\" data."))
 		mainBGDecoded, _, _ := image.Decode(bytes.NewReader(mainBG))
 		basicBG := DrawMainUserB30(mainBGDecoded, r)
 		tureResult := FinishedFullB30(basicBG, r)
 		var buf bytes.Buffer
-		err = jpeg.Encode(&buf, tureResult, nil)
+		err := jpeg.Encode(&buf, tureResult, nil)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
 			return
 		}
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("SessionKeyInfo: ", sessionKeyInfo), message.Image("base64://"+base64Str))
 	})
 
 	engine.OnRegex(`[！!]arc\sbind\s(.*)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
@@ -90,19 +86,13 @@ func init() {
 			ctx.SendChain(message.Text("cannot get user bind info."))
 			return
 		}
-		// get player info
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("好哦~已经拿到请求要求了，咱正在帮你作画哦w"))
-		playerdataByte, err := aua.Best30(os.Getenv("aualink"), os.Getenv("auakey"), id)
-		if err != nil {
-			ctx.SendChain(message.Text("cannot get user data."))
+		sessionKey, sessionKeyInfo := aua.GetSessionQuery(os.Getenv("aualink"), os.Getenv("auakey"), id)
+		playerdataByte, playerDataByteReturnMsg := aua.GetB30BySession(os.Getenv("aualink"), os.Getenv("auakey"), sessionKey)
+		if playerDataByteReturnMsg != "" {
+			ctx.SendChain(message.Text("SessionQuery: ", playerDataByteReturnMsg, "\nSession查询列队中，请过一段时间重新尝试呢～"))
 			return
 		}
 		_ = json.Unmarshal(playerdataByte, &r)
-		checkStatus := r.Status
-		if checkStatus != 0 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常，可能是接口出现问题"))
-			return
-		}
 		mainBGDecoded, _, _ := image.Decode(bytes.NewReader(mainBG))
 		basicBG := DrawMainUserB30(mainBGDecoded, r)
 		tureResult := FinishedFullB30(basicBG, r)
@@ -113,7 +103,7 @@ func init() {
 			return
 		}
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("SessionKeyInfo: ", sessionKeyInfo), message.Image("base64://"+base64Str))
 	})
 
 	engine.OnRegex(`[！!]arc\schart\s([^\]]+)\s+([^\]] +)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
