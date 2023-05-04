@@ -63,13 +63,13 @@ func init() {
 		}
 		dataBytes, err := aua.GetUserInfo(os.Getenv("aualink"), os.Getenv("auakey"), getBindInfo)
 		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误."))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误.", err))
 			return
 		}
 		_ = json.Unmarshal(dataBytes, &userinfo)
 		checkStatus := userinfo.Status
 		if checkStatus != 0 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常，可能是接口出现问题"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常，可能是接口出现问题: ERR: ", userinfo.Message))
 			return
 		}
 		err = FormatInfo(ctx.Event.UserID, userinfo.Content.AccountInfo.Code, userinfo.Content.AccountInfo.Name).BindUserArcaeaInfo(arcAcc)
