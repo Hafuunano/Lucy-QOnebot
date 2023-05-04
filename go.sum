@@ -20,6 +20,8 @@ github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230403123758-2b7aba395359 h1:MwTh5qrVnU
 github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230403123758-2b7aba395359/go.mod h1:0zfIgZzZ5QnD2a+iHN/qbRlHHAueSHxriekkLokR3Fo=
 github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230504141427-e44e13d6a895 h1:TvuDTrKJ385T0zsitSZL6g1jZ7uRbqdK/KzQZgOvVJw=
 github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230504141427-e44e13d6a895/go.mod h1:YAZFt7N5J2CV9RqpMqjmbKBbOwmK6Dm0OA9V7/hZ97E=
+github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230504144046-9cf9e3de73f3 h1:Z6zrnHV8jk3zlVhoLHjaE/TOKyFL36WvrTm/5RkXug0=
+github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230504144046-9cf9e3de73f3/go.mod h1:YAZFt7N5J2CV9RqpMqjmbKBbOwmK6Dm0OA9V7/hZ97E=
 github.com/MoYoez/img_toolbox v0.0.0-20230403161424-c9a9cb5b3880 h1:MwCGFzrgCnTimPY1znUEFY+xwdYXCygZm3eWECQ4oLA=
 github.com/MoYoez/img_toolbox v0.0.0-20230403161424-c9a9cb5b3880/go.mod h1:7LJKaGNBDii5p7Ez60ywQt84Mf/CyYysC5ehzP8sFWU=
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
