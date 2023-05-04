@@ -14,7 +14,7 @@ Lucy's Ver.1.61 Designed with Zerobot-Plugin Project.
 
 **Copyright © 2021-2023 FloatTech. All Rights Reserved.**
 
-## 关于 Arcaea B30 设计 (Deprecated.)
+## 关于 Arcaea B30 设计
 
 本项目其中包含的 Arcaea 插件 数据来源于 ArcaeaUnlimitedAPI(AUA)
 
