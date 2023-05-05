@@ -3,6 +3,7 @@ package mai
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"strconv"
 )
 
@@ -113,7 +114,8 @@ func HandleMaiDataByUsingText(handlejson []byte) (text string) {
 		if len(setSongLength) >= 30 {
 			setSongLength = setSongLength[:29] + "..."
 		}
-		mainText += fmt.Sprintf("- %v. %v (%v %v - %v) (%v Achievement %s ) (%v) | DXRating: %d \n", numList, setSongLength, mai.Charts.Dx[i].LevelLabel, mai.Charts.Dx[i].Level, mai.Charts.Dx[i].Ds, mai.Charts.Dx[i].Achievements, mai.Charts.Dx[i].Rate, showFcs, mai.Charts.Dx[i].Ra)
+		DXRating := computeRa(mai.Charts.Dx[i].Ds, mai.Charts.Dx[i].Achievements)
+		mainText += fmt.Sprintf("- %v. %v (%v %v - %v) (%v Achievement %s ) (%v) | DXRating: %d \n", numList, setSongLength, mai.Charts.Dx[i].LevelLabel, mai.Charts.Dx[i].Level, mai.Charts.Dx[i].Ds, mai.Charts.Dx[i].Achievements, mai.Charts.Dx[i].Rate, showFcs, DXRating)
 	}
 	for i := 0; i < getSDLength; i++ {
 		numList = strconv.Itoa(geDXtLength + i + 1)
@@ -128,8 +130,42 @@ func HandleMaiDataByUsingText(handlejson []byte) (text string) {
 		if len(setSongLength) >= 25 {
 			setSongLength = setSongLength[:24] + "..."
 		}
-		mainText += fmt.Sprintf("- %v. %v (%v %v - %v) (%v Achievement %v ) (%v) | DXRating: %d \n", numList, setSongLength, mai.Charts.Sd[i].LevelLabel, mai.Charts.Sd[i].Level, mai.Charts.Sd[i].Ds, mai.Charts.Sd[i].Achievements, mai.Charts.Sd[i].Rate, showFcs, mai.Charts.Sd[i].Ra)
+		DXRating := computeRa(mai.Charts.Sd[i].Ds, mai.Charts.Sd[i].Achievements)
+		mainText += fmt.Sprintf("- %v. %v (%v %v - %v) (%v Achievement %v ) (%v) | DXRating: %d \n", numList, setSongLength, mai.Charts.Sd[i].LevelLabel, mai.Charts.Sd[i].Level, mai.Charts.Sd[i].Ds, mai.Charts.Sd[i].Achievements, mai.Charts.Sd[i].Rate, showFcs, DXRating)
 	}
 	text = formatHeader + mainText + formatEnd
 	return text
+}
+
+func computeRa(ds, achievement float64) int {
+	baseRa := 22.4
+	if achievement < 50 {
+		baseRa = 7.0
+	} else if achievement < 60 {
+		baseRa = 8.0
+	} else if achievement < 70 {
+		baseRa = 9.6
+	} else if achievement < 75 {
+		baseRa = 11.2
+	} else if achievement < 80 {
+		baseRa = 12.0
+	} else if achievement < 90 {
+		baseRa = 13.6
+	} else if achievement < 94 {
+		baseRa = 15.2
+	} else if achievement < 97 {
+		baseRa = 16.8
+	} else if achievement < 98 {
+		baseRa = 20.0
+	} else if achievement < 99 {
+		baseRa = 20.3
+	} else if achievement < 99.5 {
+		baseRa = 20.8
+	} else if achievement < 100 {
+		baseRa = 21.1
+	} else if achievement < 100.5 {
+		baseRa = 21.6
+	}
+
+	return int(math.Floor(ds * (math.Min(100.5, achievement) / 100) * baseRa))
 }
