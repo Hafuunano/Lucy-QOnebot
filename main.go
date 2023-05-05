@@ -16,6 +16,7 @@ import (
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/tools"   // 工具
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/atri" // atri
+	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/mai"  // mai
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/action" // action For Lucy触发
 
