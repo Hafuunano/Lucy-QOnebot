@@ -103,7 +103,12 @@ func init() {
 			return
 		}
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("SessionKeyInfo: ", sessionKeyInfo), message.Image("base64://"+base64Str))
+		var SessionKeyInfoFull string
+		if sessionKeyInfo != "" {
+			SessionKeyInfoFull = "SessionKeyInfo: " + sessionKeyInfo
+		}
+
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(SessionKeyInfoFull), message.Image("base64://"+base64Str))
 	})
 
 	engine.OnRegex(`[！!]arc\schart\s([^\]]+)\s+([^\]] +)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
