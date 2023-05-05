@@ -41,7 +41,7 @@ type randsong struct {
 			JacketDesigner string  `json:"jacket_designer"`
 			JacketOverride bool    `json:"jacket_override"`
 			AudioOverride  bool    `json:"audio_override"`
-		} `json:"songinfo"`
+		} `json:"song_info"`
 	} `json:"content"`
 }
 

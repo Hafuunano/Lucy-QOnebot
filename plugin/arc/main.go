@@ -142,7 +142,36 @@ func init() {
 		_ = json.Unmarshal(playerdataByte, &userinfo)
 		checkStatus := userinfo.Status
 		if checkStatus != 0 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常，可能是接口出现问题"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常，可能是接口出现问题\n", userinfo.Message))
+			return
+		}
+		replyImage := RenderUserRecentLog(userinfo)
+		var buf bytes.Buffer
+		err = jpeg.Encode(&buf, replyImage, nil)
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			return
+		}
+		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
+	})
+	engine.OnRegex(`[! !]arc\sbest\s([^\]]+)\s+([^\]] +)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+		songName := ctx.State["regex_matched"].([]string)[1]
+		songDiff := ctx.State["regex_matched"].([]string)[2]
+		id, err := GetUserArcaeaInfo(arcAcc, ctx)
+		if err != nil || id == "" {
+			ctx.SendChain(message.Text("cannot get user bind info."))
+			return
+		}
+		getData, err := aua.GetUserBest(os.Getenv("aualink"), os.Getenv("auakey"), id, songName, songDiff)
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR:", err))
+			return
+		}
+		_ = json.Unmarshal(getData, &userinfo)
+		checkStatus := userinfo.Status
+		if checkStatus != 0 {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常，可能是接口出现问题\n", userinfo.Message))
 			return
 		}
 		replyImage := RenderUserRecentLog(userinfo)

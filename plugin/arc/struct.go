@@ -98,7 +98,7 @@ type user struct {
 			JacketDesigner string  `json:"jacket_designer"`
 			JacketOverride bool    `json:"jacket_override"`
 			AudioOverride  bool    `json:"audio_override"`
-		} `json:"songinfo"`
+		} `json:"song_info"`
 	} `json:"content"`
 }
 
@@ -172,7 +172,7 @@ type arcaea struct {
 			JacketDesigner string  `json:"jacket_designer"`
 			JacketOverride bool    `json:"jacket_override"`
 			AudioOverride  bool    `json:"audio_override"`
-		} `json:"best30_songinfo"`
+		} `json:"best30_song_info"`
 		Best30OverflowSonginfo []struct {
 			NameEn         string  `json:"name_en"`
 			NameJp         string  `json:"name_jp"`
@@ -195,7 +195,7 @@ type arcaea struct {
 			JacketDesigner string  `json:"jacket_designer"`
 			JacketOverride bool    `json:"jacket_override"`
 			AudioOverride  bool    `json:"audio_override"`
-		} `json:"best30_overflow_songinfo"`
+		} `json:"best30_overflow_song_info"`
 	} `json:"content"`
 }
 
