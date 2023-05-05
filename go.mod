@@ -11,7 +11,7 @@ require (
 	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b
 	github.com/FloatTech/zbpctrl v1.5.3-0.20230130095145-714ad318cd52
 	github.com/FloatTech/zbputils v1.6.2-0.20230207084008-8c14cb9fcacb
-	github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230504144046-9cf9e3de73f3
+	github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230505085552-e82b83857896
 	github.com/MoYoez/img_toolbox v0.0.0-20230403161424-c9a9cb5b3880
 	github.com/fumiama/cron v1.3.0
 	github.com/fumiama/gotracemoe v0.0.3
