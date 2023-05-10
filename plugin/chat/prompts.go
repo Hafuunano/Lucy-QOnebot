@@ -24,7 +24,7 @@ func init() {
 	}
 	_ = json.Unmarshal(getPromptsJson, &chatGPTPrompts)
 	engine.OnRegex(`!chatgpt\sact\s(.*)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
-		if ChatGPTPromptHandlerLimitedTimeManager.Load(ctx.Event.GroupID).Acquire() {
+		if !ChatGPTPromptHandlerLimitedTimeManager.Load(ctx.Event.GroupID).Acquire() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Too quick!慢一点再请求哦！"))
 			return
 		}

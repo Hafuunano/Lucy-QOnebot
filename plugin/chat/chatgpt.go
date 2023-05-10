@@ -104,7 +104,7 @@ func init() {
 	// easy and work well with chatgpt? key handler.
 	// trigger for chatgpt.
 	engine.OnRegex(`^/chat\s*(.*)$`, zero.OnlyToMe).SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		if ChatGPTPromptHandlerLimitedTimeManager.Load(ctx.Event.GroupID).Acquire() {
+		if !ChatGPTPromptHandlerLimitedTimeManager.Load(ctx.Event.GroupID).Acquire() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Too quick!慢一点再请求哦！"))
 			return
 		}
