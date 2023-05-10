@@ -6,6 +6,7 @@ import (
 	"github.com/FloatTech/zbputils/ctxext"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
+	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 	"os"
 	"strings"
 )
@@ -23,6 +24,10 @@ func init() {
 	}
 	_ = json.Unmarshal(getPromptsJson, &chatGPTPrompts)
 	engine.OnRegex(`!chatgpt\sact\s(.*)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+		if ChatGPTPromptHandlerLimitedTimeManager.Load(ctx.Event.GroupID).Acquire() {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Too quick!慢一点再请求哦！"))
+			return
+		}
 		getAct := ctx.State["regex_matched"].([]string)[1]
 		getLength := len(chatGPTPrompts)
 		for i := 0; i < getLength; i++ {
@@ -46,6 +51,7 @@ func init() {
 			Role:    "user",
 			Content: prompts,
 		})
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("msg received, handling..."))
 		resp, err := completions(messages, os.Getenv("gptkey"))
 		if err != nil {
 			ctx.SendChain(message.Text("Some errors occurred when requesting :( : ", err))
@@ -55,6 +61,7 @@ func init() {
 		reply.Content = strings.TrimSpace(reply.Content)
 		messages = append(messages, reply)
 		cache.Set(key, messages)
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经使用预设 ", getAct, " ~返回内容如下:\n", reply.Content))
+		base64Format := HandleTextTobase54UsingWryh("已经使用预设 "+getAct+" ~返回内容如下:\n"+reply.Content, ctx)
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+helper.BytesToString(base64Format)))
 	})
 }

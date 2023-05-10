@@ -147,7 +147,7 @@ func init() {
 		_ = json.Unmarshal(playerdataByte, &userinfo)
 		checkStatus := userinfo.Status
 		if checkStatus != 0 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常，可能是接口出现问题\n", userinfo.Message))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: \n", userinfo.Message))
 			return
 		}
 		replyImage := RenderUserRecentLog(userinfo)
@@ -176,7 +176,7 @@ func init() {
 		_ = json.Unmarshal(getData, &userinfo)
 		checkStatus := userinfo.Status
 		if checkStatus != 0 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常，可能是接口出现问题\n", userinfo.Message))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: \n", userinfo.Message))
 			return
 		}
 		replyImage := RenderUserRecentLog(userinfo)

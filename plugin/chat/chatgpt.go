@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/FloatTech/zbputils/img/text"
+	"github.com/wdvxdr1123/ZeroBot/extension/rate"
+	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 	"net/http"
 	"os"
 	"strings"
@@ -25,6 +28,8 @@ type sessionKey struct {
 }
 
 var cache = ttl.NewCache[sessionKey, []chatMessage](time.Minute * 15)
+
+var ChatGPTPromptHandlerLimitedTimeManager = rate.NewManager[int64](time.Minute*2, 3)
 
 // chatGPTResponseBody 响应体
 type chatGPTResponseBody struct {
@@ -97,8 +102,12 @@ func completions(messages []chatMessage, apiKey string) (*chatGPTResponseBody, e
 
 func init() {
 	// easy and work well with chatgpt? key handler.
-	// trigger for chatgpt
+	// trigger for chatgpt.
 	engine.OnRegex(`^/chat\s*(.*)$`, zero.OnlyToMe).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		if ChatGPTPromptHandlerLimitedTimeManager.Load(ctx.Event.GroupID).Acquire() {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Too quick!慢一点再请求哦！"))
+			return
+		}
 		args := ctx.State["regex_matched"].([]string)[1]
 		key := sessionKey{
 			group: ctx.Event.GroupID,
@@ -114,6 +123,7 @@ func init() {
 			Role:    "user",
 			Content: args,
 		})
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("msg received, handling..."))
 		resp, err := completions(messages, os.Getenv("gptkey"))
 		if err != nil {
 			ctx.SendChain(message.Text("Some errors occurred when requesting :( : ", err))
@@ -123,6 +133,16 @@ func init() {
 		reply.Content = strings.TrimSpace(reply.Content)
 		messages = append(messages, reply)
 		cache.Set(key, messages)
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(reply.Content))
+		base64Format := HandleTextTobase54UsingWryh(reply.Content, ctx)
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+helper.BytesToString(base64Format)))
 	})
+}
+
+func HandleTextTobase54UsingWryh(txt string, ctx *zero.Ctx) (base64Raw []byte) {
+	base64Raw, err := text.RenderToBase64(txt, text.FontPath+"wryh.ttf", 1280, 45)
+	if err != nil {
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Handle text err.", err))
+		return nil
+	}
+	return base64Raw
 }
