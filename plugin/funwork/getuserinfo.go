@@ -19,6 +19,10 @@ func init() {
 		temp := list.String()
 		id := gjson.Get(temp, "current_talkative.user_id")
 		name := ctx.CardOrNickName(id.Int())
+		if name == "" {
+			ctx.SendChain(message.Text("今日没有龙王～"))
+			return
+		}
 		ctx.SendChain(message.Text("今日的龙王是~", name, "哦"))
 	})
 	// https://github.com/Kittengarten/KittenCore 抄的

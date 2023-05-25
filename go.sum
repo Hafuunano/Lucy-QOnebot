@@ -18,8 +18,6 @@ github.com/FloatTech/zbputils v1.6.2-0.20230207084008-8c14cb9fcacb h1:kykXPttDCb
 github.com/FloatTech/zbputils v1.6.2-0.20230207084008-8c14cb9fcacb/go.mod h1:Ekq++wMLm0jy9YcdCvQ7JbpypyIL1GGCvLIxPbEwqlE=
 github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230505093055-e0b9baf347a2 h1:Z/neeXfYnUB4xx8n69JWU27PstKM8epxA9PoiBY8fjU=
 github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230505093055-e0b9baf347a2/go.mod h1:YAZFt7N5J2CV9RqpMqjmbKBbOwmK6Dm0OA9V7/hZ97E=
-github.com/MoYoez/PhigrosLibrary-thriftCilentGo v0.0.0-20230511145424-6c27efaad474 h1:xlrd5tH+c0bHV+ISo0Jasc2jpXtU3xCfzy4F4dZus3Y=
-github.com/MoYoez/PhigrosLibrary-thriftCilentGo v0.0.0-20230511145424-6c27efaad474/go.mod h1:xEOi/kasAMtGgAFGiqnARX+tEYT+MslkKjcPLx9ZrZM=
 github.com/MoYoez/img_toolbox v0.0.0-20230403161424-c9a9cb5b3880 h1:MwCGFzrgCnTimPY1znUEFY+xwdYXCygZm3eWECQ4oLA=
 github.com/MoYoez/img_toolbox v0.0.0-20230403161424-c9a9cb5b3880/go.mod h1:7LJKaGNBDii5p7Ez60ywQt84Mf/CyYysC5ehzP8sFWU=
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
