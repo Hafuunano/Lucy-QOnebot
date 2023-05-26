@@ -13,7 +13,6 @@ require (
 	github.com/FloatTech/zbputils v1.6.2-0.20230207084008-8c14cb9fcacb
 	github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230505093055-e0b9baf347a2
 	github.com/MoYoez/img_toolbox v0.0.0-20230403161424-c9a9cb5b3880
-	github.com/apache/thrift v0.18.1
 	github.com/fumiama/cron v1.3.0
 	github.com/fumiama/gotracemoe v0.0.3
 	github.com/jinzhu/gorm v1.9.16
