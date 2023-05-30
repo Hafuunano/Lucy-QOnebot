@@ -6,13 +6,11 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
-	log "github.com/sirupsen/logrus"
 )
 
 func init() {
 	go func() {
 		sdb = initialize(engine.DataFolder() + "score.db")
-		log.Println("[score]加载score数据库")
 	}()
 }
 

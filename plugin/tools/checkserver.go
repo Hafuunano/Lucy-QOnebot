@@ -26,7 +26,7 @@ func init() { // 插件主体
 			),
 			)
 		})
-	engine.OnRegex(`给夹子留话.*?(.*)`, zero.OnlyToMe).SetBlock(true).
+	engine.OnRegex(`给夹子留话.*?(.*)`).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			su := zero.BotConfig.SuperUsers[0]
 			now := time.Unix(ctx.Event.Time, 0).Format("2006-01-02 15:04:05")
@@ -38,7 +38,7 @@ func init() { // 插件主体
 			rawmsg := ctx.State["regex_matched"].([]string)[1]
 			rawmsg = message.UnescapeCQCodeText(rawmsg)
 			msg := make(message.Message, 10)
-			msg = append(msg, message.CustomNode(botname, botid, "有人留言哦w\n在"+now))
+			msg = append(msg, message.CustomNode(botname, botid, "有人留言~ \n在"+now))
 			if gid != 0 {
 				groupname := ctx.GetGroupInfo(gid, true).Name
 				msg = append(msg, message.CustomNode(botname, botid, "来自群聊:["+groupname+"]("+strconv.FormatInt(gid, 10)+")\n来自群成员:["+username+"]("+strconv.FormatInt(uid, 10)+")\n以下是留言内容"))
