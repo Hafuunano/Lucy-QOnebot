@@ -44,7 +44,7 @@ func init() {
 			today := time.Now().Format("20060102")
 			si := sdb.GetSignInByUID(uid)
 			drawedFile := cachePath + strconv.FormatInt(uid, 10) + today + "signin.png"
-			if si.UpdatedAt.Format("20060102") == today {
+			if si.UpdatedAt.Format("20060102") == today && si.Count != 0 {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("酱~ 你今天已经签到过了哦w"))
 				if file.IsExist(drawedFile) {
 					ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))

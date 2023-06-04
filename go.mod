@@ -13,7 +13,6 @@ require (
 	github.com/FloatTech/zbputils v1.6.2-0.20230207084008-8c14cb9fcacb
 	github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230505093055-e0b9baf347a2
 	github.com/MoYoez/img_toolbox v0.0.0-20230403161424-c9a9cb5b3880
-	github.com/apache/thrift v0.18.1
 	github.com/fumiama/cron v1.3.0
 	github.com/fumiama/gotracemoe v0.0.3
 	github.com/jinzhu/gorm v1.9.16
@@ -28,7 +27,6 @@ require (
 
 require (
 	github.com/FloatTech/rendercard v0.0.9 // indirect
-	github.com/MoYoez/PhigrosLibrary-thriftCilentGo v0.0.0-20230511145424-6c27efaad474 // indirect
 	github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e // indirect
 	github.com/RomiChan/websocket v1.4.3-0.20220227141055-9b2c6168c9c5 // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect

@@ -18,8 +18,6 @@ github.com/FloatTech/zbputils v1.6.2-0.20230207084008-8c14cb9fcacb h1:kykXPttDCb
 github.com/FloatTech/zbputils v1.6.2-0.20230207084008-8c14cb9fcacb/go.mod h1:Ekq++wMLm0jy9YcdCvQ7JbpypyIL1GGCvLIxPbEwqlE=
 github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230505093055-e0b9baf347a2 h1:Z/neeXfYnUB4xx8n69JWU27PstKM8epxA9PoiBY8fjU=
 github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230505093055-e0b9baf347a2/go.mod h1:YAZFt7N5J2CV9RqpMqjmbKBbOwmK6Dm0OA9V7/hZ97E=
-github.com/MoYoez/PhigrosLibrary-thriftCilentGo v0.0.0-20230511145424-6c27efaad474 h1:xlrd5tH+c0bHV+ISo0Jasc2jpXtU3xCfzy4F4dZus3Y=
-github.com/MoYoez/PhigrosLibrary-thriftCilentGo v0.0.0-20230511145424-6c27efaad474/go.mod h1:xEOi/kasAMtGgAFGiqnARX+tEYT+MslkKjcPLx9ZrZM=
 github.com/MoYoez/img_toolbox v0.0.0-20230403161424-c9a9cb5b3880 h1:MwCGFzrgCnTimPY1znUEFY+xwdYXCygZm3eWECQ4oLA=
 github.com/MoYoez/img_toolbox v0.0.0-20230403161424-c9a9cb5b3880/go.mod h1:7LJKaGNBDii5p7Ez60ywQt84Mf/CyYysC5ehzP8sFWU=
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
@@ -28,8 +26,6 @@ github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e/go.mod h1:vD7Ra3Q9o
 github.com/RomiChan/websocket v1.4.3-0.20220227141055-9b2c6168c9c5 h1:bBmmB7he0iVN4m5mcehfheeRUEer/Avo4ujnxI3uCqs=
 github.com/RomiChan/websocket v1.4.3-0.20220227141055-9b2c6168c9c5/go.mod h1:0UcFaCkhp6vZw6l5Dpq0Dp673CoF9GdvA8lTfst0GiU=
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
-github.com/apache/thrift v0.18.1 h1:lNhK/1nqjbwbiOPDBPFJVKxgDEGSepKuTh6OLiXW8kg=
-github.com/apache/thrift v0.18.1/go.mod h1:rdQn/dCcDKEWjjylUeueum4vQEjG2v8v2PqriUnbr+I=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
