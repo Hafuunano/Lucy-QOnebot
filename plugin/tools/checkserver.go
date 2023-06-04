@@ -35,16 +35,12 @@ func init() { // 插件主体
 			username := ctx.CardOrNickName(uid)
 			botid := ctx.Event.SelfID
 			botname := zero.BotConfig.NickName[0]
-			rawmsg := ctx.State["regex_matched"].([]string)[1]
+			rawmsg := ctx.State["regex_matched"].([]string)[0]
 			rawmsg = message.UnescapeCQCodeText(rawmsg)
 			msg := make(message.Message, 10)
 			msg = append(msg, message.CustomNode(botname, botid, "有人留言~ \n在"+now))
-			if gid != 0 {
-				groupname := ctx.GetGroupInfo(gid, true).Name
-				msg = append(msg, message.CustomNode(botname, botid, "来自群聊:["+groupname+"]("+strconv.FormatInt(gid, 10)+")\n来自群成员:["+username+"]("+strconv.FormatInt(uid, 10)+")\n以下是留言内容"))
-			} else {
-				msg = append(msg, message.CustomNode(botname, botid, "来自私聊:["+username+"]("+strconv.FormatInt(uid, 10)+")\n以下是留言内容:"))
-			}
+			groupname := ctx.GetGroupInfo(gid, true).Name
+			msg = append(msg, message.CustomNode(botname, botid, "来自群聊:["+groupname+"]("+strconv.FormatInt(gid, 10)+")\n来自群成员:["+username+"]("+strconv.FormatInt(uid, 10)+")\n以下是留言内容"))
 			msg = append(msg, message.CustomNode(username, uid, rawmsg))
 			ctx.SendPrivateForwardMessage(su, msg)
 		})
