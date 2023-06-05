@@ -24,12 +24,11 @@ type OrderListStruct struct {
 	Time         string `db:"time"`
 }
 
-// GlobalDataStruct (Example: blacklist_1292581422 )
+// GlobalDataStruct (Example: grouplist_1292581422 )
 type GlobalDataStruct struct {
 	PairKey  string `db:"pairkey"`
 	UserID   int64  `db:"userid"`
 	TargetID int64  `db:"targetid"`
-	StatusID int64  `db:"statusid"`
 	time     string `db:"time"`
 }
 
@@ -64,8 +63,8 @@ func InitTable(table string, db *sql.Sqlite, structList interface{}) error {
 	return db.Create(table, &structList)
 }
 
-func FormatInsertUserGlobalMarryList(UserID int64, targetID int64, StatusID int64, PairKeyRaw string) *GlobalDataStruct {
-	return &GlobalDataStruct{PairKey: PairKeyRaw, UserID: UserID, TargetID: targetID, StatusID: StatusID, time: strconv.FormatInt(time.Now().Unix(), 10)}
+func FormatInsertUserGlobalMarryList(UserID int64, targetID int64, PairKeyRaw string) *GlobalDataStruct {
+	return &GlobalDataStruct{PairKey: PairKeyRaw, UserID: UserID, TargetID: targetID, time: strconv.FormatInt(time.Now().Unix(), 10)}
 }
 
 func FormatPairKey(PairKeyRaw string, statusID int64) *PairKeyStruct {
@@ -88,7 +87,7 @@ func FormatOrderList(orderPersonal int64, targetPersonal int64, time string) *Or
 func InsertUserGlobalMarryList(db *sql.Sqlite, groupID int64, UserID int64, targetID int64, StatusID int64, PairKeyRaw string) error {
 	marryLocker.Lock()
 	defer marryLocker.Unlock()
-	formatList := FormatInsertUserGlobalMarryList(UserID, targetID, StatusID, PairKeyRaw)
+	formatList := FormatInsertUserGlobalMarryList(UserID, targetID, PairKeyRaw)
 	err := db.Insert("grouplist_"+strconv.FormatInt(groupID, 10), formatList)
 	if err != nil {
 		_ = InitTable("grouplist_"+strconv.FormatInt(groupID, 10), db, &GlobalDataStruct{})
@@ -193,6 +192,19 @@ func DeleteBlackList(db *sql.Sqlite, userID int64, targetID int64) error {
 	return err
 }
 
+// CheckTheBlackListIsExistedToThisPerson check the person is blocked.
+func CheckTheBlackListIsExistedToThisPerson(db *sql.Sqlite, userID int64, targetID int64) bool {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	var blackListNeed BlackListStruct
+	err := db.Find("blacklist_"+strconv.FormatInt(userID, 10), &blackListNeed, "where blacklist is "+strconv.FormatInt(targetID, 10))
+	if err != nil {
+		// not init or didn't find.
+		return false
+	}
+	return true
+}
+
 // AddDisabledList add disabledList
 func AddDisabledList(db *sql.Sqlite, userID int64, groupID int64) error {
 	marryLocker.Lock()
@@ -223,6 +235,19 @@ func DeleteDisabledList(db *sql.Sqlite, userID int64, groupID int64) error {
 	return err
 }
 
+// CheckDisabledListIsExistedInThisGroup Check this group.
+func CheckDisabledListIsExistedInThisGroup(db *sql.Sqlite, userID int64, groupID int64) bool {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	var disabledListNeed DisabledListStruct
+	err := db.Find("disabled_"+strconv.FormatInt(userID, 10), &disabledListNeed, "where disabledlist is "+strconv.FormatInt(groupID, 10))
+	if err != nil {
+		// not init or didn't find.
+		return false
+	}
+	return true
+}
+
 // AddOrderToList add order.
 func AddOrderToList(db *sql.Sqlite, userID int64, targetID int64, time string, groupID int64) error {
 	marryLocker.Lock()
@@ -250,6 +275,21 @@ func RemoveOrderToList(db *sql.Sqlite, userID int64, groupID int64) error {
 	}
 	err = db.Del("orderlist_"+strconv.FormatInt(groupID, 10), "where order is "+strconv.FormatInt(userID, 10))
 	return err
+}
+
+// CheckThisOrderList getList
+func CheckThisOrderList(db *sql.Sqlite, userID int64, groupID int64) (OrderUser int64, TargetUSer int64, time string) {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	var addOrderListNeed OrderListStruct
+	err := db.Find("orderlist_"+strconv.FormatInt(groupID, 10), &addOrderListNeed, "where order is "+strconv.FormatInt(userID, 10))
+	if err != nil {
+		return -1, -1, ""
+	}
+	OrderUser = addOrderListNeed.OrderPerson
+	TargetUSer = addOrderListNeed.OrderPerson
+	time = addOrderListNeed.Time
+	return OrderUser, TargetUSer, time
 }
 
 /*

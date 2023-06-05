@@ -215,23 +215,3 @@ func GetLevel(count int) int {
 	}
 	return -1
 }
-
-func InsertUserCoinsForward(sdb *Scoredb, uid int64, coins int) (err error) { // 修改金币数值
-	db := (*gorm.DB)(sdb)
-	si := Signintable{
-		UID:   uid,
-		Coins: coins,
-	}
-	if err = db.Debug().Model(&Signintable{}).First(&si, "uid = ? ", uid).Error; err != nil {
-		// error handling...
-		if gorm.IsRecordNotFoundError(err) {
-			db.Debug().Model(&Signintable{}).Create(&si) // newUser not user
-		}
-	} else {
-		err = db.Debug().Model(&Signintable{}).Where("uid = ? ", uid).Update(
-			map[string]interface{}{
-				"coins": coins,
-			}).Error
-	}
-	return
-}

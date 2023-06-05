@@ -37,12 +37,38 @@ Fake - Invisibile person here.
 shows nothing, and Lucy will make it for joke. LMAO)
 */
 func init() {
-	engine.OnFullMatch("CoinsCheck").SetBlock(true).Handle(func(ctx *zero.Ctx) {
-
-	})
-
 	engine.OnFullMatch("娶群友").SetBlock(true).Handle(func(ctx *zero.Ctx) {
-
+		uid := ctx.Event.UserID
+		gid := ctx.Event.GroupID
+		getStatusCode := CheckTheUserIsTargetOrUser(marryList, ctx) // 判断这个user是否已经和别人在一起了
+		switch {
+		case getStatusCode == 0:
+			// case target mode (0)
+			return
+		case getStatusCode == 1:
+			// case user mode (1)
+			return
+		default:
+		}
+		// ok , go next.
+		ChooseAPerson := GetUserListAndChooseOne(ctx)
+		getStatusIfBannned := CheckTheUserIsInBlackListOrGroupList(uid, ChooseAPerson, gid)
+		if getStatusIfBannned {
+			// blocked.
+			return
+		}
+		// go next. do something colorful.
+		returnNumber := GetSomeRanDomChoiceProps(ctx)
+		switch {
+		case returnNumber == 1:
+		// normal mode.
+		case returnNumber == 2:
+		// reverse Target Mode
+		case returnNumber == 3:
+		// you became your own target
+		case returnNumber == 6:
+			// now no wife mode.
+		}
 	})
 
 }

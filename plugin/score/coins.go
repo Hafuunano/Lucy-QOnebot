@@ -145,7 +145,6 @@ func init() {
 		_ = coins.InsertUserCoins(sdb, siEventUser.UID, siEventUser.Coins+modifyCoins)
 		_ = coins.InsertUserCoins(sdb, siTargetUser.UID, siTargetUser.Coins-modifyCoins)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("试着去拿走 ", eventTargetName, " 的柠檬片时,成功了.\n所以 ", eventUserName, " 得到了 ", modifyCoins, " 个柠檬片\n\n同时 ", eventTargetName, " 失去了 ", modifyCoins, " 个柠檬片\n", remindTicket))
-		return
 	})
 	engine.OnRegex(`^骗\s?\[CQ:at,qq=(\d+)\]\s(\d+)个柠檬片$`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
 		if !catchLimit.Load(ctx.Event.UserID).Acquire() {
