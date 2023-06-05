@@ -2,267 +2,277 @@ package wife
 
 import (
 	sql "github.com/FloatTech/sqlite"
-	zero "github.com/wdvxdr1123/ZeroBot"
-	"github.com/wdvxdr1123/ZeroBot/message"
 	"strconv"
 	"sync"
 	"time"
 )
 
-// JointList CheckThisGroup first | example: JointList+groupid | warning: be careful this need clean when the next day go. | EveryUser use keys when paired.
-type JointList struct {
-	Key int64 `db:"key"`
+// BlackListStruct (Example: blacklist_1292581422)
+type BlackListStruct struct {
+	BlackList int64 `db:"blacklist"`
 }
 
-// UserGroup table for every Group. | Example: groupid
-type UserGroup struct {
-	HandleID int64 `db:"handleid"` // user,set 1, sometimes it can be 0. ww.
-	Time     int64 `db:"time"`     // use timestamp (HH:MM:SS)
-	TargetID int64 `db:"targatid"` // should existed.,
-	Key      int64 `db:"key"`      // pair use key to choose.
+// DisabledListStruct (Example: disabled_1292581422)
+type DisabledListStruct struct {
+	DisabledList int64 `db:"disabledlist"`
 }
 
-// BlackListGenerator Give User Permissions to let them block someone. | BlackList+QQID
-type BlackListGenerator struct {
-	QQ        int64    `db:"user_qq"`
-	blacklist []string `db:"blacklist"`
+// OrderListStruct (Example: orderlist_1145141919180)
+type OrderListStruct struct {
+	OrderPerson  int64  `db:"order"`
+	TargerPerson int64  `db:"target"`
+	Time         string `db:"time"`
 }
 
-// UserPermissionStatus Give user permission if user didn't want to be chosen by bot. | PermissionList+QQID
-type UserPermissionStatus struct {
-	QQ           int64    `db:"user_qq"`
-	CantBeChosen []string `db:"cantbechosen"` // input groupid.
+// GlobalDataStruct (Example: blacklist_1292581422 )
+type GlobalDataStruct struct {
+	PairKey  string `db:"pairkey"`
+	UserID   int64  `db:"userid"`
+	TargetID int64  `db:"targetid"`
+	StatusID int64  `db:"statusid"`
+	time     string `db:"time"`
+}
+
+// PairKeyStruct pairkey is used to check the list.
+type PairKeyStruct struct {
+	PairKey  string `db:"pairkey"`
+	statusID int64  `db:"statusid"`
 }
 
 var (
-	userlistLocker   = sync.Mutex{}
-	userlistDatabase = &sql.Sqlite{}
+	marryList   = &sql.Sqlite{}
+	marryLocker = sync.Mutex{}
 )
 
 func init() {
-	userlistDatabase.DBPath = engine.DataFolder() + "list.db"
-	err := userlistDatabase.Open(time.Hour * 24)
+	// init UserDataBase
+	marryList.DBPath = engine.DataFolder() + "data.db"
+	err := marryList.Open(time.Hour * 24)
 	if err != nil {
 		panic(err)
 	}
-	err = InitBlackListAndUserPermission(userlistDatabase)
-	if err != nil {
-		panic(err)
-	}
-
 }
 
-// UserPermissionStatusRemoveDisabled Disabled Permission status.
-func UserPermissionStatusRemoveDisabled(EventUser int64, groupID int64, sql *sql.Sqlite, ctx *zero.Ctx) error {
-	userlistLocker.Lock()
-	defer userlistLocker.Unlock()
-	var permissionUser UserPermissionStatus
-	err := sql.Find("PermissionList"+strconv.FormatInt(EventUser, 10), &permissionUser, "where user_qq is "+strconv.FormatInt(EventUser, 10))
-	if err != nil {
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("NO NEED TO REMOVE"))
-		return err
-	}
-	getList := permissionUser.CantBeChosen
-	index := -1
-	for i, str := range getList {
-		if str == strconv.FormatInt(groupID, 10) {
-			index = i
-			break
-		}
-	}
-	if index != -1 {
-		getList = append(getList[:index], getList[index+1:]...)
-	}
-	prepareToThrow := &UserPermissionStatus{QQ: EventUser, CantBeChosen: getList}
-	err = sql.Insert("PermissionList"+strconv.FormatInt(EventUser, 10), &prepareToThrow)
-	if err != nil {
-		panic(err)
-	}
-	return nil
+/*
+SQL HANDLER
+*/
+
+// InitTable init table if not existed.
+func InitTable(table string, db *sql.Sqlite, structList interface{}) error {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	return db.Create(table, &structList)
 }
 
-// UserPermissionStatusInsertEnabled insert group to make it disabled.
-func UserPermissionStatusInsertEnabled(EventUser int64, groupID int64, sql *sql.Sqlite) error {
-	userlistLocker.Lock()
-	defer userlistLocker.Unlock()
-	var permissionUser UserPermissionStatus
-	err := sql.Find("PermissionList"+strconv.FormatInt(EventUser, 10), &permissionUser, "where user_qq is "+strconv.FormatInt(EventUser, 10))
-	if err != nil {
-		// if not existed.
-		err := sql.Create("PermissionList"+strconv.FormatInt(EventUser, 10), &UserPermissionStatus{})
-		if err != nil {
-			panic(err)
-		}
-		disabledGroup := []string{strconv.FormatInt(groupID, 10)}
-		prepareToThrow := &UserPermissionStatus{QQ: EventUser, CantBeChosen: disabledGroup}
-		err = sql.Insert("PermissionList"+strconv.FormatInt(EventUser, 10), &prepareToThrow)
-		if err != nil {
-			panic(err)
-		}
-		return nil
-	}
-	getList := permissionUser.CantBeChosen
-	getTargetIsExisted := CheckTheListIsExistedTheTarget(getList, strconv.FormatInt(groupID, 10))
-	if !getTargetIsExisted {
-		addList := append(getList, strconv.FormatInt(groupID, 10))
-		prepareToThrow := &UserPermissionStatus{QQ: EventUser, CantBeChosen: addList}
-		err = sql.Insert("PermissionList"+strconv.FormatInt(EventUser, 10), &prepareToThrow)
-		if err != nil {
-			panic(err)
-		}
-		return nil
-	}
-	// existed.
-	return err
+func FormatInsertUserGlobalMarryList(UserID int64, targetID int64, StatusID int64, PairKeyRaw string) *GlobalDataStruct {
+	return &GlobalDataStruct{PairKey: PairKeyRaw, UserID: UserID, TargetID: targetID, StatusID: StatusID, time: strconv.FormatInt(time.Now().Unix(), 10)}
 }
 
-// InsertUserBlackList Insert BlackList
-func InsertUserBlackList(EventUserId int64, blockID int64, sql *sql.Sqlite) error {
-	userlistLocker.Lock()
-	defer userlistLocker.Unlock()
-	// first get []string from user.
-	var blackList BlackListGenerator
-	err := sql.Find("BlackList"+strconv.FormatInt(EventUserId, 10), &blackList, "where user_qq is "+strconv.FormatInt(EventUserId, 10))
-	if err != nil {
-		// if not existed.
-		err := sql.Create("BlackList"+strconv.FormatInt(EventUserId, 10), &BlackListGenerator{})
-		if err != nil {
-			panic(err)
-		}
-		blackList := []string{strconv.FormatInt(blockID, 10)}
-		prePareThrowList := &BlackListGenerator{QQ: EventUserId, blacklist: blackList}
-		err = sql.Insert("BlackList"+strconv.FormatInt(EventUserId, 10), &prePareThrowList)
-		if err != nil {
-			panic(err)
-		}
-		return nil
-	}
-	getList := blackList.blacklist
-	getTargetIsExisted := CheckTheListIsExistedTheTarget(getList, strconv.FormatInt(blockID, 10))
-	if !getTargetIsExisted {
-		addList := append(getList, strconv.FormatInt(blockID, 10))
-		prePareThrowList := &BlackListGenerator{QQ: EventUserId, blacklist: addList}
-		err = sql.Insert("BlackList"+strconv.FormatInt(EventUserId, 10), &prePareThrowList)
-		if err != nil {
-			panic(err)
-		}
-		return nil
-	}
-	// then stop this case.(existed.)
-	return err
+func FormatPairKey(PairKeyRaw string, statusID int64) *PairKeyStruct {
+	return &PairKeyStruct{PairKey: PairKeyRaw, statusID: statusID}
 }
 
-// RemoveUserBlackList Remove BlackList
-func RemoveUserBlackList(EventUserId int64, blockID int64, sql *sql.Sqlite, ctx *zero.Ctx) error {
-	userlistLocker.Lock()
-	defer userlistLocker.Unlock()
-	// first get []string from user.
-	var blackList BlackListGenerator
-	err := sql.Find("BlackList"+strconv.FormatInt(EventUserId, 10), &blackList, "where user_qq is "+strconv.FormatInt(EventUserId, 10))
-	if err != nil {
-		// if not existed, no need to remove
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("NO NEED TO REMOVE."))
-		return err
-	}
-	getList := blackList.blacklist
-	index := -1
-	for i, str := range getList {
-		if str == strconv.FormatInt(blockID, 10) {
-			index = i
-			break
-		}
-	}
-	if index != -1 {
-		getList = append(getList[:index], getList[index+1:]...)
-	}
-	prePareThrowList := &BlackListGenerator{QQ: EventUserId, blacklist: getList}
-	err = sql.Insert("BlackList"+strconv.FormatInt(EventUserId, 10), &prePareThrowList)
-	if err != nil {
-		panic(err)
-	}
-	return nil
+func FormatBlackList(blockID int64) *BlackListStruct {
+	return &BlackListStruct{BlackList: blockID}
 }
 
-// InsertUserMarriedMember tips: you need to make sure that all checked.
-func InsertUserMarriedMember(handleID int64, targetID int64, ctx *zero.Ctx, sql *sql.Sqlite, key int64) error {
-	userlistLocker.Lock()
-	defer userlistLocker.Unlock()
-	getThisGroupID := ctx.Event.GroupID
-	prepareThrownList := &UserGroup{HandleID: handleID, TargetID: targetID, Time: time.Now().Unix(), Key: key}
-	err := sql.Insert(strconv.FormatInt(getThisGroupID, 10), prepareThrownList)
-	// ensure the data can be thrown.
+func FormatDisabledList(disabledID int64) *DisabledListStruct {
+	return &DisabledListStruct{DisabledList: disabledID}
+}
+
+func FormatOrderList(orderPersonal int64, targetPersonal int64, time string) *OrderListStruct {
+	return &OrderListStruct{OrderPerson: orderPersonal, TargerPerson: targetPersonal, Time: time}
+}
+
+// InsertUserGlobalMarryList no check,use it with caution // Only insert and do nothing.
+func InsertUserGlobalMarryList(db *sql.Sqlite, groupID int64, UserID int64, targetID int64, StatusID int64, PairKeyRaw string) error {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	formatList := FormatInsertUserGlobalMarryList(UserID, targetID, StatusID, PairKeyRaw)
+	err := db.Insert("grouplist_"+strconv.FormatInt(groupID, 10), formatList)
 	if err != nil {
-		err := sql.Create(strconv.FormatInt(getThisGroupID, 10), &UserGroup{})
-		err = sql.Insert(strconv.FormatInt(getThisGroupID, 10), prepareThrownList)
-		if err != nil {
-			panic(err)
-		}
+		_ = InitTable("grouplist_"+strconv.FormatInt(groupID, 10), db, &GlobalDataStruct{})
+		err = db.Insert("grouplist_"+strconv.FormatInt(groupID, 10), formatList)
+	}
+	// throw key
+	err = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(PairKeyRaw, StatusID))
+	if err != nil {
+		_ = InitTable("pairkey_"+strconv.FormatInt(groupID, 10), db, &PairKeyStruct{})
+		_ = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(PairKeyRaw, StatusID))
 	}
 	return err
 }
 
-// InitBlackListAndUserPermission Initalize sqlite data.
-func InitBlackListAndUserPermission(sqlite *sql.Sqlite) error {
-	userlistLocker.Lock()
-	defer userlistLocker.Unlock()
-	err := sqlite.Create("blacklist", &BlackListGenerator{})
-	err = sqlite.Create("permissionList", &UserPermissionStatus{})
-	return err
-}
-
-// CheckTheListIsExistedTheTarget feature.
-func CheckTheListIsExistedTheTarget(list []string, target string) bool {
-	index := -1
-	for i, str := range list {
-		if str == target {
-			index = i
-			break
-		}
-	}
-	if index != -1 {
-		return true
-	}
-	return false
-}
-
-// JointListIfFind find it. if not existed then created.
-func JointListIfFind(sql *sql.Sqlite, eventKey int64, groupID int64) bool {
-	userlistLocker.Lock()
-	defer userlistLocker.Unlock()
-	var JointListHandle JointList
-	err := sql.Find("JointList"+strconv.FormatInt(groupID, 10), &JointListHandle, "where key is "+strconv.FormatInt(eventKey, 10))
+// RemoveUserGlobalMarryList just remove it,it will persist the key and change it to Type4.
+func RemoveUserGlobalMarryList(db *sql.Sqlite, pairKey string, groupID int64) bool {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	// first find the key list.
+	var pairKeyNeed PairKeyStruct
+	err := db.Find("pairkey_"+strconv.FormatInt(groupID, 10), &pairKeyNeed, "where pairkey is "+pairKey)
 	if err != nil {
-		// not existed? or cannot find.
-		_ = sql.Create("JointList"+strconv.FormatInt(groupID, 10), &JointListHandle)
+		// cannnot find, don't need to remove.
+		return false
+	}
+	// if found.
+	getThisKey := pairKeyNeed.PairKey
+	err = db.Del("pairkey_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
+	err = db.Del("grouplist_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
+	// store? || persist this key and check the next time.
+	err = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(pairKey, 4))
+	if err != nil {
 		return false
 	}
 	return true
 }
 
-// JointListAdd add it
-func JointListAdd(sql *sql.Sqlite, eventKey int64, groupID int64) error {
-	getStatus := JointListIfFind(sql, eventKey, groupID)
-	if !getStatus {
-		// add.
-		err := sql.Insert("JointList"+strconv.FormatInt(groupID, 10), &JointList{Key: eventKey})
-		if err != nil {
-			return err
-		}
+// CustomRemoveUserGlobalMarryList just remove it,it will persist the key (referKeyStatus)
+func CustomRemoveUserGlobalMarryList(db *sql.Sqlite, pairKey string, groupID int64, statusID int64) bool {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	// first find the key list.
+	var pairKeyNeed PairKeyStruct
+	err := db.Find("pairkey_"+strconv.FormatInt(groupID, 10), &pairKeyNeed, "where pairkey is "+pairKey)
+	if err != nil {
+		// cannnot find, don't need to remove.
+		return false
 	}
-	return nil
+	// if found.
+	getThisKey := pairKeyNeed.PairKey
+	err = db.Del("pairkey_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
+	err = db.Del("grouplist_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
+	// store? || persist this key and check the next time.
+	err = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(pairKey, statusID))
+	if err != nil {
+		return false
+	}
+	return true
 }
 
-// JointListRemove Remove it
-func JointListRemove(sql *sql.Sqlite, eventKey int64, groupID int64) error {
-	userlistLocker.Lock()
-	defer userlistLocker.Unlock()
-	getStatus := JointListIfFind(sql, eventKey, groupID)
-	if getStatus {
-		// add.
-		err := sql.Del("JointList"+strconv.FormatInt(groupID, 10), "where key is "+strconv.FormatInt(eventKey, 10))
-		if err != nil {
-			return err
+// CheckThisKeyStatus check this key status.
+func CheckThisKeyStatus(db *sql.Sqlite, pairKey string, groupID int64) int64 {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	// first find the key list.
+	var pairKeyNeed PairKeyStruct
+	err := db.Find("pairkey_"+strconv.FormatInt(groupID, 10), &pairKeyNeed, "where pairkey is "+pairKey)
+	if err != nil {
+		// cannnot find, don't need to remove.
+		return -1
+	}
+	return pairKeyNeed.statusID
+}
+
+// AddBlackList add blacklist
+func AddBlackList(db *sql.Sqlite, userID int64, targetID int64) error {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	var blackListNeed BlackListStruct
+	err := db.Find("blacklist_"+strconv.FormatInt(userID, 10), &blackListNeed, "where blacklist is "+strconv.FormatInt(targetID, 10))
+	if err != nil {
+		// add it, not sure then init this and add.
+		_ = InitTable("blacklist_"+strconv.FormatInt(userID, 10), db, BlackListStruct{})
+		err = db.Insert("blacklist_"+strconv.FormatInt(userID, 10), FormatBlackList(targetID))
+		return err
+	}
+	// find this so don't do it.
+	return err
+}
+
+// DeleteBlackList delete blacklist.
+func DeleteBlackList(db *sql.Sqlite, userID int64, targetID int64) error {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	var blackListNeed BlackListStruct
+	err := db.Find("blacklist_"+strconv.FormatInt(userID, 10), &blackListNeed, "where blacklist is "+strconv.FormatInt(targetID, 10))
+	if err != nil {
+		// not init or didn't find.
+		return err
+	}
+	_ = db.Del("blacklist_"+strconv.FormatInt(userID, 10), "where blacklist is "+strconv.FormatInt(targetID, 10))
+	return err
+}
+
+// AddDisabledList add disabledList
+func AddDisabledList(db *sql.Sqlite, userID int64, groupID int64) error {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	var disabledListNeed DisabledListStruct
+	err := db.Find("disabled_"+strconv.FormatInt(userID, 10), &disabledListNeed, "where disabledlist is "+strconv.FormatInt(groupID, 10))
+	if err != nil {
+		// add it, not sure then init this and add.
+		_ = InitTable("disabled_"+strconv.FormatInt(userID, 10), db, DisabledListStruct{})
+		err = db.Insert("disabled_"+strconv.FormatInt(userID, 10), FormatDisabledList(groupID))
+		return err
+	}
+	// find this so don't do it.
+	return err
+}
+
+// DeleteDisabledList delete disabledlist.
+func DeleteDisabledList(db *sql.Sqlite, userID int64, groupID int64) error {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	var disabledListNeed DisabledListStruct
+	err := db.Find("disabled_"+strconv.FormatInt(userID, 10), &disabledListNeed, "where disabledlist is "+strconv.FormatInt(groupID, 10))
+	if err != nil {
+		// not init or didn't find.
+		return err
+	}
+	_ = db.Del("disabled_"+strconv.FormatInt(userID, 10), "where disabledlist is "+strconv.FormatInt(groupID, 10))
+	return err
+}
+
+// AddOrderToList add order.
+func AddOrderToList(db *sql.Sqlite, userID int64, targetID int64, time string, groupID int64) error {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	var addOrderListNeed OrderListStruct
+	err := db.Find("orderlist_"+strconv.FormatInt(groupID, 10), &addOrderListNeed, "where order is "+strconv.FormatInt(userID, 10))
+	if err != nil {
+		// create and insert.
+		_ = InitTable("orderlist_"+strconv.FormatInt(groupID, 10), db, OrderListStruct{})
+		_ = db.Insert("orderlist_"+strconv.FormatInt(groupID, 10), FormatOrderList(userID, targetID, time))
+		return err
+	}
+	// find it.
+	return err
+}
+
+// RemoveOrderToList remove it.
+func RemoveOrderToList(db *sql.Sqlite, userID int64, groupID int64) error {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	var addOrderListNeed OrderListStruct
+	err := db.Find("orderlist_"+strconv.FormatInt(groupID, 10), &addOrderListNeed, "where order is "+strconv.FormatInt(userID, 10))
+	if err != nil {
+		return err
+	}
+	err = db.Del("orderlist_"+strconv.FormatInt(groupID, 10), "where order is "+strconv.FormatInt(userID, 10))
+	return err
+}
+
+/*
+This Path is to use to find the list and delete it.
+*/
+
+// FindInList find the list is existed.
+func FindInList(list []int, target int) (bool, int) {
+	for i, num := range list {
+		if num == target {
+			return true, i
 		}
 	}
-	return nil
+	return false, -1
+}
+
+// FindAndDeleteInThisList the list and delete it.
+func FindAndDeleteInThisList(list []int, target int) ([]int, bool) {
+	for i, num := range list {
+		if num == target {
+			list = append(list[:i], list[i+1:]...)
+			return list, true
+		}
+	}
+	return list, false
 }

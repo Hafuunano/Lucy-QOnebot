@@ -9,22 +9,20 @@ import (
 
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 
+	coins "github.com/FloatTech/ZeroBot-Plugin/compounds/coins"
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/gg"
-	"github.com/FloatTech/zbputils/ctxext"
-	"github.com/wdvxdr1123/ZeroBot/message"
-
 	_ "github.com/FloatTech/sqlite" // import sql
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
+	"github.com/FloatTech/zbputils/ctxext"
 	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
 var (
-	rateLimit  = rate.NewManager[int64](time.Second*60, 12) // time setup
-	levelArray = [...]int{0, 1, 2, 5, 10, 20, 35, 55, 75, 100, 120, 180, 260, 360, 480, 600}
-	sdb        *scoredb
-	engine     = control.Register("score", &ctrl.Options[*zero.Ctx]{
+	rateLimit = rate.NewManager[int64](time.Second*60, 12) // time setup
+	engine    = control.Register("score", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
 		Help:              "Hi NekoPachi!\n说明书: https://lucy.impart.icu",
 		PrivateDataFolder: "score",
@@ -33,6 +31,7 @@ var (
 
 func init() {
 	cachePath := engine.DataFolder() + "scorecache/"
+	sdb := coins.Initialize("./data/score/score.db")
 	engine.OnFullMatchGroup([]string{"签到", "打卡"}, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
 			if !rateLimit.Load(ctx.Event.GroupID).Acquire() {
@@ -42,7 +41,7 @@ func init() {
 			mutex.Lock()
 			uid := ctx.Event.UserID
 			today := time.Now().Format("20060102")
-			si := sdb.GetSignInByUID(uid)
+			si := coins.GetSignInByUID(sdb, uid)
 			drawedFile := cachePath + strconv.FormatInt(uid, 10) + today + "signin.png"
 			if si.UpdatedAt.Format("20060102") == today && si.Count != 0 {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("酱~ 你今天已经签到过了哦w"))
@@ -52,18 +51,18 @@ func init() {
 				return
 			}
 			coinsGet := 300 + rand.Intn(200)
-			_ = sdb.InsertUserCoins(uid, si.Coins+coinsGet)
-			_ = sdb.InsertOrUpdateSignInCountByUID(uid, si.Count+1) // 柠檬片获取
-			score := sdb.GetScoreByUID(uid).Score
+			_ = coins.InsertUserCoins(sdb, uid, si.Coins+coinsGet)
+			_ = coins.InsertOrUpdateSignInCountByUID(sdb, uid, si.Count+1) // 柠檬片获取
+			score := coins.GetScoreByUID(sdb, uid).Score
 			score++ //  每日+1
-			_ = sdb.InsertOrUpdateScoreByUID(uid, score)
-			CurrentCountTable := sdb.GetCurrentCount(today)
+			_ = coins.InsertOrUpdateScoreByUID(sdb, uid, score)
+			CurrentCountTable := coins.GetCurrentCount(sdb, today)
 			handledTodayNum := CurrentCountTable.Counttime + 1
-			_ = sdb.UpdateUserTime(handledTodayNum, today) // 总体计算 隔日清零
+			_ = coins.UpdateUserTime(sdb, handledTodayNum, today) // 总体计算 隔日清零
 
 			if time.Now().Hour() > 6 && time.Now().Hour() < 19 {
 				// package for test draw.
-				getTimeReplyMsg := getHourWord(time.Now()) // get time and msg
+				getTimeReplyMsg := coins.GetHourWord(time.Now()) // get time and msg
 				currentTime := time.Now().Format("2006-01-02 15:04:05")
 				// time day.
 				dayTimeImg, _ := gg.LoadImage(engine.DataFolder() + "BetaScoreDay.png")
@@ -81,10 +80,10 @@ func init() {
 				dayGround.DrawStringWrapped(strconv.Itoa(coinsGet), 220, 370, 1, 1, 0, 1.3, gg.AlignCenter)          // draw third part
 				dayGround.DrawStringWrapped(strconv.Itoa(si.Coins+coinsGet), 720, 370, 1, 1, 0, 1.3, gg.AlignCenter) // draw forth part
 				// level array with rectangle work.
-				rankNum := getLevel(score)
+				rankNum := coins.GetLevel(score)
 				RankGoal := rankNum + 1
-				achieveNextGoal := levelArray[RankGoal]
-				achievedGoal := levelArray[rankNum]
+				achieveNextGoal := coins.LevelArray[RankGoal]
+				achievedGoal := coins.LevelArray[rankNum]
 				currentNextGoalMeasure := achieveNextGoal - score  // measure rest of the num. like 20 - currentLink(TestRank 15)
 				measureGoalsLens := achieveNextGoal - achievedGoal // like 20 - 10
 				currentResult := float64(currentNextGoalMeasure) / float64(measureGoalsLens)
@@ -104,7 +103,7 @@ func init() {
 			} else {
 				// nightVision
 				// package for test draw.
-				getTimeReplyMsg := getHourWord(time.Now()) // get time and msg
+				getTimeReplyMsg := coins.GetHourWord(time.Now()) // get time and msg
 				currentTime := time.Now().Format("2006-01-02 15:04:05")
 				nightTimeImg, _ := gg.LoadImage(engine.DataFolder() + "BetaScoreNight.png")
 				nightGround := gg.NewContext(1886, 1060)
@@ -121,10 +120,10 @@ func init() {
 				nightGround.DrawStringWrapped(strconv.Itoa(coinsGet), 225, 360, 1, 1, 0, 1.3, gg.AlignCenter)          // draw third part
 				nightGround.DrawStringWrapped(strconv.Itoa(si.Coins+coinsGet), 720, 360, 1, 1, 0, 1.3, gg.AlignCenter) // draw forth part
 				// level array with rectangle work.
-				rankNum := getLevel(score)
+				rankNum := coins.GetLevel(score)
 				RankGoal := rankNum + 1
-				achieveNextGoal := levelArray[RankGoal]
-				achievedGoal := levelArray[rankNum]
+				achieveNextGoal := coins.LevelArray[RankGoal]
+				achievedGoal := coins.LevelArray[rankNum]
 				currentNextGoalMeasure := achieveNextGoal - score  // measure rest of the num. like 20 - currentLink(TestRank 15)
 				measureGoalsLens := achieveNextGoal - achievedGoal // like 20 - 10
 				currentResult := float64(currentNextGoalMeasure) / float64(measureGoalsLens)
