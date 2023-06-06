@@ -1,16 +1,21 @@
 package wife
 
 import (
+	"crypto/md5"
+	"encoding/hex"
+	"fmt"
 	fcext "github.com/FloatTech/floatbox/ctxext"
 	sql "github.com/FloatTech/sqlite"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
+	"github.com/wdvxdr1123/ZeroBot/message"
 	"math/rand"
 	"strconv"
 	"time"
 )
 
 var GlobalTimeManager = rate.NewManager[int64](time.Hour*12, 6)
+var LeaveTimeManager = rate.NewManager[int64](time.Hour*12, 4)
 
 // GetUserListAndChooseOne choose people.
 func GetUserListAndChooseOne(ctx *zero.Ctx) int64 {
@@ -19,32 +24,51 @@ func GetUserListAndChooseOne(ctx *zero.Ctx) int64 {
 	return getThisUserID
 }
 
-// GlobalCDModel cd timeManager
-func GlobalCDModel(ctx *zero.Ctx) bool {
+// GlobalCDModelCost cd timeManager
+func GlobalCDModelCost(ctx *zero.Ctx) bool {
 	// 12h 6times.
 	UserKeyTag := ctx.Event.UserID + ctx.Event.GroupID
-	if !GlobalTimeManager.Load(UserKeyTag).Acquire() {
-		return false
-	}
-	return true
+	return GlobalTimeManager.Load(UserKeyTag).Acquire()
+}
+
+// GlobalCDModelCostLeastReply Get the existed Token.
+func GlobalCDModelCostLeastReply(ctx *zero.Ctx) int {
+	UserKeyTag := ctx.Event.UserID + ctx.Event.GroupID
+	return int(GlobalTimeManager.Load(UserKeyTag).Tokens())
+}
+
+// LeaveCDModelCost cd timeManager
+func LeaveCDModelCost(ctx *zero.Ctx) bool {
+	// 12h 6times.
+	UserKeyTag := ctx.Event.UserID + ctx.Event.GroupID
+	return LeaveTimeManager.Load(UserKeyTag).Acquire()
+}
+
+// LeaveCDModelCostLeastReply Get the existed Token.
+func LeaveCDModelCostLeastReply(ctx *zero.Ctx) int {
+	UserKeyTag := ctx.Event.UserID + ctx.Event.GroupID
+	return int(LeaveTimeManager.Load(UserKeyTag).Tokens())
 }
 
 // CheckTheUserIsTargetOrUser check the status.
-func CheckTheUserIsTargetOrUser(db *sql.Sqlite, ctx *zero.Ctx) int64 {
+func CheckTheUserIsTargetOrUser(db *sql.Sqlite, ctx *zero.Ctx, userID int64) (statuscode int64, targetID int64) {
 	// -1 --> not found | 0 --> Target | 1 --> User
 	marryLocker.Lock()
 	defer marryLocker.Unlock()
-	userID := ctx.Event.UserID
 	groupID := ctx.Event.GroupID
-	err := db.Find("grouplist_"+strconv.FormatInt(groupID, 10), &GlobalDataStruct{}, "Where userid is "+strconv.FormatInt(userID, 10))
+	var globalDataStructList GlobalDataStruct
+	err := db.Find("grouplist_"+strconv.FormatInt(groupID, 10), &globalDataStructList, "where userid is "+strconv.FormatInt(userID, 10))
 	if err != nil {
-		err := db.Find("grouplist_"+strconv.FormatInt(groupID, 10), &GlobalDataStruct{}, "Where targetid is "+strconv.FormatInt(userID, 10))
+		err = db.Find("grouplist_"+strconv.FormatInt(groupID, 10), &globalDataStructList, "where targetid is "+strconv.FormatInt(userID, 10))
 		if err != nil {
-			return -1
+			return -1, -1
 		}
-		return 0
+		return 0, globalDataStructList.UserID
 	}
-	return 1
+	if globalDataStructList.TargetID == globalDataStructList.UserID {
+		return 10, globalDataStructList.UserID
+	}
+	return 1, globalDataStructList.TargetID
 }
 
 // CheckTheUserIsInBlackListOrGroupList Check this user is in list?
@@ -56,16 +80,18 @@ func CheckTheUserIsInBlackListOrGroupList(userID int64, targetID int64, groupID 
 	if CheckTheBlackListIsExistedToThisPerson(marryList, userID, targetID) || CheckTheBlackListIsExistedToThisPerson(marryList, targetID, userID) {
 		return true
 	}
-	if CheckDisabledListIsExistedInThisGroup(marryList, targetID, groupID) {
+	// check the target is disabled this group
+	if CheckDisabledListIsExistedInThisGroup(marryList, userID, groupID) {
 		return true
 	}
 	return false
 }
 
+// GetSomeRanDomChoiceProps get some props chances to make it random.
 func GetSomeRanDomChoiceProps(ctx *zero.Ctx) int64 {
 	// get Random numbers.
-	randNum := fcext.RandSenderPerDayN(ctx.Event.UserID, 100)
-	if randNum > 89 {
+	randNum := rand.Intn(90) + fcext.RandSenderPerDayN(ctx.Event.UserID, 30)
+	if randNum > 110 {
 		getOtherRand := rand.Intn(9)
 		switch {
 		case getOtherRand < 3:
@@ -77,4 +103,134 @@ func GetSomeRanDomChoiceProps(ctx *zero.Ctx) int64 {
 		}
 	}
 	return 1
+}
+
+// ReplyMentMode format the reply and clear.
+func ReplyMentMode(header string, referTarget int64, statusCodeToPerson int64, ctx *zero.Ctx) string {
+	msg := header
+	var replyTarget string
+	if statusCodeToPerson == 1 {
+		replyTarget = "老婆"
+	} else {
+		replyTarget = "老公"
+	}
+	formatReply := msg + "\n今天你的群" + replyTarget + "是\n" + "[ " + ctx.CardOrNickName(referTarget) + " ] " + "( " + strconv.FormatInt(referTarget, 10) + " ) 哦w～"
+	return formatReply
+}
+
+// GenerateMD5 Generate MD5
+func GenerateMD5(userID int64, targetID int64, groupID int64) string {
+	input := strconv.FormatInt(userID+targetID+groupID, 10)
+	hash := md5.New()
+	hash.Write([]byte(input))
+	hashValue := hash.Sum(nil)
+	hashString := hex.EncodeToString(hashValue)
+	return hashString
+}
+
+// CheckTheUserStatusAndDoRepeat If ture, means it no others (Only defer to current user.)
+func CheckTheUserStatusAndDoRepeat(ctx *zero.Ctx) bool {
+	getStatusCode, getOtherUserData := CheckTheUserIsTargetOrUser(marryList, ctx, ctx.Event.UserID) // 判断这个user是否已经和别人在一起了，同时判断Type3
+	switch {
+	case getStatusCode == 0:
+		// case target mode (0)
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("貌似你今天已经有了哦～", ReplyMentMode("", getOtherUserData, 0, ctx)))
+		return false
+	case getStatusCode == 1:
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("貌似你今天已经有了哦～", ReplyMentMode("", getOtherUserData, 1, ctx)))
+		// case user mode (1)
+		return false
+	case getStatusCode == 10:
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("啾啾～今天的对象是你自己哦w"))
+		return false
+	}
+	return true
+}
+
+// CheckTheTargetUserStatusAndDoRepeat Check the target status and do repeats.
+func CheckTheTargetUserStatusAndDoRepeat(ctx *zero.Ctx, ChooseAPerson int64) bool {
+	getTargetStatusCode, _ := CheckTheUserIsTargetOrUser(marryList, ctx, ChooseAPerson) // 判断这个target是否已经和别人在一起了，同时判断Type3
+	switch {
+	case getTargetStatusCode == 1 || getTargetStatusCode == 0:
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("抽取到了～不过对方已经有人了哦w～算是运气不好的一次呢,Lucy多给一次机会呢w"))
+		return false
+	case getTargetStatusCode == 10:
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("啾啾～今天的对方是单身贵族哦（笑~ Lucy再给你一次机会哦w"))
+		return false
+	}
+	return true
+}
+
+// ResuitTheReferUserAndMakeIt Result For Married || be married,
+func ResuitTheReferUserAndMakeIt(ctx *zero.Ctx, dict map[string][]string, EventUser int64, TargetUser int64) {
+	// get failed possibility.
+	props := rand.Intn(100)
+	if props < 50 {
+		// failed,lost chance.
+		getFailedMsg := dict["failed"][rand.Intn(len(dict["failed"]))]
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(getFailedMsg))
+		return
+	}
+	returnNumber := GetSomeRanDomChoiceProps(ctx)
+	switch {
+	case returnNumber == 1:
+		GlobalCDModelCost(ctx)
+		getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
+		// normal mode. nothing happened.
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode(getSuccessMsg, TargetUser, 1, ctx)))
+		generatePairKey := GenerateMD5(EventUser, TargetUser, ctx.Event.GroupID)
+		err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, EventUser, TargetUser, 1, generatePairKey)
+		if err != nil {
+			fmt.Print(err)
+			return
+		}
+	case returnNumber == 2:
+		GlobalCDModelCost(ctx)
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode("貌似很奇怪哦～因为某种奇怪的原因～1变成了0,0变成了1", TargetUser, 0, ctx)))
+		generatePairKey := GenerateMD5(TargetUser, EventUser, ctx.Event.GroupID)
+		err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, TargetUser, EventUser, 2, generatePairKey)
+		if err != nil {
+			panic(err)
+		}
+	// reverse Target Mode
+	case returnNumber == 3:
+		GlobalCDModelCost(ctx)
+		// drop target pls.
+		// status 3 turns to be case 1 ,for it cannot check it again. (With 2 same person, so it can be panic.)
+		getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
+		// normal mode. nothing happened.
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode(getSuccessMsg, TargetUser, 1, ctx)))
+		generatePairKey := GenerateMD5(EventUser, TargetUser, ctx.Event.GroupID)
+		err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, EventUser, TargetUser, 1, generatePairKey)
+		if err != nil {
+			fmt.Print(err)
+			return
+		}
+	// you became your own target
+	case returnNumber == 6:
+		GlobalCDModelCost(ctx)
+		// now no wife mode.
+		getHideMsg := dict["hide_mode"][rand.Intn(len(dict["hide_mode"]))]
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(getHideMsg, "\n貌似没有任何反馈～"))
+		generatePairKey := GenerateMD5(EventUser, TargetUser, ctx.Event.GroupID)
+		err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, EventUser, TargetUser, 6, generatePairKey)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func CheckThePairKey(db *sql.Sqlite, uid int64, groupID int64) string {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	var globalDataStructList GlobalDataStruct
+	err := db.Find("grouplist_"+strconv.FormatInt(groupID, 10), &globalDataStructList, "where userid is "+strconv.FormatInt(uid, 10))
+	if err != nil {
+		err = db.Find("grouplist_"+strconv.FormatInt(groupID, 10), &globalDataStructList, "where targetid is "+strconv.FormatInt(uid, 10))
+		if err != nil {
+			return ""
+		}
+		return globalDataStructList.PairKey
+	}
+	return globalDataStructList.PairKey
 }

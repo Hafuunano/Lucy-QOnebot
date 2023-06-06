@@ -1,6 +1,7 @@
 package wife
 
 import (
+	"fmt"
 	sql "github.com/FloatTech/sqlite"
 	"strconv"
 	"sync"
@@ -29,13 +30,13 @@ type GlobalDataStruct struct {
 	PairKey  string `db:"pairkey"`
 	UserID   int64  `db:"userid"`
 	TargetID int64  `db:"targetid"`
-	time     string `db:"time"`
+	Time     string `db:"time"`
 }
 
 // PairKeyStruct pairkey is used to check the list.
 type PairKeyStruct struct {
 	PairKey  string `db:"pairkey"`
-	statusID int64  `db:"statusid"`
+	StatusID int64  `db:"statusid"`
 }
 
 var (
@@ -56,29 +57,27 @@ func init() {
 SQL HANDLER
 */
 
-// InitTable init table if not existed.
-func InitTable(table string, db *sql.Sqlite, structList interface{}) error {
-	marryLocker.Lock()
-	defer marryLocker.Unlock()
-	return db.Create(table, &structList)
-}
-
+// FormatInsertUserGlobalMarryList Format Insert
 func FormatInsertUserGlobalMarryList(UserID int64, targetID int64, PairKeyRaw string) *GlobalDataStruct {
-	return &GlobalDataStruct{PairKey: PairKeyRaw, UserID: UserID, TargetID: targetID, time: strconv.FormatInt(time.Now().Unix(), 10)}
+	return &GlobalDataStruct{PairKey: PairKeyRaw, UserID: UserID, TargetID: targetID, Time: strconv.FormatInt(time.Now().Unix(), 10)}
 }
 
+// FormatPairKey Format PairKey
 func FormatPairKey(PairKeyRaw string, statusID int64) *PairKeyStruct {
-	return &PairKeyStruct{PairKey: PairKeyRaw, statusID: statusID}
+	return &PairKeyStruct{PairKey: PairKeyRaw, StatusID: statusID}
 }
 
+// FormatBlackList Format BlackList
 func FormatBlackList(blockID int64) *BlackListStruct {
 	return &BlackListStruct{BlackList: blockID}
 }
 
+// FormatDisabledList Format DisabledList
 func FormatDisabledList(disabledID int64) *DisabledListStruct {
 	return &DisabledListStruct{DisabledList: disabledID}
 }
 
+// FormatOrderList Format OrderList
 func FormatOrderList(orderPersonal int64, targetPersonal int64, time string) *OrderListStruct {
 	return &OrderListStruct{OrderPerson: orderPersonal, TargerPerson: targetPersonal, Time: time}
 }
@@ -89,14 +88,17 @@ func InsertUserGlobalMarryList(db *sql.Sqlite, groupID int64, UserID int64, targ
 	defer marryLocker.Unlock()
 	formatList := FormatInsertUserGlobalMarryList(UserID, targetID, PairKeyRaw)
 	err := db.Insert("grouplist_"+strconv.FormatInt(groupID, 10), formatList)
+	fmt.Print(err, "1")
 	if err != nil {
-		_ = InitTable("grouplist_"+strconv.FormatInt(groupID, 10), db, &GlobalDataStruct{})
+		err = db.Create("grouplist_"+strconv.FormatInt(groupID, 10), &GlobalDataStruct{})
+		fmt.Print(err, "2")
 		err = db.Insert("grouplist_"+strconv.FormatInt(groupID, 10), formatList)
+		fmt.Print(err, "4")
 	}
 	// throw key
 	err = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(PairKeyRaw, StatusID))
 	if err != nil {
-		_ = InitTable("pairkey_"+strconv.FormatInt(groupID, 10), db, &PairKeyStruct{})
+		_ = db.Create("pairkey_"+strconv.FormatInt(groupID, 10), &PairKeyStruct{})
 		_ = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(PairKeyRaw, StatusID))
 	}
 	return err
@@ -117,7 +119,7 @@ func RemoveUserGlobalMarryList(db *sql.Sqlite, pairKey string, groupID int64) bo
 	getThisKey := pairKeyNeed.PairKey
 	err = db.Del("pairkey_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
 	err = db.Del("grouplist_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
-	// store? || persist this key and check the next time.
+	// store? || persist this key and check the next Time.
 	err = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(pairKey, 4))
 	if err != nil {
 		return false
@@ -140,7 +142,7 @@ func CustomRemoveUserGlobalMarryList(db *sql.Sqlite, pairKey string, groupID int
 	getThisKey := pairKeyNeed.PairKey
 	err = db.Del("pairkey_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
 	err = db.Del("grouplist_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
-	// store? || persist this key and check the next time.
+	// store? || persist this key and check the next Time.
 	err = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(pairKey, statusID))
 	if err != nil {
 		return false
@@ -159,7 +161,7 @@ func CheckThisKeyStatus(db *sql.Sqlite, pairKey string, groupID int64) int64 {
 		// cannnot find, don't need to remove.
 		return -1
 	}
-	return pairKeyNeed.statusID
+	return pairKeyNeed.StatusID
 }
 
 // AddBlackList add blacklist
@@ -170,7 +172,7 @@ func AddBlackList(db *sql.Sqlite, userID int64, targetID int64) error {
 	err := db.Find("blacklist_"+strconv.FormatInt(userID, 10), &blackListNeed, "where blacklist is "+strconv.FormatInt(targetID, 10))
 	if err != nil {
 		// add it, not sure then init this and add.
-		_ = InitTable("blacklist_"+strconv.FormatInt(userID, 10), db, BlackListStruct{})
+		_ = db.Create("blacklist_"+strconv.FormatInt(userID, 10), BlackListStruct{})
 		err = db.Insert("blacklist_"+strconv.FormatInt(userID, 10), FormatBlackList(targetID))
 		return err
 	}
@@ -213,7 +215,7 @@ func AddDisabledList(db *sql.Sqlite, userID int64, groupID int64) error {
 	err := db.Find("disabled_"+strconv.FormatInt(userID, 10), &disabledListNeed, "where disabledlist is "+strconv.FormatInt(groupID, 10))
 	if err != nil {
 		// add it, not sure then init this and add.
-		_ = InitTable("disabled_"+strconv.FormatInt(userID, 10), db, DisabledListStruct{})
+		_ = db.Create("disabled_"+strconv.FormatInt(userID, 10), DisabledListStruct{})
 		err = db.Insert("disabled_"+strconv.FormatInt(userID, 10), FormatDisabledList(groupID))
 		return err
 	}
@@ -256,7 +258,7 @@ func AddOrderToList(db *sql.Sqlite, userID int64, targetID int64, time string, g
 	err := db.Find("orderlist_"+strconv.FormatInt(groupID, 10), &addOrderListNeed, "where order is "+strconv.FormatInt(userID, 10))
 	if err != nil {
 		// create and insert.
-		_ = InitTable("orderlist_"+strconv.FormatInt(groupID, 10), db, OrderListStruct{})
+		_ = db.Create("orderlist_"+strconv.FormatInt(groupID, 10), OrderListStruct{})
 		_ = db.Insert("orderlist_"+strconv.FormatInt(groupID, 10), FormatOrderList(userID, targetID, time))
 		return err
 	}
@@ -290,29 +292,4 @@ func CheckThisOrderList(db *sql.Sqlite, userID int64, groupID int64) (OrderUser 
 	TargetUSer = addOrderListNeed.OrderPerson
 	time = addOrderListNeed.Time
 	return OrderUser, TargetUSer, time
-}
-
-/*
-This Path is to use to find the list and delete it.
-*/
-
-// FindInList find the list is existed.
-func FindInList(list []int, target int) (bool, int) {
-	for i, num := range list {
-		if num == target {
-			return true, i
-		}
-	}
-	return false, -1
-}
-
-// FindAndDeleteInThisList the list and delete it.
-func FindAndDeleteInThisList(list []int, target int) ([]int, bool) {
-	for i, num := range list {
-		if num == target {
-			list = append(list[:i], list[i+1:]...)
-			return list, true
-		}
-	}
-	return list, false
 }

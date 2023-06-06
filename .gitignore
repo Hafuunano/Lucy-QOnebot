@@ -1,9 +1,10 @@
 plugins/*.so
 plugins/*.dll
 .idea/
-.DS_Store 
+.DS_Store
 .vscode
 go-zero*
 nohup.out
 zerobot
-plugin/funwork/wtf.go
+.env
+data/*
