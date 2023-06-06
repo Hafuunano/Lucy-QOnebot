@@ -107,7 +107,7 @@ func init() {
 			// status code 3
 			GlobalCDModelCost(ctx)
 			// drop target pls.
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode("嗯哼哼～抽到了自己，然而 Lucy 还是将双方写成一个人哦w （笑w ", ctx.Event.UserID, 1, ctx)))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode("嗯哼哼～抽到了自己，然而 Lucy 还是将双方写成一个人哦w （笑w ", ctx.Event.UserID, 1, ctx), message.Image(GenerateUserImageLink(ctx.Event.UserID))))
 			generatePairKey := GenerateMD5(ctx.Event.UserID, ctx.Event.UserID, ctx.Event.GroupID)
 			err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 3, generatePairKey)
 			if err != nil {
@@ -121,7 +121,7 @@ func init() {
 			GlobalCDModelCost(ctx)
 			getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
 			// normal mode. nothing happened.
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode(getSuccessMsg, ChooseAPerson, 1, ctx)))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode(getSuccessMsg, ChooseAPerson, 1, ctx), message.Image(GenerateUserImageLink(ChooseAPerson))))
 			generatePairKey := GenerateMD5(ctx.Event.UserID, ChooseAPerson, ctx.Event.GroupID)
 			err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ChooseAPerson, 1, generatePairKey)
 			if err != nil {
@@ -130,7 +130,7 @@ func init() {
 			}
 		case returnNumber == 2:
 			GlobalCDModelCost(ctx)
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode("貌似很奇怪哦～因为某种奇怪的原因～1变成了0,0变成了1", ChooseAPerson, 0, ctx)))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode("貌似很奇怪哦～因为某种奇怪的原因～1变成了0,0变成了1", ChooseAPerson, 0, ctx), message.Image(GenerateUserImageLink(ChooseAPerson))))
 			generatePairKey := GenerateMD5(ChooseAPerson, ctx.Event.UserID, ctx.Event.GroupID)
 			err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ChooseAPerson, ctx.Event.UserID, 2, generatePairKey)
 			if err != nil {
@@ -140,7 +140,7 @@ func init() {
 		case returnNumber == 3:
 			GlobalCDModelCost(ctx)
 			// drop target pls.
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode("嗯哼哼～发生了一些错误～本来应当抽到别人的变成了自己～所以", ctx.Event.UserID, 1, ctx)))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode("嗯哼哼～发生了一些错误～本来应当抽到别人的变成了自己～所以", ctx.Event.UserID, 1, ctx), message.Image(GenerateUserImageLink(ctx.Event.UserID))))
 			generatePairKey := GenerateMD5(ctx.Event.UserID, ctx.Event.UserID, ctx.Event.GroupID)
 			err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 3, generatePairKey)
 			if err != nil {
@@ -176,7 +176,7 @@ func init() {
 			switch rand.Intn(5) {
 			case 1:
 				GlobalCDModelCost(ctx)
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode("貌似Lucy故意添加了 --force 的命令，成功了(笑 ", ctx.Event.UserID, 1, ctx)))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode("貌似Lucy故意添加了 --force 的命令，成功了(笑 ", ctx.Event.UserID, 1, ctx)), message.Image(GenerateUserImageLink(ctx.Event.UserID)))
 				generatePairKey := GenerateMD5(ctx.Event.UserID, ctx.Event.UserID, ctx.Event.GroupID)
 				err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 3, generatePairKey)
 				if err != nil {
@@ -200,7 +200,7 @@ func init() {
 				GlobalCDModelCost(ctx)
 				getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
 				// normal mode. nothing happened.
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode(getSuccessMsg, fiancee, 1, ctx)))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode(getSuccessMsg, fiancee, 1, ctx)), message.Image(GenerateUserImageLink(fiancee)))
 				generatePairKey := GenerateMD5(ctx.Event.UserID, fiancee, ctx.Event.GroupID)
 				err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, fiancee, 1, generatePairKey)
 				if err != nil {
@@ -238,7 +238,7 @@ func init() {
 			_ = RemoveUserGlobalMarryList(marryList, getPairKey, ctx.Event.GroupID)
 		}
 	})
-	engine.OnRegex(`^试着骗(\[CQ:at,qq=(\d+)\]\s?|(\d+))做我的老婆`, zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^试着骗(\[CQ:at,qq=(\d+)\]\s?|(\d+))做我的老婆x`, zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		fid := ctx.State["regex_matched"].([]string)
 		fiancee, _ := strconv.ParseInt(fid[2]+fid[3], 10, 64)
 		uid := ctx.Event.UserID
@@ -266,7 +266,7 @@ func init() {
 		if rand.Intn(100) < 30 {
 			// win this goal
 			getNTRMsg := dict["ntr"][rand.Intn(len(dict["ntr"]))]
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode(getNTRMsg, fiancee, 5, ctx)))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode(getNTRMsg, fiancee, 5, ctx)), message.Image(GenerateUserImageLink(ctx.Event.UserID)))
 			CustomRemoveUserGlobalMarryList(marryList, CheckThePairKey(marryList, fiancee, ctx.Event.GroupID), ctx.Event.GroupID, 7)
 			pairKey := GenerateMD5(ctx.Event.UserID, fiancee, ctx.Event.GroupID)
 			err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, fiancee, 5, pairKey)

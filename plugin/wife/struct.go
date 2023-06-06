@@ -242,24 +242,3 @@ func GenerateUserImageLink(uid int64) string {
 /*
 This Path is to use to find the list and delete it.
 */
-
-// FindInList find the list is existed.
-func FindInList(list []int, target int) (bool, int) {
-	for i, num := range list {
-		if num == target {
-			return true, i
-		}
-	}
-	return false, -1
-}
-
-// FindAndDeleteInThisList the list and delete it.
-func FindAndDeleteInThisList(list []int, target int) ([]int, bool) {
-	for i, num := range list {
-		if num == target {
-			list = append(list[:i], list[i+1:]...)
-			return list, true
-		}
-	}
-	return list, false
-}
