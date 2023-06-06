@@ -283,3 +283,25 @@ func CheckThisOrderList(db *sql.Sqlite, userID int64, groupID int64) (OrderUser 
 	time = addOrderListNeed.Time
 	return OrderUser, TargetUSer, time
 }
+
+// GetTheGroupList Get this group.
+func GetTheGroupList(gid int64) (list [][2]string, num int) {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	gidStr := strconv.FormatInt(gid, 10)
+	getNum, _ := marryList.Count("grouplist_" + gidStr)
+	if getNum == 0 {
+		return nil, 0
+	}
+	var info GlobalDataStruct
+	list = make([][2]string, 0, num)
+	_ = marryList.FindFor("grouplist_"+gidStr, &info, "GROUP BY userid", func() error {
+		getInfoSlice := [2]string{
+			strconv.FormatInt(info.UserID, 10),
+			strconv.FormatInt(info.TargetID, 10),
+		}
+		list = append(list, getInfoSlice)
+		return nil
+	})
+	return list, getNum
+}
