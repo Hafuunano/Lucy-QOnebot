@@ -117,14 +117,11 @@ func RemoveUserGlobalMarryList(db *sql.Sqlite, pairKey string, groupID int64) bo
 	}
 	// if found.
 	getThisKey := pairKeyNeed.PairKey
-	err = db.Del("pairkey_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
-	err = db.Del("grouplist_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
+	_ = db.Del("pairkey_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
+	_ = db.Del("grouplist_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
 	// store? || persist this key and check the next Time.
-	err = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(pairKey, 4))
-	if err != nil {
-		return false
-	}
-	return true
+	_ = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(pairKey, 4))
+	return err == nil
 }
 
 // CustomRemoveUserGlobalMarryList just remove it,it will persist the key (referKeyStatus)
@@ -140,14 +137,11 @@ func CustomRemoveUserGlobalMarryList(db *sql.Sqlite, pairKey string, groupID int
 	}
 	// if found.
 	getThisKey := pairKeyNeed.PairKey
-	err = db.Del("pairkey_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
-	err = db.Del("grouplist_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
+	_ = db.Del("pairkey_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
+	_ = db.Del("grouplist_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
 	// store? || persist this key and check the next Time.
-	err = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(pairKey, statusID))
-	if err != nil {
-		return false
-	}
-	return true
+	_ = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(pairKey, statusID))
+	return err == nil
 }
 
 // CheckThisKeyStatus check this key status.
@@ -200,11 +194,7 @@ func CheckTheBlackListIsExistedToThisPerson(db *sql.Sqlite, userID int64, target
 	defer marryLocker.Unlock()
 	var blackListNeed BlackListStruct
 	err := db.Find("blacklist_"+strconv.FormatInt(userID, 10), &blackListNeed, "where blacklist is "+strconv.FormatInt(targetID, 10))
-	if err != nil {
-		// not init or didn't find.
-		return false
-	}
-	return true
+	return err == nil
 }
 
 // AddDisabledList add disabledList
