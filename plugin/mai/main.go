@@ -26,7 +26,7 @@ func init() {
 			return
 		}
 		txt := HandleMaiDataByUsingText(dataPlayer)
-		base64Font, err := text.RenderToBase64(txt, text.SakuraFontFile, 1920, 45)
+		base64Font, err := text.RenderToBase64(txt, text.BoldFontFile, 1920, 45)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
 			return

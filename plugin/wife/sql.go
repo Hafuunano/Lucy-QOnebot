@@ -110,18 +110,35 @@ func RemoveUserGlobalMarryList(db *sql.Sqlite, pairKey string, groupID int64) bo
 	defer marryLocker.Unlock()
 	// first find the key list.
 	var pairKeyNeed PairKeyStruct
-	err := db.Find("pairkey_"+strconv.FormatInt(groupID, 10), &pairKeyNeed, "where pairkey is "+pairKey)
+	err := db.Find("pairkey_"+strconv.FormatInt(groupID, 10), &pairKeyNeed, "where pairkey is '"+pairKey+"'")
 	if err != nil {
+		fmt.Print(err)
+		panic(err)
 		// cannnot find, don't need to remove.
 		return false
 	}
 	// if found.
 	getThisKey := pairKeyNeed.PairKey
-	_ = db.Del("pairkey_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
-	_ = db.Del("grouplist_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
+	err = db.Del("pairkey_"+strconv.FormatInt(groupID, 10), "where pairkey is '"+getThisKey+"'")
+	if err != nil {
+		panic(err)
+		// cannnot find, don't need to remove.
+		return false
+	}
+	err = db.Del("grouplist_"+strconv.FormatInt(groupID, 10), "where pairkey is '"+getThisKey+"'")
+	if err != nil {
+		panic(err)
+		// cannnot find, don't need to remove.
+		return false
+	}
+	err = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(pairKey, 4))
+	if err != nil {
+		panic(err)
+		// cannnot find, don't need to remove.
+		return false
+	}
 	// store? || persist this key and check the next Time.
-	_ = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(pairKey, 4))
-	return err == nil
+	return true
 }
 
 // CustomRemoveUserGlobalMarryList just remove it,it will persist the key (referKeyStatus)
@@ -130,15 +147,15 @@ func CustomRemoveUserGlobalMarryList(db *sql.Sqlite, pairKey string, groupID int
 	defer marryLocker.Unlock()
 	// first find the key list.
 	var pairKeyNeed PairKeyStruct
-	err := db.Find("pairkey_"+strconv.FormatInt(groupID, 10), &pairKeyNeed, "where pairkey is "+pairKey)
+	err := db.Find("pairkey_"+strconv.FormatInt(groupID, 10), &pairKeyNeed, "where pairkey is '"+pairKey+"'")
 	if err != nil {
 		// cannnot find, don't need to remove.
 		return false
 	}
 	// if found.
 	getThisKey := pairKeyNeed.PairKey
-	_ = db.Del("pairkey_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
-	_ = db.Del("grouplist_"+strconv.FormatInt(groupID, 10), "where pairkey is "+getThisKey)
+	_ = db.Del("pairkey_"+strconv.FormatInt(groupID, 10), "where pairkey is '"+getThisKey+"'")
+	_ = db.Del("grouplist_"+strconv.FormatInt(groupID, 10), "where pairkey is '"+getThisKey+"'")
 	// store? || persist this key and check the next Time.
 	_ = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(pairKey, statusID))
 	return err == nil
@@ -166,7 +183,7 @@ func AddBlackList(db *sql.Sqlite, userID int64, targetID int64) error {
 	marryLocker.Lock()
 	defer marryLocker.Unlock()
 	var blackListNeed BlackListStruct
-	err := db.Find("blacklist_"+strconv.FormatInt(userID, 10), &blackListNeed, "where blacklist is "+strconv.FormatInt(targetID, 10))
+	err := db.Find("blacklist_"+strconv.FormatInt(userID, 10), &blackListNeed, "where blacklist is '"+strconv.FormatInt(targetID, 10)+"'")
 	if err != nil {
 		// add it, not sure then init this and add.
 		_ = db.Create("blacklist_"+strconv.FormatInt(userID, 10), BlackListStruct{})
@@ -182,12 +199,12 @@ func DeleteBlackList(db *sql.Sqlite, userID int64, targetID int64) error {
 	marryLocker.Lock()
 	defer marryLocker.Unlock()
 	var blackListNeed BlackListStruct
-	err := db.Find("blacklist_"+strconv.FormatInt(userID, 10), &blackListNeed, "where blacklist is "+strconv.FormatInt(targetID, 10))
+	err := db.Find("blacklist_"+strconv.FormatInt(userID, 10), &blackListNeed, "where blacklist is '"+strconv.FormatInt(targetID, 10)+"'")
 	if err != nil {
 		// not init or didn't find.
 		return err
 	}
-	_ = db.Del("blacklist_"+strconv.FormatInt(userID, 10), "where blacklist is "+strconv.FormatInt(targetID, 10))
+	_ = db.Del("blacklist_"+strconv.FormatInt(userID, 10), "where blacklist is '"+strconv.FormatInt(targetID, 10)+"'")
 	return err
 }
 
@@ -196,7 +213,7 @@ func CheckTheBlackListIsExistedToThisPerson(db *sql.Sqlite, userID int64, target
 	marryLocker.Lock()
 	defer marryLocker.Unlock()
 	var blackListNeed BlackListStruct
-	err := db.Find("blacklist_"+strconv.FormatInt(userID, 10), &blackListNeed, "where blacklist is "+strconv.FormatInt(targetID, 10))
+	err := db.Find("blacklist_"+strconv.FormatInt(userID, 10), &blackListNeed, "where blacklist is '"+strconv.FormatInt(targetID, 10)+"'")
 	return err == nil
 }
 
@@ -205,7 +222,7 @@ func AddDisabledList(db *sql.Sqlite, userID int64, groupID int64) error {
 	marryLocker.Lock()
 	defer marryLocker.Unlock()
 	var disabledListNeed DisabledListStruct
-	err := db.Find("disabled_"+strconv.FormatInt(userID, 10), &disabledListNeed, "where disabledlist is "+strconv.FormatInt(groupID, 10))
+	err := db.Find("disabled_"+strconv.FormatInt(userID, 10), &disabledListNeed, "where disabledlist is '"+strconv.FormatInt(groupID, 10)+"'")
 	if err != nil {
 		// add it, not sure then init this and add.
 		_ = db.Create("disabled_"+strconv.FormatInt(userID, 10), DisabledListStruct{})
@@ -221,12 +238,12 @@ func DeleteDisabledList(db *sql.Sqlite, userID int64, groupID int64) error {
 	marryLocker.Lock()
 	defer marryLocker.Unlock()
 	var disabledListNeed DisabledListStruct
-	err := db.Find("disabled_"+strconv.FormatInt(userID, 10), &disabledListNeed, "where disabledlist is "+strconv.FormatInt(groupID, 10))
+	err := db.Find("disabled_"+strconv.FormatInt(userID, 10), &disabledListNeed, "where disabledlist is '"+strconv.FormatInt(groupID, 10)+"'")
 	if err != nil {
 		// not init or didn't find.
 		return err
 	}
-	_ = db.Del("disabled_"+strconv.FormatInt(userID, 10), "where disabledlist is "+strconv.FormatInt(groupID, 10))
+	_ = db.Del("disabled_"+strconv.FormatInt(userID, 10), "where disabledlist is '"+strconv.FormatInt(groupID, 10)+"'")
 	return err
 }
 
@@ -235,7 +252,7 @@ func CheckDisabledListIsExistedInThisGroup(db *sql.Sqlite, userID int64, groupID
 	marryLocker.Lock()
 	defer marryLocker.Unlock()
 	var disabledListNeed DisabledListStruct
-	err := db.Find("disabled_"+strconv.FormatInt(userID, 10), &disabledListNeed, "where disabledlist is "+strconv.FormatInt(groupID, 10))
+	err := db.Find("disabled_"+strconv.FormatInt(userID, 10), &disabledListNeed, "where disabledlist is '"+strconv.FormatInt(groupID, 10)+"'")
 	if err != nil {
 		// not init or didn't find.
 		return false
@@ -248,7 +265,7 @@ func AddOrderToList(db *sql.Sqlite, userID int64, targetID int64, time string, g
 	marryLocker.Lock()
 	defer marryLocker.Unlock()
 	var addOrderListNeed OrderListStruct
-	err := db.Find("orderlist_"+strconv.FormatInt(groupID, 10), &addOrderListNeed, "where order is "+strconv.FormatInt(userID, 10))
+	err := db.Find("orderlist_"+strconv.FormatInt(groupID, 10), &addOrderListNeed, "where order is '"+strconv.FormatInt(userID, 10)+"'")
 	if err != nil {
 		// create and insert.
 		_ = db.Create("orderlist_"+strconv.FormatInt(groupID, 10), OrderListStruct{})
@@ -264,11 +281,11 @@ func RemoveOrderToList(db *sql.Sqlite, userID int64, groupID int64) error {
 	marryLocker.Lock()
 	defer marryLocker.Unlock()
 	var addOrderListNeed OrderListStruct
-	err := db.Find("orderlist_"+strconv.FormatInt(groupID, 10), &addOrderListNeed, "where order is "+strconv.FormatInt(userID, 10))
+	err := db.Find("orderlist_"+strconv.FormatInt(groupID, 10), &addOrderListNeed, "where order is '"+strconv.FormatInt(userID, 10)+"'")
 	if err != nil {
 		return err
 	}
-	err = db.Del("orderlist_"+strconv.FormatInt(groupID, 10), "where order is "+strconv.FormatInt(userID, 10))
+	err = db.Del("orderlist_"+strconv.FormatInt(groupID, 10), "where order is '"+strconv.FormatInt(userID, 10)+"'")
 	return err
 }
 

@@ -73,9 +73,9 @@ func CheckTheUserIsTargetOrUser(db *sql.Sqlite, ctx *zero.Ctx, userID int64) (st
 	defer marryLocker.Unlock()
 	groupID := ctx.Event.GroupID
 	var globalDataStructList GlobalDataStruct
-	err := db.Find("grouplist_"+strconv.FormatInt(groupID, 10), &globalDataStructList, "where userid is "+strconv.FormatInt(userID, 10))
+	err := db.Find("grouplist_"+strconv.FormatInt(groupID, 10), &globalDataStructList, "where userid is '"+strconv.FormatInt(userID, 10)+"'")
 	if err != nil {
-		err = db.Find("grouplist_"+strconv.FormatInt(groupID, 10), &globalDataStructList, "where targetid is "+strconv.FormatInt(userID, 10))
+		err = db.Find("grouplist_"+strconv.FormatInt(groupID, 10), &globalDataStructList, "where targetid is '"+strconv.FormatInt(userID, 10)+"'")
 		if err != nil {
 			return -1, -1
 		}
@@ -122,7 +122,7 @@ func GetSomeRanDomChoiceProps(ctx *zero.Ctx) int64 {
 }
 
 // ReplyMeantMode format the reply and clear.
-func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, ctx *zero.Ctx) string {
+func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, ctx *zero.Ctx) message.MessageID {
 	msg := header
 	var replyTarget string
 	if statusCodeToPerson == 1 {
@@ -130,8 +130,10 @@ func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, 
 	} else {
 		replyTarget = "老公"
 	}
-	formatReply := msg + "\n今天你的群" + replyTarget + "是\n" + "[ " + ctx.CardOrNickName(referTarget) + " ] " + "( " + strconv.FormatInt(referTarget, 10) + " ) 哦w～"
-	return formatReply
+	aheader := msg + "\n今天你的群" + replyTarget + "是\n"
+	formatAvatar := GenerateUserImageLink(referTarget)
+	formatReply := "[ " + ctx.CardOrNickName(referTarget) + " ] " + "( " + strconv.FormatInt(referTarget, 10) + " ) 哦w～"
+	return ctx.SendChain(message.Text(aheader), message.Image(formatAvatar), message.Text(formatReply))
 }
 
 // GenerateMD5 Generate MD5
@@ -150,10 +152,10 @@ func CheckTheUserStatusAndDoRepeat(ctx *zero.Ctx) bool {
 	switch {
 	case getStatusCode == 0:
 		// case target mode (0)
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("貌似你今天已经有了哦～", ReplyMeantMode("", getOtherUserData, 0, ctx)))
+		ctx.Send(ReplyMeantMode("貌似你今天已经有了哦～", getOtherUserData, 0, ctx))
 		return false
 	case getStatusCode == 1:
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("貌似你今天已经有了哦～", ReplyMeantMode("", getOtherUserData, 1, ctx)))
+		ctx.Send(ReplyMeantMode("貌似你今天已经有了哦～", getOtherUserData, 1, ctx))
 		// case user mode (1)
 		return false
 	case getStatusCode == 10:
@@ -193,7 +195,7 @@ func ResuitTheReferUserAndMakeIt(ctx *zero.Ctx, dict map[string][]string, EventU
 		GlobalCDModelCost(ctx)
 		getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
 		// normal mode. nothing happened.
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMeantMode(getSuccessMsg, TargetUser, 1, ctx)))
+		ctx.Send(ReplyMeantMode(getSuccessMsg, TargetUser, 1, ctx))
 		generatePairKey := GenerateMD5(EventUser, TargetUser, ctx.Event.GroupID)
 		err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, EventUser, TargetUser, 1, generatePairKey)
 		if err != nil {
@@ -202,7 +204,7 @@ func ResuitTheReferUserAndMakeIt(ctx *zero.Ctx, dict map[string][]string, EventU
 		}
 	case returnNumber == 2:
 		GlobalCDModelCost(ctx)
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMeantMode("貌似很奇怪哦～因为某种奇怪的原因～1变成了0,0变成了1", TargetUser, 0, ctx)))
+		ctx.Send(ReplyMeantMode("貌似很奇怪哦～因为某种奇怪的原因～1变成了0,0变成了1", TargetUser, 0, ctx))
 		generatePairKey := GenerateMD5(TargetUser, EventUser, ctx.Event.GroupID)
 		err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, TargetUser, EventUser, 2, generatePairKey)
 		if err != nil {
@@ -215,7 +217,7 @@ func ResuitTheReferUserAndMakeIt(ctx *zero.Ctx, dict map[string][]string, EventU
 		// status 3 turns to be case 1 ,for it cannot check it again. (With 2 same person, so it can be panic.)
 		getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
 		// normal mode. nothing happened.
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMeantMode(getSuccessMsg, TargetUser, 1, ctx)))
+		ctx.Send(ReplyMeantMode(getSuccessMsg, TargetUser, 1, ctx))
 		generatePairKey := GenerateMD5(EventUser, TargetUser, ctx.Event.GroupID)
 		err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, EventUser, TargetUser, 1, generatePairKey)
 		if err != nil {
@@ -241,9 +243,9 @@ func CheckThePairKey(db *sql.Sqlite, uid int64, groupID int64) string {
 	marryLocker.Lock()
 	defer marryLocker.Unlock()
 	var globalDataStructList GlobalDataStruct
-	err := db.Find("grouplist_"+strconv.FormatInt(groupID, 10), &globalDataStructList, "where userid is "+strconv.FormatInt(uid, 10))
+	err := db.Find("grouplist_"+strconv.FormatInt(groupID, 10), &globalDataStructList, "where userid is '"+strconv.FormatInt(uid, 10)+"'")
 	if err != nil {
-		err = db.Find("grouplist_"+strconv.FormatInt(groupID, 10), &globalDataStructList, "where targetid is "+strconv.FormatInt(uid, 10))
+		err = db.Find("grouplist_"+strconv.FormatInt(groupID, 10), &globalDataStructList, "where targetid is '"+strconv.FormatInt(uid, 10)+"'")
 		if err != nil {
 			return ""
 		}
@@ -254,7 +256,8 @@ func CheckThePairKey(db *sql.Sqlite, uid int64, groupID int64) string {
 
 // GenerateUserImageLink Generate Format Link.
 func GenerateUserImageLink(uid int64) string {
-	return "https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(uid, 10) + "&s=200"
+	index := message.UnescapeCQCodeText("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(uid, 10) + "&s=640")
+	return index
 }
 
 // ResetToInitalizeMode delete marrylist (pairkey | grouplist)
@@ -284,7 +287,7 @@ func ResetToInitalizeMode() {
 // CheckTheOrderListAndBackDetailed Check this and reply some details
 func CheckTheOrderListAndBackDetailed(userID int64, groupID int64) (chance int, target int64, time string) {
 	var orderListStructFinder OrderListStruct
-	err := marryList.Find("orderlist_"+strconv.FormatInt(groupID, 10), &orderListStructFinder, "where order is "+strconv.FormatInt(userID, 10))
+	err := marryList.Find("orderlist_"+strconv.FormatInt(groupID, 10), &orderListStructFinder, "where order is '"+strconv.FormatInt(userID, 10)+"'")
 	if err != nil {
 		return 0, 0, ""
 	}
