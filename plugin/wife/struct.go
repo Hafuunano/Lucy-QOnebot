@@ -281,6 +281,19 @@ func ResetToInitalizeMode() {
 	}
 }
 
+// CheckTheOrderListAndBackDetailed Check this and reply some details
+func CheckTheOrderListAndBackDetailed(userID int64, groupID int64) (chance int, target int64, time string) {
+	var orderListStructFinder OrderListStruct
+	err := marryList.Find("orderlist_"+strconv.FormatInt(groupID, 10), &orderListStructFinder, "where order is "+strconv.FormatInt(userID, 10))
+	if err != nil {
+		return 0, 0, ""
+	}
+	getTheTarget := orderListStructFinder.TargerPerson
+	getTheTimer := orderListStructFinder.Time
+	getRandomMoreChance := rand.Intn(30)
+	return getRandomMoreChance, getTheTarget, getTheTimer
+}
+
 // FindStrings find the strings in list.
 func FindStrings(list []string, searchString string) []string {
 	result := make([]string, 0)
@@ -292,6 +305,7 @@ func FindStrings(list []string, searchString string) []string {
 	return result
 }
 
+// getNextEcecutionTime to this 23:00
 func getNextExecutionTime() time.Time {
 	now := time.Now()
 	nextExecutionTime := time.Date(now.Year(), now.Month(), now.Day(), 23, 0, 0, 0, now.Location())

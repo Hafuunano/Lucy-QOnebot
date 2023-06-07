@@ -144,6 +144,7 @@ func CustomRemoveUserGlobalMarryList(db *sql.Sqlite, pairKey string, groupID int
 	return err == nil
 }
 
+/*
 // CheckThisKeyStatus check this key status.
 func CheckThisKeyStatus(db *sql.Sqlite, pairKey string, groupID int64) int64 {
 	marryLocker.Lock()
@@ -157,6 +158,8 @@ func CheckThisKeyStatus(db *sql.Sqlite, pairKey string, groupID int64) int64 {
 	}
 	return pairKeyNeed.StatusID
 }
+
+*/
 
 // AddBlackList add blacklist
 func AddBlackList(db *sql.Sqlite, userID int64, targetID int64) error {
@@ -269,6 +272,7 @@ func RemoveOrderToList(db *sql.Sqlite, userID int64, groupID int64) error {
 	return err
 }
 
+/*
 // CheckThisOrderList getList
 func CheckThisOrderList(db *sql.Sqlite, userID int64, groupID int64) (OrderUser int64, TargetUSer int64, time string) {
 	marryLocker.Lock()
@@ -283,6 +287,8 @@ func CheckThisOrderList(db *sql.Sqlite, userID int64, groupID int64) (OrderUser 
 	time = addOrderListNeed.Time
 	return OrderUser, TargetUSer, time
 }
+
+*/
 
 // GetTheGroupList Get this group.
 func GetTheGroupList(gid int64) (list [][2]string, num int) {

@@ -28,6 +28,8 @@ import (
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/chat" // 回复
 
+	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/wife" // wife plugin
+
 	"github.com/FloatTech/floatbox/process"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/driver"
