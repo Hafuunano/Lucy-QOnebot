@@ -11,11 +11,27 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 )
 
 var GlobalTimeManager = rate.NewManager[int64](time.Hour*12, 6)
 var LeaveTimeManager = rate.NewManager[int64](time.Hour*12, 4)
+
+func init() {
+	timer := time.NewTimer(time.Until(getNextExecutionTime()))
+	// 启动一个 goroutine 监听定时器的到期事件
+	go func() {
+		for {
+			select {
+			case <-timer.C:
+				fmt.Println("Executing task...")
+				ResetToInitalizeMode()
+				timer.Reset(time.Until(getNextExecutionTime()))
+			}
+		}
+	}()
+}
 
 // GetUserListAndChooseOne choose people.
 func GetUserListAndChooseOne(ctx *zero.Ctx) int64 {
@@ -105,8 +121,8 @@ func GetSomeRanDomChoiceProps(ctx *zero.Ctx) int64 {
 	return 1
 }
 
-// ReplyMentMode format the reply and clear.
-func ReplyMentMode(header string, referTarget int64, statusCodeToPerson int64, ctx *zero.Ctx) string {
+// ReplyMeantMode format the reply and clear.
+func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, ctx *zero.Ctx) string {
 	msg := header
 	var replyTarget string
 	if statusCodeToPerson == 1 {
@@ -134,10 +150,10 @@ func CheckTheUserStatusAndDoRepeat(ctx *zero.Ctx) bool {
 	switch {
 	case getStatusCode == 0:
 		// case target mode (0)
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("貌似你今天已经有了哦～", ReplyMentMode("", getOtherUserData, 0, ctx)))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("貌似你今天已经有了哦～", ReplyMeantMode("", getOtherUserData, 0, ctx)))
 		return false
 	case getStatusCode == 1:
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("貌似你今天已经有了哦～", ReplyMentMode("", getOtherUserData, 1, ctx)))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("貌似你今天已经有了哦～", ReplyMeantMode("", getOtherUserData, 1, ctx)))
 		// case user mode (1)
 		return false
 	case getStatusCode == 10:
@@ -177,7 +193,7 @@ func ResuitTheReferUserAndMakeIt(ctx *zero.Ctx, dict map[string][]string, EventU
 		GlobalCDModelCost(ctx)
 		getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
 		// normal mode. nothing happened.
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode(getSuccessMsg, TargetUser, 1, ctx)))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMeantMode(getSuccessMsg, TargetUser, 1, ctx)))
 		generatePairKey := GenerateMD5(EventUser, TargetUser, ctx.Event.GroupID)
 		err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, EventUser, TargetUser, 1, generatePairKey)
 		if err != nil {
@@ -186,7 +202,7 @@ func ResuitTheReferUserAndMakeIt(ctx *zero.Ctx, dict map[string][]string, EventU
 		}
 	case returnNumber == 2:
 		GlobalCDModelCost(ctx)
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode("貌似很奇怪哦～因为某种奇怪的原因～1变成了0,0变成了1", TargetUser, 0, ctx)))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMeantMode("貌似很奇怪哦～因为某种奇怪的原因～1变成了0,0变成了1", TargetUser, 0, ctx)))
 		generatePairKey := GenerateMD5(TargetUser, EventUser, ctx.Event.GroupID)
 		err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, TargetUser, EventUser, 2, generatePairKey)
 		if err != nil {
@@ -199,7 +215,7 @@ func ResuitTheReferUserAndMakeIt(ctx *zero.Ctx, dict map[string][]string, EventU
 		// status 3 turns to be case 1 ,for it cannot check it again. (With 2 same person, so it can be panic.)
 		getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
 		// normal mode. nothing happened.
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMentMode(getSuccessMsg, TargetUser, 1, ctx)))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ReplyMeantMode(getSuccessMsg, TargetUser, 1, ctx)))
 		generatePairKey := GenerateMD5(EventUser, TargetUser, ctx.Event.GroupID)
 		err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, EventUser, TargetUser, 1, generatePairKey)
 		if err != nil {
@@ -220,6 +236,7 @@ func ResuitTheReferUserAndMakeIt(ctx *zero.Ctx, dict map[string][]string, EventU
 	}
 }
 
+// CheckThePairKey Check this pair key
 func CheckThePairKey(db *sql.Sqlite, uid int64, groupID int64) string {
 	marryLocker.Lock()
 	defer marryLocker.Unlock()
@@ -235,10 +252,51 @@ func CheckThePairKey(db *sql.Sqlite, uid int64, groupID int64) string {
 	return globalDataStructList.PairKey
 }
 
+// GenerateUserImageLink Generate Format Link.
 func GenerateUserImageLink(uid int64) string {
 	return "https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(uid, 10) + "&s=200"
 }
 
-/*
-This Path is to use to find the list and delete it.
-*/
+// ResetToInitalizeMode delete marrylist (pairkey | grouplist)
+func ResetToInitalizeMode() {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	getFullList, err := marryList.ListTables()
+	if err != nil {
+		panic(err)
+	}
+	// find all the list named: grouplist | pairkey
+	getFilteredList := FindStrings(getFullList, "grouplist")
+	getPairKeyFilteredList := FindStrings(getFullList, "pairkey")
+	getFullFilteredList := append(getFilteredList, getPairKeyFilteredList...)
+	getLength := len(getFullFilteredList)
+	if getLength == 0 {
+		return
+	}
+	for i := 0; i <= getLength; i++ {
+		err := marryList.Drop(getFullFilteredList[i])
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+// FindStrings find the strings in list.
+func FindStrings(list []string, searchString string) []string {
+	result := make([]string, 0)
+	for _, item := range list {
+		if strings.Contains(item, searchString) {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+func getNextExecutionTime() time.Time {
+	now := time.Now()
+	nextExecutionTime := time.Date(now.Year(), now.Month(), now.Day(), 23, 0, 0, 0, now.Location())
+	if nextExecutionTime.Before(now) {
+		nextExecutionTime = nextExecutionTime.Add(24 * time.Hour)
+	}
+	return nextExecutionTime
+}
