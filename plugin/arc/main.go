@@ -69,7 +69,7 @@ func init() {
 		_ = json.Unmarshal(dataBytes, &userinfo)
 		checkStatus := userinfo.Status
 		if checkStatus != 0 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常，可能是接口出现问题: ERR: ", userinfo.Message))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常: ", m[checkStatus]))
 			return
 		}
 		err = FormatInfo(ctx.Event.UserID, userinfo.Content.AccountInfo.Code, userinfo.Content.AccountInfo.Name).BindUserArcaeaInfo(arcAcc)
@@ -89,7 +89,7 @@ func init() {
 		sessionKey, sessionKeyInfo := aua.GetSessionQuery(os.Getenv("aualink"), os.Getenv("auakey"), id)
 		playerdataByte, playerDataByteReturnMsg := aua.GetB30BySession(os.Getenv("aualink"), os.Getenv("auakey"), sessionKey)
 		if playerDataByteReturnMsg != "" {
-			ctx.SendChain(message.Text("SessionQuery: ", playerDataByteReturnMsg, "\nSession查询列队中，请过一段时间重新尝试呢～"))
+			ctx.SendChain(message.Text("SessionQuery: ", playerDataByteReturnMsg, "\nSession查询中，请过一段时间尝试呢～"))
 			return
 		}
 		_ = json.Unmarshal(playerdataByte, &r)
@@ -105,7 +105,7 @@ func init() {
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		var SessionKeyInfoFull string
 		if sessionKeyInfo != "" {
-			SessionKeyInfoFull = "SessionKeyInfo: " + sessionKeyInfo
+			SessionKeyInfoFull = "SessionKeyInfo: " + m[-33]
 		}
 
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(SessionKeyInfoFull), message.Image("base64://"+base64Str))
@@ -147,7 +147,7 @@ func init() {
 		_ = json.Unmarshal(playerdataByte, &userinfo)
 		checkStatus := userinfo.Status
 		if checkStatus != 0 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: \n", userinfo.Message))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: \n", m[userinfo.Status]))
 			return
 		}
 		replyImage := RenderUserRecentLog(userinfo)
@@ -176,7 +176,7 @@ func init() {
 		_ = json.Unmarshal(getData, &userinfo)
 		checkStatus := userinfo.Status
 		if checkStatus != 0 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: \n", userinfo.Message))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: \n", m[checkStatus]))
 			return
 		}
 		replyImage := RenderUserRecentLog(userinfo)
