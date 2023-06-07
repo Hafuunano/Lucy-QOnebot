@@ -77,7 +77,7 @@ func init() {
 			return
 		}
 		reverseCheckTheUserIsDisabled := CheckDisabledListIsExistedInThisGroup(marryList, uid, gid)
-		if reverseCheckTheUserIsDisabled {
+		if !reverseCheckTheUserIsDisabled {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你已经禁用了被随机，所以不可以参与娶群友哦w"))
 			return
 		}
@@ -219,7 +219,7 @@ func init() {
 		choice := ctx.State["regex_matched"].([]string)[1]
 		fiancee, _ := strconv.ParseInt(ctx.State["regex_matched"].([]string)[2], 10, 64)
 		uid := ctx.Event.UserID
-		reverseCheckTheUserIsDisabled := CheckDisabledListIsExistedInThisGroup(marryList, uid, ctx.Event.GroupID)
+		reverseCheckTheUserIsDisabled := !CheckDisabledListIsExistedInThisGroup(marryList, uid, ctx.Event.GroupID)
 		if reverseCheckTheUserIsDisabled {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你已经禁用了被随机，所以不可以参与娶群友哦w"))
 			return
@@ -289,7 +289,7 @@ func init() {
 			return
 		}
 		reverseCheckTheUserIsDisabled := CheckDisabledListIsExistedInThisGroup(marryList, ctx.Event.UserID, ctx.Event.GroupID)
-		if reverseCheckTheUserIsDisabled {
+		if !reverseCheckTheUserIsDisabled {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你已经禁用了被随机，所以不可以参与娶群友哦w"))
 			return
 		}
@@ -311,7 +311,7 @@ func init() {
 		fiancee, _ := strconv.ParseInt(fid[2]+fid[3], 10, 64)
 		uid := ctx.Event.UserID
 		reverseCheckTheUserIsDisabled := CheckDisabledListIsExistedInThisGroup(marryList, ctx.Event.UserID, ctx.Event.GroupID)
-		if reverseCheckTheUserIsDisabled {
+		if !reverseCheckTheUserIsDisabled {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你已经禁用了被随机，所以不可以参与娶群友哦w"))
 			return
 		}
@@ -383,7 +383,7 @@ func init() {
 		fid := ctx.State["regex_matched"].([]string)
 		fiancee, _ := strconv.ParseInt(fid[2]+fid[3], 10, 64)
 		_ = DeleteBlackList(marryList, ctx.Event.UserID, fiancee)
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经移除了了～"))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经移除了～"))
 	})
 	engine.OnFullMatch("添加本群禁用群老婆", zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		gid := ctx.Event.GroupID
@@ -400,7 +400,7 @@ func init() {
 		si := coins.GetSignInByUID(sdb, ctx.Event.UserID)
 		fiancee, _ := strconv.ParseInt(fid[2]+fid[3], 10, 64)
 		reverseCheckTheUserIsDisabled := CheckDisabledListIsExistedInThisGroup(marryList, ctx.Event.UserID, ctx.Event.GroupID)
-		if reverseCheckTheUserIsDisabled {
+		if !reverseCheckTheUserIsDisabled {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你已经禁用了被随机，所以不可以参与娶群友哦w"))
 			return
 		}
@@ -408,22 +408,21 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("本次许愿的柠檬片不足哦～需要1000个柠檬片才可以哦w"))
 			return
 		}
-		getStatusIfBannned := CheckTheUserIsInBlackListOrGroupList(fiancee, ctx.Event.UserID, ctx.Event.GroupID)
-		if !getStatusIfBannned {
-			ctx.SendChain(message.Reply(ctx.Event.Message), message.Text("已经被对方Ban掉了，愿望无法实现～"))
+		if !CheckTheBlackListIsExistedToThisPerson(marryList, fiancee, ctx.Event.UserID) || !CheckTheBlackListIsExistedToThisPerson(marryList, ctx.Event.UserID, fiancee) {
+			ctx.SendChain(message.Reply(ctx.Event.Message), message.Text("已经被Ban掉了，愿望无法实现～"))
 			return
 		}
 		_, getTargetID, _ := CheckTheOrderListAndBackDetailed(ctx.Event.UserID, ctx.Event.GroupID)
-		if getTargetID != fiancee {
+		if getTargetID != fiancee && getTargetID != 0 {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("每次仅可以许愿一个人w 不允许第二个人"))
+			return
+		}
+		if fiancee == ctx.Event.UserID {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("坏哦！为什么要许自己的x"))
 			return
 		}
 		if getTargetID == fiancee {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经许过一次了哦～不需要第二次"))
-			return
-		}
-		if getTargetID == ctx.Event.UserID {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("坏哦！为什么要许自己的x"))
 			return
 		}
 		// Handler
@@ -431,5 +430,10 @@ func init() {
 		timeStamp := time.Now().Unix() + (6 * 60 * 60)
 		_ = AddOrderToList(marryList, ctx.Event.UserID, fiancee, strconv.FormatInt(timeStamp, 10), ctx.Event.GroupID)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经许愿成功了哦～w 给", ctx.CardOrNickName(fiancee), " 的许愿已经生效，将会在6小时后增加70%可能性实现w"))
+	})
+
+	engine.OnFullMatch("重置娶群友", zero.SuperUserPermission).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		ResetToInitalizeMode()
+		ctx.SendChain(message.Text("done"))
 	})
 }

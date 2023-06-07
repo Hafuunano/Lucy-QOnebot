@@ -93,11 +93,11 @@ func CheckTheUserIsInBlackListOrGroupList(userID int64, targetID int64, groupID 
 	1 --> the user random the person that he don't want (Other is in his blocklist) | or in blocklist(others)
 	*/
 	// first check the blocklist
-	if CheckTheBlackListIsExistedToThisPerson(marryList, userID, targetID) || CheckTheBlackListIsExistedToThisPerson(marryList, targetID, userID) {
+	if !CheckTheBlackListIsExistedToThisPerson(marryList, userID, targetID) || !CheckTheBlackListIsExistedToThisPerson(marryList, targetID, userID) {
 		return true
 	}
 	// check the target is disabled this group
-	if CheckDisabledListIsExistedInThisGroup(marryList, userID, groupID) {
+	if !CheckDisabledListIsExistedInThisGroup(marryList, userID, groupID) {
 		return true
 	}
 	return false
@@ -276,7 +276,7 @@ func ResetToInitalizeMode() {
 	if getLength == 0 {
 		return
 	}
-	for i := 0; i <= getLength; i++ {
+	for i := 0; i < getLength; i++ {
 		err := marryList.Drop(getFullFilteredList[i])
 		if err != nil {
 			panic(err)

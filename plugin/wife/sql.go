@@ -88,12 +88,9 @@ func InsertUserGlobalMarryList(db *sql.Sqlite, groupID int64, UserID int64, targ
 	defer marryLocker.Unlock()
 	formatList := FormatInsertUserGlobalMarryList(UserID, targetID, PairKeyRaw)
 	err := db.Insert("grouplist_"+strconv.FormatInt(groupID, 10), formatList)
-	fmt.Print(err, "1")
 	if err != nil {
 		err = db.Create("grouplist_"+strconv.FormatInt(groupID, 10), &GlobalDataStruct{})
-		fmt.Print(err, "2")
 		err = db.Insert("grouplist_"+strconv.FormatInt(groupID, 10), formatList)
-		fmt.Print(err, "4")
 	}
 	// throw key
 	err = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(PairKeyRaw, StatusID))
@@ -186,7 +183,7 @@ func AddBlackList(db *sql.Sqlite, userID int64, targetID int64) error {
 	err := db.Find("blacklist_"+strconv.FormatInt(userID, 10), &blackListNeed, "where blacklist is '"+strconv.FormatInt(targetID, 10)+"'")
 	if err != nil {
 		// add it, not sure then init this and add.
-		_ = db.Create("blacklist_"+strconv.FormatInt(userID, 10), BlackListStruct{})
+		_ = db.Create("blacklist_"+strconv.FormatInt(userID, 10), &BlackListStruct{})
 		err = db.Insert("blacklist_"+strconv.FormatInt(userID, 10), FormatBlackList(targetID))
 		return err
 	}
@@ -214,7 +211,13 @@ func CheckTheBlackListIsExistedToThisPerson(db *sql.Sqlite, userID int64, target
 	defer marryLocker.Unlock()
 	var blackListNeed BlackListStruct
 	err := db.Find("blacklist_"+strconv.FormatInt(userID, 10), &blackListNeed, "where blacklist is '"+strconv.FormatInt(targetID, 10)+"'")
-	return err == nil
+	if err != nil {
+		return true
+	}
+	if blackListNeed.BlackList == targetID {
+		return false
+	}
+	return true
 }
 
 // AddDisabledList add disabledList
@@ -225,7 +228,7 @@ func AddDisabledList(db *sql.Sqlite, userID int64, groupID int64) error {
 	err := db.Find("disabled_"+strconv.FormatInt(userID, 10), &disabledListNeed, "where disabledlist is '"+strconv.FormatInt(groupID, 10)+"'")
 	if err != nil {
 		// add it, not sure then init this and add.
-		_ = db.Create("disabled_"+strconv.FormatInt(userID, 10), DisabledListStruct{})
+		err = db.Create("disabled_"+strconv.FormatInt(userID, 10), &DisabledListStruct{})
 		err = db.Insert("disabled_"+strconv.FormatInt(userID, 10), FormatDisabledList(groupID))
 		return err
 	}
@@ -255,6 +258,9 @@ func CheckDisabledListIsExistedInThisGroup(db *sql.Sqlite, userID int64, groupID
 	err := db.Find("disabled_"+strconv.FormatInt(userID, 10), &disabledListNeed, "where disabledlist is '"+strconv.FormatInt(groupID, 10)+"'")
 	if err != nil {
 		// not init or didn't find.
+		return true
+	}
+	if disabledListNeed.DisabledList == groupID {
 		return false
 	}
 	return true
@@ -268,7 +274,7 @@ func AddOrderToList(db *sql.Sqlite, userID int64, targetID int64, time string, g
 	err := db.Find("orderlist_"+strconv.FormatInt(groupID, 10), &addOrderListNeed, "where order is '"+strconv.FormatInt(userID, 10)+"'")
 	if err != nil {
 		// create and insert.
-		_ = db.Create("orderlist_"+strconv.FormatInt(groupID, 10), OrderListStruct{})
+		_ = db.Create("orderlist_"+strconv.FormatInt(groupID, 10), &OrderListStruct{})
 		_ = db.Insert("orderlist_"+strconv.FormatInt(groupID, 10), FormatOrderList(userID, targetID, time))
 		return err
 	}
