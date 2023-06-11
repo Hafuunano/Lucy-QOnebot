@@ -5,15 +5,18 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/ctxext"
 	aua "github.com/MoYoez/Arcaea_auaAPI"
+	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"image"
 	"image/jpeg"
 	"os"
+	"strconv"
 )
 
 var (
@@ -32,9 +35,21 @@ func init() {
 	engine.OnRegex(`^[！!]arc\s*(\d+)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		id := ctx.State["regex_matched"].([]string)[1]
 		sessionKey, sessionKeyInfo := aua.GetSessionQuery(os.Getenv("aualink"), os.Getenv("auakey"), id)
-		playerdataByte, playerDataByteReturnMsg := aua.GetB30BySession(os.Getenv("aualink"), os.Getenv("auakey"), sessionKey)
-		if playerDataByteReturnMsg != "" {
-			ctx.SendChain(message.Text("SessionQuery: ", playerDataByteReturnMsg, "\nSession查询列队中，请过一段时间重新尝试呢～"))
+		playerdataByte, err := aua.DrawRequestArc(os.Getenv("aualink")+"/arcapi/user/bests/result?session_info="+sessionKey+"&overflow=10&with_recent=false&with_song_info=true", os.Getenv("auakey"))
+		getPlayerReplyStatusId := gjson.Get(string(playerdataByte), "status").Int()
+		switch {
+		case getPlayerReplyStatusId == -31:
+			getChartNumber := gjson.Get(string(playerdataByte), "content.queried_charts").String()
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-31]+getChartNumber+"\n预计等待时间：1-3 分钟"))
+			return
+		case getPlayerReplyStatusId == -32:
+			getUserSessionWaitList := gjson.Get(string(playerdataByte), "current_account").Int()
+			perdictWaitTime := (5-float64(getUserSessionWaitList))*0.5 + 3
+			strPerdictWaitTime := fmt.Sprintf("%f", perdictWaitTime)
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-32]+strconv.FormatInt(getUserSessionWaitList, 10)+"\n预计等待时间："+strPerdictWaitTime+"分钟"))
+			return
+		case getPlayerReplyStatusId != 0 && getPlayerReplyStatusId != -33:
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w？貌似出现了一些问题：Code: ", getPlayerReplyStatusId, "信息：", m[int(getPlayerReplyStatusId)]))
 			return
 		}
 		_ = json.Unmarshal(playerdataByte, &r)
@@ -44,7 +59,7 @@ func init() {
 		basicBG := DrawMainUserB30(mainBGDecoded, r)
 		tureResult := FinishedFullB30(basicBG, r)
 		var buf bytes.Buffer
-		err := jpeg.Encode(&buf, tureResult, nil)
+		err = jpeg.Encode(&buf, tureResult, nil)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
 			return
@@ -83,13 +98,25 @@ func init() {
 	engine.OnRegex(`[！!]arc\sb30$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		id, err := GetUserArcaeaInfo(arcAcc, ctx)
 		if err != nil || id == "" {
-			ctx.SendChain(message.Text("cannot get user bind info."))
+			ctx.SendChain(message.Text("找不到用户信息，请检查你是否已经在Lucy端进行绑定，方式： “！arc bind {username | userid} ” "))
 			return
 		}
 		sessionKey, sessionKeyInfo := aua.GetSessionQuery(os.Getenv("aualink"), os.Getenv("auakey"), id)
-		playerdataByte, playerDataByteReturnMsg := aua.GetB30BySession(os.Getenv("aualink"), os.Getenv("auakey"), sessionKey)
-		if playerDataByteReturnMsg != "" {
-			ctx.SendChain(message.Text("SessionQuery: ", playerDataByteReturnMsg, "\nSession查询中，请过一段时间尝试呢～"))
+		playerdataByte, err := aua.DrawRequestArc(os.Getenv("aualink")+"/arcapi/user/bests/result?session_info="+sessionKey+"&overflow=10&with_recent=false&with_song_info=true", os.Getenv("auakey"))
+		getPlayerReplyStatusId := gjson.Get(string(playerdataByte), "status").Int()
+		switch {
+		case getPlayerReplyStatusId == -31:
+			getChartNumber := gjson.Get(string(playerdataByte), "content.queried_charts").String()
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-31]+getChartNumber+"\n预计等待时间：1-3 分钟"))
+			return
+		case getPlayerReplyStatusId == -32:
+			getUserSessionWaitList := gjson.Get(string(playerdataByte), "current_account").Int()
+			perdictWaitTime := (5-float64(getUserSessionWaitList))*0.5 + 3
+			strPerdictWaitTime := fmt.Sprintf("%f", perdictWaitTime)
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-32]+strconv.FormatInt(getUserSessionWaitList, 10)+"\n预计等待时间："+strPerdictWaitTime+"分钟"))
+			return
+		case getPlayerReplyStatusId != 0 && getPlayerReplyStatusId != -33:
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w？貌似出现了一些问题：Code: ", getPlayerReplyStatusId, "信息：", m[int(getPlayerReplyStatusId)]))
 			return
 		}
 		_ = json.Unmarshal(playerdataByte, &r)
@@ -105,7 +132,7 @@ func init() {
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		var SessionKeyInfoFull string
 		if sessionKeyInfo != "" {
-			SessionKeyInfoFull = "SessionKeyInfo: " + m[-33]
+			SessionKeyInfoFull = m[-33]
 		}
 
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(SessionKeyInfoFull), message.Image("base64://"+base64Str))
@@ -134,7 +161,7 @@ func init() {
 		// get info.
 		id, err := GetUserArcaeaInfo(arcAcc, ctx)
 		if err != nil || id == "" {
-			ctx.SendChain(message.Text("cannot get user bind info."))
+			ctx.SendChain(message.Text("找不到用户信息，请检查你是否已经在Lucy端进行绑定，方式： “！arc bind {username | userid} ” "))
 			return
 		}
 		// get player info
@@ -165,7 +192,7 @@ func init() {
 		songDiff := ctx.State["regex_matched"].([]string)[2]
 		id, err := GetUserArcaeaInfo(arcAcc, ctx)
 		if err != nil || id == "" {
-			ctx.SendChain(message.Text("cannot get user bind info."))
+			ctx.SendChain(message.Text("找不到用户信息，请检查你是否已经在Lucy端进行绑定，方式： “！arc bind {username | userid} ” "))
 			return
 		}
 		getData, err := aua.GetUserBest(os.Getenv("aualink"), os.Getenv("auakey"), id, songName, songDiff)

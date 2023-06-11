@@ -37,3 +37,25 @@ var m = map[int]string{
 	-34:  "用户无效",
 	-233: "发生内部错误(非Bot触发)",
 }
+
+/*
+{
+    "status": -31,
+    "message": "session querying, queried charts: 10",
+    "content": {
+        "queried_charts": 10
+    }
+}
+
+*/
+
+/*
+
+{
+    "status": -32,
+    "message": "session waiting for account, account count: 1",
+    "content": {
+        "current_account": 1
+    }
+}
+*/
