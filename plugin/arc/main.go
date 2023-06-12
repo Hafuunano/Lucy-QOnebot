@@ -59,7 +59,7 @@ func init() {
 		basicBG := DrawMainUserB30(mainBGDecoded, r)
 		tureResult := FinishedFullB30(basicBG, r)
 		var buf bytes.Buffer
-		err = jpeg.Encode(&buf, tureResult, nil)
+		err := jpeg.Encode(&buf, tureResult, nil)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
 			return
