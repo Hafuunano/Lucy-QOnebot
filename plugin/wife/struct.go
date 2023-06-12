@@ -101,18 +101,6 @@ func CheckTheUserIsInBlackListOrGroupList(userID int64, targetID int64, groupID 
 	return false
 }
 
-// CheckTheUserIsInBlackList 检查是否黑名单，不检查disabled
-func CheckTheUserIsInBlackList(userID int64, targetID int64, groupID int64) bool {
-	/* -1 --> both is null
-	1 --> the user random the person that he don't want (Other is in his blocklist) | or in blocklist(others)
-	*/
-	// first check the blocklist
-	if !CheckTheBlackListIsExistedToThisPerson(marryList, userID, targetID) || !CheckTheBlackListIsExistedToThisPerson(marryList, targetID, userID) {
-		return true
-	}
-	return false
-}
-
 // GetSomeRanDomChoiceProps get some props chances to make it random.
 func GetSomeRanDomChoiceProps(ctx *zero.Ctx) int64 {
 	// get Random numbers.
