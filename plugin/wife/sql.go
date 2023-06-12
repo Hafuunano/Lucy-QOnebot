@@ -1,11 +1,11 @@
 package wife
 
 import (
-	"fmt"
-	sql "github.com/FloatTech/sqlite"
 	"strconv"
 	"sync"
 	"time"
+
+	sql "github.com/FloatTech/sqlite"
 )
 
 // BlackListStruct (Example: blacklist_1292581422)
@@ -89,8 +89,8 @@ func InsertUserGlobalMarryList(db *sql.Sqlite, groupID int64, UserID int64, targ
 	formatList := FormatInsertUserGlobalMarryList(UserID, targetID, PairKeyRaw)
 	err := db.Insert("grouplist_"+strconv.FormatInt(groupID, 10), formatList)
 	if err != nil {
-		err = db.Create("grouplist_"+strconv.FormatInt(groupID, 10), &GlobalDataStruct{})
-		err = db.Insert("grouplist_"+strconv.FormatInt(groupID, 10), formatList)
+		_ = db.Create("grouplist_"+strconv.FormatInt(groupID, 10), &GlobalDataStruct{})
+		_ = db.Insert("grouplist_"+strconv.FormatInt(groupID, 10), formatList)
 	}
 	// throw key
 	err = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(PairKeyRaw, StatusID))
@@ -109,8 +109,6 @@ func RemoveUserGlobalMarryList(db *sql.Sqlite, pairKey string, groupID int64) bo
 	var pairKeyNeed PairKeyStruct
 	err := db.Find("pairkey_"+strconv.FormatInt(groupID, 10), &pairKeyNeed, "where pairkey is '"+pairKey+"'")
 	if err != nil {
-		fmt.Print(err)
-		panic(err)
 		// cannnot find, don't need to remove.
 		return false
 	}
@@ -118,24 +116,17 @@ func RemoveUserGlobalMarryList(db *sql.Sqlite, pairKey string, groupID int64) bo
 	getThisKey := pairKeyNeed.PairKey
 	err = db.Del("pairkey_"+strconv.FormatInt(groupID, 10), "where pairkey is '"+getThisKey+"'")
 	if err != nil {
-		panic(err)
 		// cannnot find, don't need to remove.
 		return false
 	}
 	err = db.Del("grouplist_"+strconv.FormatInt(groupID, 10), "where pairkey is '"+getThisKey+"'")
 	if err != nil {
-		panic(err)
 		// cannnot find, don't need to remove.
 		return false
 	}
 	err = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(pairKey, 4))
-	if err != nil {
-		panic(err)
-		// cannnot find, don't need to remove.
-		return false
-	}
+	return err == nil
 	// store? || persist this key and check the next Time.
-	return true
 }
 
 // CustomRemoveUserGlobalMarryList just remove it,it will persist the key (referKeyStatus)
@@ -228,8 +219,8 @@ func AddDisabledList(db *sql.Sqlite, userID int64, groupID int64) error {
 	err := db.Find("disabled_"+strconv.FormatInt(userID, 10), &disabledListNeed, "where disabledlist is '"+strconv.FormatInt(groupID, 10)+"'")
 	if err != nil {
 		// add it, not sure then init this and add.
-		err = db.Create("disabled_"+strconv.FormatInt(userID, 10), &DisabledListStruct{})
-		err = db.Insert("disabled_"+strconv.FormatInt(userID, 10), FormatDisabledList(groupID))
+		_ = db.Create("disabled_"+strconv.FormatInt(userID, 10), &DisabledListStruct{})
+		_ = db.Insert("disabled_"+strconv.FormatInt(userID, 10), FormatDisabledList(groupID))
 		return err
 	}
 	// find this so don't do it.

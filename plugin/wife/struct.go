@@ -4,15 +4,16 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"math/rand"
+	"strconv"
+	"strings"
+	"time"
+
 	fcext "github.com/FloatTech/floatbox/ctxext"
 	sql "github.com/FloatTech/sqlite"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"github.com/wdvxdr1123/ZeroBot/message"
-	"math/rand"
-	"strconv"
-	"strings"
-	"time"
 )
 
 var GlobalTimeManager = rate.NewManager[int64](time.Hour*12, 6)
@@ -22,13 +23,10 @@ func init() {
 	timer := time.NewTimer(time.Until(getNextExecutionTime()))
 	// 启动一个 goroutine 监听定时器的到期事件
 	go func() {
-		for {
-			select {
-			case <-timer.C:
-				fmt.Println("Executing task...")
-				ResetToInitalizeMode()
-				timer.Reset(time.Until(getNextExecutionTime()))
-			}
+		for range timer.C {
+			fmt.Println("Executing task...")
+			ResetToInitalizeMode()
+			timer.Reset(time.Until(getNextExecutionTime()))
 		}
 	}()
 }
@@ -103,6 +101,18 @@ func CheckTheUserIsInBlackListOrGroupList(userID int64, targetID int64, groupID 
 	return false
 }
 
+// CheckTheUserIsInBlackList 检查是否黑名单，不检查disabled
+func CheckTheUserIsInBlackList(userID int64, targetID int64, groupID int64) bool {
+	/* -1 --> both is null
+	1 --> the user random the person that he don't want (Other is in his blocklist) | or in blocklist(others)
+	*/
+	// first check the blocklist
+	if !CheckTheBlackListIsExistedToThisPerson(marryList, userID, targetID) || !CheckTheBlackListIsExistedToThisPerson(marryList, targetID, userID) {
+		return true
+	}
+	return false
+}
+
 // GetSomeRanDomChoiceProps get some props chances to make it random.
 func GetSomeRanDomChoiceProps(ctx *zero.Ctx) int64 {
 	// get Random numbers.
@@ -170,7 +180,7 @@ func CheckTheTargetUserStatusAndDoRepeat(ctx *zero.Ctx, ChooseAPerson int64) boo
 	getTargetStatusCode, _ := CheckTheUserIsTargetOrUser(marryList, ctx, ChooseAPerson) // 判断这个target是否已经和别人在一起了，同时判断Type3
 	switch {
 	case getTargetStatusCode == 1 || getTargetStatusCode == 0:
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("抽取到了～不过对方已经有人了哦w～算是运气不好的一次呢,Lucy多给一次机会呢w"))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("对方已经有人了哦w～算是运气不好的一次呢,Lucy多给一次机会呢w"))
 		return false
 	case getTargetStatusCode == 10:
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("啾啾～今天的对方是单身贵族哦（笑~ Lucy再给你一次机会哦w"))

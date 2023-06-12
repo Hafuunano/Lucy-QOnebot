@@ -1,7 +1,6 @@
 package wife
 
 import (
-	"fmt"
 	coins "github.com/FloatTech/ZeroBot-Plugin/compounds/coins"
 	"github.com/FloatTech/floatbox/binary"
 	ctrl "github.com/FloatTech/zbpctrl"
@@ -51,7 +50,7 @@ func init() {
 	dict := make(map[string][]string) // this dict is used to reply
 	// dict path.
 	dict["block"] = []string{"嗯哼？貌似没有找到哦w", "再试试哦w，或许有帮助w", "运气不太好哦，想一下办法呢x"}
-	dict["success"] = []string{"Lucky To You~", "恭喜哦ww~ ", "这边来恭喜一下哦w～"}
+	dict["success"] = []string{"Lucky To You~", "恭喜哦ww~ ", "这边来恭喜一下哦w～", "貌似很成功的一次尝试呢w~"}
 	dict["failed"] = []string{"今天的运气有一点背哦~这一次没有成功呢x", "_(:з」∠)_下次还有机会 抱抱w", "没关系哦，虽然失败了但还有机会呢x"}
 	dict["ntr"] = []string{"嗯哼～这位还是成功了呢x", "aaa 好怪 不过还是让你通过了 ^^ "}
 	dict["lost_failed"] = []string{"为什么要分呢? 让咱捏捏w", "太坏了啦！不许！"}
@@ -70,37 +69,53 @@ func init() {
 			- add this key.
 			- add more feature.
 		*/
+		/*
+			TODO: HIDE MODE TYPE 6
+
+		*/
 		uid := ctx.Event.UserID
 		gid := ctx.Event.GroupID
-		// fast check
-		if !CheckTheUserStatusAndDoRepeat(ctx) {
-			return
-		}
-		reverseCheckTheUserIsDisabled := CheckDisabledListIsExistedInThisGroup(marryList, uid, gid)
-		if !reverseCheckTheUserIsDisabled {
+		// Check if Disabled this group.
+		if !CheckDisabledListIsExistedInThisGroup(marryList, uid, gid) {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你已经禁用了被随机，所以不可以参与娶群友哦w"))
 			return
 		}
+		// fast check (Check User Itself.)
+		if !CheckTheUserStatusAndDoRepeat(ctx) {
+			return
+		}
+
 		ChooseAPerson := GetUserListAndChooseOne(ctx)
 		// ok , go next. || before that we should check this person is in the lucky list?
-		// reverse check
+
+		// Luck Path. (Only available in marry action.)
 		getLuckyChance, getLuckyPeople, getLuckyTime := CheckTheOrderListAndBackDetailed(ctx.Event.UserID, ctx.Event.GroupID)
 		getCurrentTime := time.Now().Unix()
 		getLuckyTimeToInt64, _ := strconv.ParseInt(getLuckyTime, 10, 64)
-		if getLuckyChance > 10 && getLuckyTimeToInt64 > getCurrentTime {
+
+		if getLuckyChance > 10 && getLuckyTimeToInt64 < getCurrentTime {
+			if getLuckyTimeToInt64+(24*60*60) < getCurrentTime {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("貌似时间过去的太久了 这一次算是撤销掉了哦x,不过返回消耗的柠檬片，并且机会不变"))
+				_ = RemoveOrderToList(marryList, ctx.Event.UserID, gid)
+				getUserID := coins.GetSignInByUID(sdb, ctx.Event.UserID)
+				_ = coins.InsertUserCoins(sdb, ctx.Event.UserID, getUserID.Coins+1000)
+				return
+			}
 			getTargetStatusCode, _ := CheckTheUserIsTargetOrUser(marryList, ctx, getLuckyPeople) // 判断这个target是否已经和别人在一起了，同时判断Type3
 			if getTargetStatusCode == -1 {
 				// do this?
 				getExistedToken := GlobalCDModelCostLeastReply(ctx)
 				if getExistedToken == 0 {
-					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天的机会已经使用完了哦～12小时后再来试试吧，不过这边可以透露一下～已经抽到了哦w～不过给你保留这次机会w"))
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天的机会已经使用完了哦～12小时后再来试试吧，不过这边可以透露一下～许愿池已经实现了哦w～不过给你保留这次机会w"))
 					return
 				}
 				// check the target status.
 				getStatusIfBannned := CheckTheUserIsInBlackListOrGroupList(getLuckyPeople, uid, gid)
 				if getStatusIfBannned {
 					// blocked.
-					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("看起来挺倒霉的～貌似对方在许愿的过程中加入了黑名单x，只能无情删掉了哦x,不过这一次机会不会被浪费掉"))
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("看起来挺倒霉的～貌似对方在许愿的过程中加入了黑名单x,或者对方已经禁用了对于本群的功能，只能无情删掉了哦x,不过这一次机会不会被浪费掉，并且会返回相应的柠檬片～"))
+					getUserID := coins.GetSignInByUID(sdb, ctx.Event.UserID)
+					_ = coins.InsertUserCoins(sdb, ctx.Event.UserID, getUserID.Coins+1000)
 					_ = RemoveOrderToList(marryList, uid, gid)
 					return
 				}
@@ -110,30 +125,21 @@ func init() {
 				// normal mode. nothing happened.
 				ctx.Send(ReplyMeantMode("许愿池生效～\n"+getSuccessMsg, getLuckyPeople, 1, ctx))
 				generatePairKey := GenerateMD5(ctx.Event.UserID, getLuckyPeople, ctx.Event.GroupID)
-				err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, getLuckyPeople, 1, generatePairKey)
-				if err != nil {
-					fmt.Print(err)
-					return
-				}
-				err = RemoveOrderToList(marryList, ctx.Event.UserID, gid)
-				if err != nil {
-					fmt.Print(err)
-					return
-				}
+				_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, getLuckyPeople, 1, generatePairKey)
+				_ = RemoveOrderToList(marryList, ctx.Event.UserID, gid)
 				return
 			} else {
+				// target not -1 (has others.)
 				// didn't do it.
 				GlobalCDModelCost(ctx)
-				err := RemoveOrderToList(marryList, ctx.Event.UserID, gid)
-				if err != nil {
-					fmt.Print(err)
-					return
-				}
+				_ = RemoveOrderToList(marryList, ctx.Event.UserID, gid)
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("抱歉哦～虽然已经使用了愿望池，不过仍然没有成功呢awa～"))
 				// handle this chance but no cares
 				return
 			}
 		}
+
+		// Luck Path end.
 
 		if !CheckTheTargetUserStatusAndDoRepeat(ctx, ChooseAPerson) {
 			return
@@ -152,7 +158,7 @@ func init() {
 			return
 		}
 		// go next. do something colorful, pls cost something.
-		// go next.
+
 		getExistedToken := GlobalCDModelCostLeastReply(ctx)
 		if getExistedToken == 0 {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天的机会已经使用完了哦～12小时后再来试试吧"))
@@ -165,12 +171,9 @@ func init() {
 			// drop target pls.
 			ctx.Send(ReplyMeantMode("嗯哼哼～抽到了自己，然而 Lucy 还是将双方写成一个人哦w （笑w ", ctx.Event.UserID, 1, ctx))
 			generatePairKey := GenerateMD5(ctx.Event.UserID, ctx.Event.UserID, ctx.Event.GroupID)
-			err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 3, generatePairKey)
-			if err != nil {
-				panic(err)
-			}
+			_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 3, generatePairKey)
+
 		}
-		// get failed possibility.
 		returnNumber := GetSomeRanDomChoiceProps(ctx)
 		switch {
 		case returnNumber == 1:
@@ -179,29 +182,19 @@ func init() {
 			// normal mode. nothing happened.
 			ctx.Send(ReplyMeantMode(getSuccessMsg, ChooseAPerson, 1, ctx))
 			generatePairKey := GenerateMD5(ctx.Event.UserID, ChooseAPerson, ctx.Event.GroupID)
-			err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ChooseAPerson, 1, generatePairKey)
-			if err != nil {
-				fmt.Print(err)
-				return
-			}
+			_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ChooseAPerson, 1, generatePairKey)
 		case returnNumber == 2:
 			GlobalCDModelCost(ctx)
 			ctx.Send(ReplyMeantMode("貌似很奇怪哦～因为某种奇怪的原因～1变成了0,0变成了1", ChooseAPerson, 0, ctx))
 			generatePairKey := GenerateMD5(ChooseAPerson, ctx.Event.UserID, ctx.Event.GroupID)
-			err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ChooseAPerson, ctx.Event.UserID, 2, generatePairKey)
-			if err != nil {
-				panic(err)
-			}
+			_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ChooseAPerson, ctx.Event.UserID, 2, generatePairKey)
 		// reverse Target Mode
 		case returnNumber == 3:
 			GlobalCDModelCost(ctx)
 			// drop target pls.
 			ctx.Send(ReplyMeantMode("嗯哼哼～发生了一些错误～本来应当抽到别人的变成了自己～所以", ctx.Event.UserID, 1, ctx))
 			generatePairKey := GenerateMD5(ctx.Event.UserID, ctx.Event.UserID, ctx.Event.GroupID)
-			err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 3, generatePairKey)
-			if err != nil {
-				panic(err)
-			}
+			_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 3, generatePairKey)
 		// you became your own target
 		case returnNumber == 6:
 			GlobalCDModelCost(ctx)
@@ -209,18 +202,21 @@ func init() {
 			getHideMsg := dict["hide_mode"][rand.Intn(len(dict["hide_mode"]))]
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(getHideMsg, "\n貌似没有任何反馈～"))
 			generatePairKey := GenerateMD5(ctx.Event.UserID, ChooseAPerson, ctx.Event.GroupID)
-			err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 6, generatePairKey)
-			if err != nil {
-				panic(err)
-			}
+			_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 6, generatePairKey)
 		}
 	})
-	engine.OnRegex(`^(娶|嫁)\[CQ:at,qq=(\d+)\]`, zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+
+	engine.OnRegex(`^(娶|嫁)(\[CQ:at,qq=(\d+)\]|Lucy)`, zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		choice := ctx.State["regex_matched"].([]string)[1]
-		fiancee, _ := strconv.ParseInt(ctx.State["regex_matched"].([]string)[2], 10, 64)
+		fianceeRaw := ctx.State["regex_matched"].([]string)[2]
+		var fiancee int64
+		if fianceeRaw == "Lucy" {
+			fiancee = ctx.Event.SelfID
+		} else {
+			fiancee, _ = strconv.ParseInt(fianceeRaw, 10, 64)
+		}
 		uid := ctx.Event.UserID
-		reverseCheckTheUserIsDisabled := !CheckDisabledListIsExistedInThisGroup(marryList, uid, ctx.Event.GroupID)
-		if reverseCheckTheUserIsDisabled {
+		if !CheckDisabledListIsExistedInThisGroup(marryList, uid, ctx.Event.GroupID) {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你已经禁用了被随机，所以不可以参与娶群友哦w"))
 			return
 		}
@@ -263,11 +259,7 @@ func init() {
 				// normal mode. nothing happened.
 				ctx.Send(ReplyMeantMode(getSuccessMsg, fiancee, 1, ctx))
 				generatePairKey := GenerateMD5(ctx.Event.UserID, fiancee, ctx.Event.GroupID)
-				err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, fiancee, 1, generatePairKey)
-				if err != nil {
-					fmt.Print(err)
-					return
-				}
+				_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, fiancee, 1, generatePairKey)
 				return
 			}
 		}
@@ -278,6 +270,7 @@ func init() {
 			ResuitTheReferUserAndMakeIt(ctx, dict, fiancee, uid)
 		}
 	})
+
 	engine.OnFullMatch("我要离婚", zero.OnlyToMe, zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		getStatusCode, _ := CheckTheUserIsTargetOrUser(marryList, ctx, ctx.Event.UserID)
 		if getStatusCode == -1 {
@@ -293,7 +286,6 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你已经禁用了被随机，所以不可以参与娶群友哦w"))
 			return
 		}
-
 		getlostSuccessedMsg := dict["lost_success"][rand.Intn(len(dict["lost_success"]))]
 		getLostFailedMsg := dict["lost_failed"][rand.Intn(len(dict["lost_failed"]))]
 		if rand.Intn(4) >= 2 {
@@ -306,6 +298,7 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(getlostSuccessedMsg))
 		}
 	})
+
 	engine.OnRegex(`^试着骗(\[CQ:at,qq=(\d+)\]\s?|(\d+))做我的老婆x`, zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		fid := ctx.State["regex_matched"].([]string)
 		fiancee, _ := strconv.ParseInt(fid[2]+fid[3], 10, 64)
@@ -366,7 +359,7 @@ func init() {
 			RawMsg += strconv.FormatInt(int64(i+1), 10) + ". " + ctx.CardOrNickName(getUserInt64) + "( " + getList[i][0] + " )" + "  -->  " + ctx.CardOrNickName(getTargetInt64) + "( " + getList[i][1] + " )" + "\n"
 		}
 		headerMsg := "群老婆列表～ For Group( " + strconv.FormatInt(ctx.Event.GroupID, 10) + " )" + " [ " + ctx.GetGroupInfo(ctx.Event.GroupID, false).Name + " ]\n\n"
-		base64Font, err := text.RenderToBase64(headerMsg+RawMsg, text.BoldFontFile, 1920, 45)
+		base64Font, err := text.RenderToBase64(headerMsg+RawMsg+"\n\n Tips: 此列表将会在 23：00 PM (GMT+8) 重置", text.BoldFontFile, 1920, 45)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
 			return
