@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/ctxext"
@@ -44,9 +43,7 @@ func init() {
 			return
 		case getPlayerReplyStatusId == -32:
 			getUserSessionWaitList := gjson.Get(string(playerdataByte), "current_account").Int()
-			perdictWaitTime := (5-float64(getUserSessionWaitList))*0.5 + 3
-			strPerdictWaitTime := fmt.Sprintf("%f", perdictWaitTime)
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-32]+strconv.FormatInt(getUserSessionWaitList, 10)+"\n预计等待时间："+strPerdictWaitTime+"分钟"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-32]+strconv.FormatInt(getUserSessionWaitList, 10)+"\n预计等待时间："+PerdictUserWaitTime(getUserSessionWaitList)))
 			return
 		case getPlayerReplyStatusId != 0 && getPlayerReplyStatusId != -33:
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w？貌似出现了一些问题：Code: ", getPlayerReplyStatusId, "信息：", m[int(getPlayerReplyStatusId)]))
@@ -111,9 +108,7 @@ func init() {
 			return
 		case getPlayerReplyStatusId == -32:
 			getUserSessionWaitList := gjson.Get(string(playerdataByte), "current_account").Int()
-			perdictWaitTime := (5-float64(getUserSessionWaitList))*0.5 + 3
-			strPerdictWaitTime := fmt.Sprintf("%f", perdictWaitTime)
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-32]+strconv.FormatInt(getUserSessionWaitList, 10)+"\n预计等待时间："+strPerdictWaitTime+"分钟"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-32]+strconv.FormatInt(getUserSessionWaitList, 10)+"\n预计等待时间："+PerdictUserWaitTime(getUserSessionWaitList)))
 			return
 		case getPlayerReplyStatusId != 0 && getPlayerReplyStatusId != -33:
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w？貌似出现了一些问题：Code: ", getPlayerReplyStatusId, "信息：", m[int(getPlayerReplyStatusId)]))
@@ -150,7 +145,7 @@ func init() {
 		var buf bytes.Buffer
 		err = jpeg.Encode(&buf, resultPreview, nil)
 		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("错误: ", err))
 			return
 		}
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
@@ -168,7 +163,7 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("好哦~正在帮你抓取最近游玩记录"))
 		playerdataByte, err := aua.GetUserInfo(os.Getenv("aualink"), os.Getenv("auakey"), id)
 		if err != nil {
-			ctx.SendChain(message.Text("cannot get user data."))
+			ctx.SendChain(message.Text("获取用户信息失败"))
 			return
 		}
 		_ = json.Unmarshal(playerdataByte, &userinfo)
@@ -187,6 +182,7 @@ func init() {
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
+
 	engine.OnRegex(`[! !]arc\sbest\s([^\]]+)\s+([^\]] +)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		songName := ctx.State["regex_matched"].([]string)[1]
 		songDiff := ctx.State["regex_matched"].([]string)[2]
@@ -197,20 +193,20 @@ func init() {
 		}
 		getData, err := aua.GetUserBest(os.Getenv("aualink"), os.Getenv("auakey"), id, songName, songDiff)
 		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR:", err))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误：", err))
 			return
 		}
 		_ = json.Unmarshal(getData, &userinfo)
 		checkStatus := userinfo.Status
 		if checkStatus != 0 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: \n", m[checkStatus]))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误: ", m[checkStatus]))
 			return
 		}
 		replyImage := RenderUserRecentLog(userinfo)
 		var buf bytes.Buffer
 		err = jpeg.Encode(&buf, replyImage, nil)
 		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误: ", err))
 			return
 		}
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())

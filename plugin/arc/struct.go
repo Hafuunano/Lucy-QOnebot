@@ -736,3 +736,18 @@ func RenderUserRecentLog(userinfo user) image.Image {
 	mainBG.Fill()
 	return mainBG.Image()
 }
+
+func PerdictUserWaitTime(rawWaitLine int64) string {
+	getPersentTime := time.Now().Hour()
+	var waitTime string
+	switch {
+	case (getPersentTime > 0 && getPersentTime < 10) || (getPersentTime > 14 && getPersentTime < 21):
+		waitTime = strconv.Itoa(int(7*rawWaitLine + 5))
+		return waitTime + "分钟，现在处于非调用频繁时间段，可能相对来说时间会更久"
+	case (getPersentTime > 10 && getPersentTime < 14) || (getPersentTime > 20 && getPersentTime < 24):
+		waitTime = strconv.Itoa(int(3*rawWaitLine + 5))
+		return waitTime + "分钟，目前调用人数相对较多，预计会比等待时间要快"
+	}
+	waitTime = strconv.Itoa(int(5*rawWaitLine + 5))
+	return waitTime + "分钟"
+}

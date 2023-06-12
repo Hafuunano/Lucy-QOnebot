@@ -44,8 +44,7 @@ func QueryMaiBotDataFromQQ(qq int) (playerdata []byte, err error) {
 	playerData, err := io.ReadAll(resp.Body)
 	return playerData, err
 }
-
-func QueryMaiDataFromUsername(username string) (playerdata []byte, err error) {
+func QueryMaiBotDataFromUserName(username string) (playerdata []byte, err error) {
 	// packed json and sent.
 	jsonStruct := DivingFishB50{Username: username, B50: true}
 	jsonStructData, err := json.Marshal(jsonStruct)

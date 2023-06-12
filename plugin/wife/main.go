@@ -224,6 +224,22 @@ func init() {
 		if !CheckTheUserStatusAndDoRepeat(ctx) {
 			return
 		}
+		if !CheckTheTargetUserStatusAndDoRepeat(ctx, fiancee) {
+			return
+		}
+		// check the target status.
+		getStatusIfBannned := CheckTheUserIsInBlackListOrGroupList(fiancee, uid, ctx.Event.GroupID)
+		/*
+			disabled_Target
+			blacklist_Target
+		*/
+		if getStatusIfBannned {
+			// blocked.
+			GlobalCDModelCost(ctx)
+			getReply := dict["block"][rand.Intn(len(dict["block"]))]
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(getReply))
+			return
+		}
 		if GlobalCDModelCostLeastReply(ctx) == 0 {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天的机会已经使用完了哦～12小时后再来试试吧"))
 			return

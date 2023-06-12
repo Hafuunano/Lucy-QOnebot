@@ -33,4 +33,19 @@ func init() {
 		}
 		ctx.SendChain(message.Image("base64://" + binary.BytesToString(base64Font)))
 	})
+	engine.OnRegex(`^[！!]chun$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		uid := ctx.Event.UserID
+		dataPlayer, err := QueryChunDataFromQQ(int(uid))
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			return
+		}
+		txt := HandleChunDataByUsingText(dataPlayer)
+		base64Font, err := text.RenderToBase64(txt, text.BoldFontFile, 1920, 45)
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			return
+		}
+		ctx.SendChain(message.Image("base64://" + binary.BytesToString(base64Font)))
+	})
 }
