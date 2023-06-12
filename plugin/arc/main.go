@@ -35,7 +35,7 @@ func init() {
 	engine.OnRegex(`^[！!]arc\s*(\d+)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		id := ctx.State["regex_matched"].([]string)[1]
 		sessionKey, sessionKeyInfo := aua.GetSessionQuery(os.Getenv("aualink"), os.Getenv("auakey"), id)
-		playerdataByte, err := aua.DrawRequestArc(os.Getenv("aualink")+"/arcapi/user/bests/result?session_info="+sessionKey+"&overflow=10&with_recent=false&with_song_info=true", os.Getenv("auakey"))
+		playerdataByte, _ := aua.DrawRequestArc(os.Getenv("aualink")+"/arcapi/user/bests/result?session_info="+sessionKey+"&overflow=10&with_recent=false&with_song_info=true", os.Getenv("auakey"))
 		getPlayerReplyStatusId := gjson.Get(string(playerdataByte), "status").Int()
 		switch {
 		case getPlayerReplyStatusId == -31:
@@ -102,7 +102,7 @@ func init() {
 			return
 		}
 		sessionKey, sessionKeyInfo := aua.GetSessionQuery(os.Getenv("aualink"), os.Getenv("auakey"), id)
-		playerdataByte, err := aua.DrawRequestArc(os.Getenv("aualink")+"/arcapi/user/bests/result?session_info="+sessionKey+"&overflow=10&with_recent=false&with_song_info=true", os.Getenv("auakey"))
+		playerdataByte, _ := aua.DrawRequestArc(os.Getenv("aualink")+"/arcapi/user/bests/result?session_info="+sessionKey+"&overflow=10&with_recent=false&with_song_info=true", os.Getenv("auakey"))
 		getPlayerReplyStatusId := gjson.Get(string(playerdataByte), "status").Int()
 		switch {
 		case getPlayerReplyStatusId == -31:
