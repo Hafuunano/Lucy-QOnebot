@@ -3,57 +3,39 @@ package pgr
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/md5"
 	"encoding/base64"
-	"encoding/hex"
-	"strconv"
-	"time"
+	"fmt"
+	"os"
 )
 
-func HashResolveSessionByUid(userID int64, md5 string, hash string) string {
-	// hash resolver
-	// get ThisDay
-	userIDToStr := strconv.FormatInt(userID, 10)
-	keyFormat := md5 + "+" + time.Now().Weekday().String() + "+" + userIDToStr
-	deckey := generateMD5(keyFormat)
-	getRawData, err := decryptAES(hash, deckey)
-	if err != nil {
-		panic(err)
-	}
-	return getRawData
+func DecHashToRaw(raw string) string {
+	formatData := CBCDecrypt(raw, os.Getenv("hashkey"))
+	return formatData
 }
 
-func decryptAES(encryptedData string, key string) (string, error) {
-	encryptedBytes, err := base64.StdEncoding.DecodeString(encryptedData)
-	if err != nil {
-		return "", err
-	}
+func CBCDecrypt(ciphertext string, key string) string {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("cbc decrypt err:", err)
+		}
+	}()
 
 	block, err := aes.NewCipher([]byte(key))
 	if err != nil {
-		return "", err
+		return ""
 	}
 
-	iv := make([]byte, aes.BlockSize)
-	stream := cipher.NewCBCDecrypter(block, iv)
+	ciphercode, err := base64.StdEncoding.DecodeString(ciphertext)
+	if err != nil {
+		return ""
+	}
 
-	decryptedBytes := make([]byte, len(encryptedBytes))
-	stream.CryptBlocks(decryptedBytes, encryptedBytes)
+	iv := ciphercode[:aes.BlockSize]        // 密文的前 16 个字节为 iv
+	ciphercode = ciphercode[aes.BlockSize:] // 正式密文
 
-	// 去除填充字节
-	padding := int(decryptedBytes[len(decryptedBytes)-1])
-	decryptedBytes = decryptedBytes[:len(decryptedBytes)-padding]
+	mode := cipher.NewCBCDecrypter(block, iv)
+	mode.CryptBlocks(ciphercode, ciphercode)
 
-	return string(decryptedBytes), nil
-}
-
-func generateMD5(input string) string {
-	hash := md5.New()
-	hash.Write([]byte(input))
-	hashBytes := hash.Sum(nil)
-
-	// 将哈希字节转换为十六进制表示
-	hashString := hex.EncodeToString(hashBytes)
-
-	return hashString
+	plaintext := string(ciphercode) // ↓ 减去 padding
+	return plaintext[:len(plaintext)-int(plaintext[len(plaintext)-1])]
 }

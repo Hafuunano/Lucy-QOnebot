@@ -1,6 +1,5 @@
 plugins/*.so
 plugins/*.dll
-plugin/pgr/hash.go
 .idea/
 .DS_Store
 .vscode
