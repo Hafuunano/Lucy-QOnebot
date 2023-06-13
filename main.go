@@ -30,7 +30,7 @@ import (
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/wife" // wife plugin
 
-	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/pgr" // wife plugin
+	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/pgr" // pgr plugin
 
 	"github.com/FloatTech/floatbox/process"
 	zero "github.com/wdvxdr1123/ZeroBot"

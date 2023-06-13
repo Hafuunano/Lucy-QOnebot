@@ -42,7 +42,7 @@ func GetUserInfoFromDatabase(userID int64) *PhigrosSQL {
 	defer pgrLocker.Unlock()
 	var infosql PhigrosSQL
 	userIDStr := strconv.FormatInt(userID, 10)
-	err := pgrDatabase.Find("userinfo", &infosql, "where user_id is "+userIDStr)
+	err := pgrDatabase.Find("userinfo", &infosql, "where user_qq is "+userIDStr)
 	if err != nil {
 		return nil
 	}
