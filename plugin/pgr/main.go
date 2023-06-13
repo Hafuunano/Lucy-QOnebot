@@ -84,7 +84,8 @@ func init() {
 		*/
 		var renderText string
 		var isFC string
-		header := "Phigros B19 Beta | Rating (RKS) : " + strconv.FormatFloat(PhigrosSaves.RKS, 'f', 2, 64) + " | 课题分 ： " + strconv.FormatInt(int64(PhigrosSaves.HardCoreScore), 10) + "\n"
+		username := ctx.CardOrNickName(ctx.Event.UserID)
+		header := "Phigros B19 Beta | " + username + " Rating (RKS) : " + strconv.FormatFloat(PhigrosSaves.RKS, 'f', 2, 64) + " | 课题分 ： " + strconv.FormatInt(int64(PhigrosSaves.HardCoreScore), 10) + "\n"
 		for i := 0; i < getLength; i++ {
 			if PhigrosB19Data[i].Fc == true {
 				isFC = "FC"
