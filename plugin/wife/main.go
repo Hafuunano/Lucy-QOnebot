@@ -74,8 +74,6 @@ func init() {
 	dict["lost_success"] = []string{"好呢w 就这样呢(", "已经成功了哦w"}
 	dict["hide_mode"] = []string{"哼哼～ 哼唧", "喵喵喵？！"}
 
-	// ticker
-
 	// main Class
 	engine.OnFullMatch("娶群友", zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		/*

@@ -47,31 +47,32 @@ func init() {
 	sdb := coins.Initialize("./data/score/score.db")
 	engine.OnFullMatchGroup([]string{"签到", "打卡"}, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
-			if !rateLimit.Load(ctx.Event.GroupID).Acquire() {
-				return
-			}
 			var mutex sync.RWMutex // 添加读写锁以保证稳定性
 			mutex.Lock()
+			defer mutex.Unlock()
 			uid := ctx.Event.UserID
+			getNowUnixFormatElevenThirten := time.Unix(time.Now().Unix()+60*30, 0).Format("20060102")
 			today := time.Now().Format("20060102")
 			si := coins.GetSignInByUID(sdb, uid)
 			drawedFile := cachePath + strconv.FormatInt(uid, 10) + today + "signin.png"
-			if si.UpdatedAt.Format("20060102") == today && si.Count != 0 {
+
+			if si.UpdatedAt.Format("20060102") == getNowUnixFormatElevenThirten && si.Count != 0 {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("酱~ 你今天已经签到过了哦w"))
 				if file.IsExist(drawedFile) {
 					ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
 				}
 				return
 			}
+
 			coinsGet := 300 + rand.Intn(200)
 			_ = coins.InsertUserCoins(sdb, uid, si.Coins+coinsGet)
 			_ = coins.InsertOrUpdateSignInCountByUID(sdb, uid, si.Count+1) // 柠檬片获取
 			score := coins.GetScoreByUID(sdb, uid).Score
 			score++ //  每日+1
 			_ = coins.InsertOrUpdateScoreByUID(sdb, uid, score)
-			CurrentCountTable := coins.GetCurrentCount(sdb, today)
+			CurrentCountTable := coins.GetCurrentCount(sdb, getNowUnixFormatElevenThirten)
 			handledTodayNum := CurrentCountTable.Counttime + 1
-			_ = coins.UpdateUserTime(sdb, handledTodayNum, today) // 总体计算 隔日清零
+			_ = coins.UpdateUserTime(sdb, handledTodayNum, getNowUnixFormatElevenThirten) // 总体计算 隔日清零
 
 			if time.Now().Hour() > 6 && time.Now().Hour() < 19 {
 				// package for test draw.
@@ -154,6 +155,6 @@ func init() {
 				_ = nightGround.SavePNG(drawedFile)
 				ctx.SendChain(message.At(uid), message.Text("[HiMoYoBot]签到成功\n"), message.Image("file:///"+file.BOTPATH+"/"+drawedFile))
 			}
-			mutex.Unlock()
+
 		})
 }
