@@ -4,6 +4,7 @@ package funwork
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/FloatTech/zbputils/ctxext"
 	"image"
 	"net/http"
 	"os"
@@ -61,7 +62,7 @@ func init() {
 			return true
 		},
 	)
-	engine.OnFullMatch("今日人品", getTarot).SetBlock(true).
+	engine.OnFullMatch("今日人品", getTarot).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
 			userPic := strconv.FormatInt(ctx.Event.UserID, 10) + time.Now().Format("20060102") + ".png"
 			picDir, err := os.ReadDir(engine.DataFolder() + "randpic")

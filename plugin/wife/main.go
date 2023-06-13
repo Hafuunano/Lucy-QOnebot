@@ -5,19 +5,36 @@ import (
 	"github.com/FloatTech/floatbox/binary"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
+	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/img/text"
 	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/extension/rate"
+	"github.com/wdvxdr1123/ZeroBot/extension/single"
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"math/rand"
 	"strconv"
 	"time"
 )
 
-var engine = control.Register("wife", &ctrl.Options[*zero.Ctx]{
-	DisableOnDefault:  false,
-	Help:              "Hi NekoPachi!\n说明书: https://lucy.impart.icu",
-	PrivateDataFolder: "wife",
-})
+var (
+	MessageTickerLimiter = rate.NewManager[int64](time.Minute*1, 2)
+	engine               = control.Register("wife", &ctrl.Options[*zero.Ctx]{
+		DisableOnDefault:  false,
+		Help:              "Hi NekoPachi!\n说明书: https://lucy.impart.icu",
+		PrivateDataFolder: "wife",
+	}).ApplySingle(ReverseSingle)
+	ReverseSingle = single.New(
+		single.WithKeyFn(func(ctx *zero.Ctx) int64 {
+			return ctx.Event.UserID
+		}),
+		single.WithPostFn[int64](func(ctx *zero.Ctx) {
+			if !MessageTickerLimiter.Load(ctx.Event.UserID).Acquire() {
+				return
+			}
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("正在操作哦～"))
+		}),
+	)
+)
 
 /*
 StatusID:
@@ -60,7 +77,7 @@ func init() {
 	// ticker
 
 	// main Class
-	engine.OnFullMatch("娶群友", zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnFullMatch("娶群友", zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		/*
 			Work:
 			- Check the User Status, if the user is 1 or 0 || 10 ,then pause and do this handler.
@@ -205,8 +222,7 @@ func init() {
 			_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 6, generatePairKey)
 		}
 	})
-
-	engine.OnRegex(`^(娶|嫁)(\[CQ:at,qq=(\d+)\]|Lucy)`, zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^(娶|嫁)(\[CQ:at,qq=(\d+)\]|Lucy)`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		choice := ctx.State["regex_matched"].([]string)[1]
 		fianceeRaw := ctx.State["regex_matched"].([]string)[2]
 		var fiancee int64
@@ -286,8 +302,7 @@ func init() {
 			ResuitTheReferUserAndMakeIt(ctx, dict, fiancee, uid)
 		}
 	})
-
-	engine.OnFullMatch("我要离婚", zero.OnlyToMe, zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnFullMatch("我要离婚", zero.OnlyToMe, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		getStatusCode, _ := CheckTheUserIsTargetOrUser(marryList, ctx, ctx.Event.UserID)
 		if getStatusCode == -1 {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("貌似？没有对象的样子x"))
@@ -314,8 +329,7 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(getlostSuccessedMsg))
 		}
 	})
-
-	engine.OnRegex(`^试着骗(\[CQ:at,qq=(\d+)\]\s?|(\d+))做我的老婆x`, zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^试着骗(\[CQ:at,qq=(\d+)\]\s?|(\d+))做我的老婆x`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		fid := ctx.State["regex_matched"].([]string)
 		fiancee, _ := strconv.ParseInt(fid[2]+fid[3], 10, 64)
 		uid := ctx.Event.UserID
@@ -362,7 +376,7 @@ func init() {
 			return
 		}
 	})
-	engine.OnFullMatch("群老婆列表", zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnFullMatch("群老婆列表", zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		getList, num := GetTheGroupList(ctx.Event.GroupID)
 		var RawMsg string
 		if num == 0 {
@@ -382,29 +396,29 @@ func init() {
 		}
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+binary.BytesToString(base64Font)))
 	})
-	engine.OnRegex(`^添加黑名单(\[CQ:at,qq=(\d+)\]\s?|(\d+))`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^添加黑名单(\[CQ:at,qq=(\d+)\]\s?|(\d+))`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		fid := ctx.State["regex_matched"].([]string)
 		fiancee, _ := strconv.ParseInt(fid[2]+fid[3], 10, 64)
 		_ = AddBlackList(marryList, ctx.Event.UserID, fiancee)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经加入了～"))
 	})
-	engine.OnRegex(`^移除黑名单(\[CQ:at,qq=(\d+)\]\s?|(\d+))`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^移除黑名单(\[CQ:at,qq=(\d+)\]\s?|(\d+))`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		fid := ctx.State["regex_matched"].([]string)
 		fiancee, _ := strconv.ParseInt(fid[2]+fid[3], 10, 64)
 		_ = DeleteBlackList(marryList, ctx.Event.UserID, fiancee)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经移除了～"))
 	})
-	engine.OnFullMatch("添加本群禁用群老婆", zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnFullMatch("添加本群禁用群老婆", zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		gid := ctx.Event.GroupID
 		_ = AddDisabledList(marryList, ctx.Event.UserID, gid)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经加入了～,在本群你将不会加入此游戏"))
 	})
-	engine.OnFullMatch("删除本群禁用群老婆", zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnFullMatch("删除本群禁用群老婆", zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		gid := ctx.Event.GroupID
 		_ = DeleteDisabledList(marryList, ctx.Event.UserID, gid)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经移除了～,在本群你将加入此游戏"))
 	})
-	engine.OnRegex(`^添加许愿(\[CQ:at,qq=(\d+)\]\s?|(\d+))`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^添加许愿(\[CQ:at,qq=(\d+)\]\s?|(\d+))`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		fid := ctx.State["regex_matched"].([]string)
 		si := coins.GetSignInByUID(sdb, ctx.Event.UserID)
 		fiancee, _ := strconv.ParseInt(fid[2]+fid[3], 10, 64)
@@ -440,7 +454,6 @@ func init() {
 		_ = AddOrderToList(marryList, ctx.Event.UserID, fiancee, strconv.FormatInt(timeStamp, 10), ctx.Event.GroupID)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经许愿成功了哦～w 给", ctx.CardOrNickName(fiancee), " 的许愿已经生效，将会在6小时后增加70%可能性实现w"))
 	})
-
 	engine.OnFullMatch("重置娶群友", zero.SuperUserPermission).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		ResetToInitalizeMode()
 		ctx.SendChain(message.Text("done"))

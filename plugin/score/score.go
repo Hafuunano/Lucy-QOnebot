@@ -2,6 +2,7 @@
 package score
 
 import (
+	"github.com/wdvxdr1123/ZeroBot/extension/single"
 	"math/rand"
 	"strconv"
 	"sync"
@@ -26,7 +27,19 @@ var (
 		DisableOnDefault:  false,
 		Help:              "Hi NekoPachi!\n说明书: https://lucy.impart.icu",
 		PrivateDataFolder: "score",
-	})
+	}).ApplySingle(ReverseSingle)
+	ReverseSingle = single.New(
+		single.WithKeyFn(func(ctx *zero.Ctx) int64 {
+			return ctx.Event.UserID
+		}),
+		single.WithPostFn[int64](func(ctx *zero.Ctx) {
+			if !MessageTickerLimiter.Load(ctx.Event.UserID).Acquire() {
+				return
+			}
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("正在操作哦～"))
+		}),
+	)
+	MessageTickerLimiter = rate.NewManager[int64](time.Minute*1, 2)
 )
 
 func init() {

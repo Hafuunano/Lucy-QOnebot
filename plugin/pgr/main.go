@@ -19,7 +19,7 @@ import (
 // update: use PhigrosUnlimitedAPI + Phigros Library as Maintainer.
 
 var (
-	engine = control.Register("pgr", &ctrl.Options[*zero.Ctx]{
+	engine = control.Register("phigros", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
 		Help:              "Hi NekoPachi!\n",
 		PrivateDataFolder: "phi",
