@@ -221,17 +221,17 @@ func init() {
 	})
 	engine.OnRegex(`^(娶|嫁)(\[CQ:at,qq=(\d+)\]|Lucy)`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		choice := ctx.State["regex_matched"].([]string)[1]
-		fianceeRaw := ctx.State["regex_matched"].([]string)[2]
-		fianceeRawInt64, _ := strconv.ParseInt(fianceeRaw, 10, 64)
-		if fianceeRawInt64 == 0 || ctx.Event.UserID == 0 {
-			ctx.SendChain(message.Reply(ctx.Event.UserID), message.Text("用户不合法"))
-			return
-		}
+		getStatus := ctx.State["regex_matched"].([]string)[2]
+		fianceeID, _ := strconv.ParseInt(ctx.State["regex_matched"].([]string)[3], 10, 64)
 		var fiancee int64
-		if fianceeRaw == "Lucy" {
+		if getStatus == "Lucy" {
 			fiancee = ctx.Event.SelfID
 		} else {
-			fiancee, _ = strconv.ParseInt(fianceeRaw, 10, 64)
+			fiancee = fianceeID
+		}
+		if fiancee == 0 || ctx.Event.UserID == 0 {
+			ctx.SendChain(message.Reply(ctx.Event.UserID), message.Text("用户不合法"))
+			return
 		}
 		uid := ctx.Event.UserID
 		if !CheckDisabledListIsExistedInThisGroup(marryList, uid, ctx.Event.GroupID) {
@@ -331,7 +331,7 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(getlostSuccessedMsg))
 		}
 	})
-	engine.OnRegex(`^试着骗(\[CQ:at,qq=(\d+)\]\s?|(\d+))做我的老婆x`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^试着骗(\[CQ:at,qq=(\d+)\]\s?|(\d+))做我的老婆`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		fid := ctx.State["regex_matched"].([]string)
 		fiancee, _ := strconv.ParseInt(fid[2]+fid[3], 10, 64)
 		if fiancee == 0 || ctx.Event.UserID == 0 {

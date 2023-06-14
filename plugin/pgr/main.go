@@ -29,16 +29,15 @@ var (
 func init() {
 	engine.OnRegex(`^\/pgr\sbind\s(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		hash := ctx.State["regex_matched"].([]string)[1]
-		defer func() {
-			if err := recover(); err != nil {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请前往 https://pgr.impart.icu 获取绑定码进行绑定 "))
+		userInfo := GetUserInfoTimeFromDatabase(ctx.Event.UserID)
+		if userInfo == 0 {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请前往 https://pgr.impart.icu 获取绑定码进行绑定 "))
+			return
+		} else {
+			if userInfo+(12*60*60) > time.Now().Unix() {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("12小时内仅允许绑定一次哦"))
 				return
 			}
-		}()
-		userInfo := GetUserInfoFromDatabase(ctx.Event.UserID).Time
-		if userInfo+(12*60*60) > time.Now().Unix() {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("12小时内仅允许绑定一次哦"))
-			return
 		}
 		indexReply := DecHashToRaw(hash)
 		// get session.
