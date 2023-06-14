@@ -229,7 +229,7 @@ func init() {
 		} else {
 			fiancee = fianceeID
 		}
-		if fiancee == 0 || ctx.Event.UserID == 0 {
+		if fiancee == 80000000 || ctx.Event.UserID == 80000000 {
 			ctx.SendChain(message.Reply(ctx.Event.UserID), message.Text("用户不合法"))
 			return
 		}
