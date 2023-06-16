@@ -173,12 +173,8 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 	// background render path.
 	var i int
 	_ = json.Unmarshal(dataOrigin, &phigrosB19)
-	if phigrosB19.Content.BestList.Phi != true {
-		i = 0
-	} else {
-		i = 1
-	}
-	for ; i < len(phigrosB19.Content.BestList.Best); i++ {
+	i = 0
+	if phigrosB19.Content.BestList.Phi == true { // while render the first set this change To Phi
 		renderImage := phigrosB19.Content.BestList.Best[i].Songid
 		getRenderImage := background + renderImage[:len(renderImage)-2] + ".png"
 		getImage, _ := gg.LoadImage(getRenderImage)
@@ -195,12 +191,12 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		canvas.Fill()
 		// draw number format
 		canvas.SetRGBA255(255, 255, 255, 245)
-		drawTriAngle(canvas, 77, float64(referceWidth-37), float64(referceLength+802), 100, 75)
+		drawTriAngle(canvas, 77, float64(referceWidth-26), float64(referceLength+800), 90, 55)
 		canvas.Fill()
 		// draw number path
 		canvas.SetColor(color.Black)
-		_ = canvas.LoadFontFace(font, 45)
-		canvas.DrawString("#"+strconv.Itoa(i), float64(referceWidth-40), float64(referceLength+855))
+		_ = canvas.LoadFontFace(font, 35)
+		canvas.DrawString("Phi", float64(referceWidth-20), float64(referceLength+840))
 		canvas.Fill()
 		// render Diff.
 		getDiff := phigrosB19.Content.BestList.Best[i].Level
@@ -233,12 +229,87 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		canvas.DrawStringAnchored(getScore, float64(referceWidth+740), float64(referceLength+950), 0.5, 0.5)
 		canvas.Fill()
 		canvas.SetColor(color.White)
-		canvas.SetLineWidth(10)
-		canvas.DrawLine(float64(referceWidth+630), float64(referceLength+1000), float64(referceWidth+890), float64(referceLength+1000))
+		canvas.SetLineWidth(4)
+		canvas.DrawLine(float64(referceWidth+630), float64(referceLength+990), float64(referceWidth+890), float64(referceLength+990))
 		canvas.Stroke()
-		_ = canvas.LoadFontFace(font, 30)
+		_ = canvas.LoadFontFace(font, 40)
 		getAcc := strconv.FormatFloat(phigrosB19.Content.BestList.Best[i].Acc, 'f', 2, 64) + "%"
-		canvas.DrawStringAnchored(getAcc, float64(referceWidth+740), float64(referceLength+1030), 0.5, 0.5)
+		canvas.DrawStringAnchored(getAcc, float64(referceWidth+760), float64(referceLength+1020), 0.5, 0.5)
+		canvas.Fill()
+		// width = referceWidth | height = 800+ referenceLength
+		if isRight != true {
+			referceWidth = referceWidth + 1280
+			referceLength += 75
+			isRight = true
+		} else {
+			referceWidth = referceWidth - 1280
+			referceLength -= 75
+			isRight = false
+			referceLength += 400
+		}
+		i = i + 1
+	}
+	for ; i < len(phigrosB19.Content.BestList.Best); i++ {
+		renderImage := phigrosB19.Content.BestList.Best[i].Songid
+		getRenderImage := background + renderImage[:len(renderImage)-2] + ".png"
+		getImage, _ := gg.LoadImage(getRenderImage)
+		// get background
+		cardBackGround := DrawParallelogram(getImage)
+		canvas.DrawImage(cardBackGround, referceWidth, 800+referceLength)
+		// draw score path
+		canvas.SetRGBA255(0, 0, 0, 160)
+		drawTriAngle(canvas, 77, float64(referceWidth+500), float64(referceLength+850), 500, 210)
+		canvas.Fill()
+		// draw white line.
+		canvas.SetColor(color.White)
+		drawTriAngle(canvas, 77, float64(referceWidth+1000), float64(referceLength+850), 6, 210)
+		canvas.Fill()
+		// draw number format
+		canvas.SetRGBA255(255, 255, 255, 245)
+		drawTriAngle(canvas, 77, float64(referceWidth-26), float64(referceLength+800), 90, 55)
+		canvas.Fill()
+		// draw number path
+		canvas.SetColor(color.Black)
+		_ = canvas.LoadFontFace(font, 35)
+		canvas.DrawString("#"+strconv.Itoa(i), float64(referceWidth-20), float64(referceLength+840))
+		canvas.Fill()
+		// render Diff.
+		getDiff := phigrosB19.Content.BestList.Best[i].Level
+		SetDiffColor(getDiff, canvas)
+		drawTriAngle(canvas, 77, float64(referceWidth-65), float64(referceLength+992), 150, 80)
+		canvas.Fill()
+		// render Text
+		getRKS := strconv.FormatFloat(phigrosB19.Content.BestList.Best[i].Rating, 'f', 1, 64)
+		getRating := strconv.FormatFloat(phigrosB19.Content.BestList.Best[i].Rks, 'f', 2, 64)
+		canvas.SetColor(color.White)
+		_ = canvas.LoadFontFace(font, 30)
+		canvas.DrawString(getDiff+" "+getRKS, float64(referceWidth-50), float64(referceLength+1019))
+		canvas.Fill()
+		canvas.SetColor(color.White)
+		_ = canvas.LoadFontFace(font, 45)
+		canvas.DrawString(getRating, float64(referceWidth-60), float64(referceLength+1062))
+		canvas.Fill()
+		// render info (acc,score,name)
+		getRankLink := GetRank(phigrosB19.Content.BestList.Best[i].Score, phigrosB19.Content.BestList.Best[i].Isfc)
+		loadRankImage, _ := gg.LoadImage(rank + getRankLink + ".png")
+		canvas.DrawImage(loadRankImage, referceWidth+500, referceLength+920)
+		canvas.Fill()
+		getName := phigrosB19.Content.BestList.Best[i].Songname
+		_ = canvas.LoadFontFace(font, 35)
+		canvas.DrawStringAnchored(getName, float64(referceWidth+740), float64(referceLength+890), 0.5, 0.5)
+		canvas.SetColor(color.White)
+		canvas.Fill()
+		getScore := strconv.Itoa(phigrosB19.Content.BestList.Best[i].Score)
+		_ = canvas.LoadFontFace(font, 50)
+		canvas.DrawStringAnchored(getScore, float64(referceWidth+740), float64(referceLength+950), 0.5, 0.5)
+		canvas.Fill()
+		canvas.SetColor(color.White)
+		canvas.SetLineWidth(4)
+		canvas.DrawLine(float64(referceWidth+630), float64(referceLength+990), float64(referceWidth+890), float64(referceLength+990))
+		canvas.Stroke()
+		_ = canvas.LoadFontFace(font, 40)
+		getAcc := strconv.FormatFloat(phigrosB19.Content.BestList.Best[i].Acc, 'f', 2, 64) + "%"
+		canvas.DrawStringAnchored(getAcc, float64(referceWidth+760), float64(referceLength+1020), 0.5, 0.5)
 		canvas.Fill()
 		// width = referceWidth | height = 800+ referenceLength
 		if isRight != true {
@@ -385,7 +456,7 @@ func GetRank(num int, isFC bool) string {
 		rankPicName = "fc"
 	}
 	switch {
-	case num == 100000:
+	case num == 1000000:
 		rankPicName = "phi"
 	case num >= 960000:
 		rankPicName = "v"
@@ -407,12 +478,12 @@ func GetRank(num int, isFC bool) string {
 func SetDiffColor(diff string, canvas *gg.Context) {
 	switch {
 	case diff == "IN":
-		canvas.SetRGB255(255, 0, 0)
+		canvas.SetRGB255(189, 45, 36)
 	case diff == "HD":
-		canvas.SetRGB255(0, 255, 255)
+		canvas.SetRGB255(50, 115, 179)
 	case diff == "AT":
-		canvas.SetRGB255(190, 190, 190)
+		canvas.SetRGB255(56, 56, 56)
 	case diff == "EZ":
-		canvas.SetRGB255(0, 255, 128)
+		canvas.SetRGB255(79, 200, 134)
 	}
 }

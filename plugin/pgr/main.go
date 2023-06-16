@@ -62,7 +62,7 @@ func init() {
 		getPhigrosLink := os.Getenv("pualink")
 		getPhigrosKey := os.Getenv("puakey")
 		userData := GetUserInfoFromDatabase(ctx.Event.UserID)
-		getFullLink := getPhigrosLink + "/user/best19?SessionToken=" + userData.PhiSession + "&withsonginfo=true"
+		getFullLink := getPhigrosLink + "/user/best19?SessionToken=" + userData.PhiSession + "&withsonginfo=true&overflow=2"
 		phidata, err := DrawRequestPhigros(getFullLink, getPhigrosKey, "POST")
 		if err != nil {
 			panic(err)
