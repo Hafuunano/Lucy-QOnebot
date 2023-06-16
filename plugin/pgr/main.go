@@ -14,6 +14,7 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"unicode/utf8"
 )
 
 // too lazy,so this way is to use thrift host server (Working on HiMoYo Cloud.) (replace: now use PUA API)
@@ -29,7 +30,7 @@ var (
 )
 
 func init() {
-	engine.OnRegex(`^!/pgr\sbind\s(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^[! ！]pgr\sbind\s(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		hash := ctx.State["regex_matched"].([]string)[1]
 		userInfo := GetUserInfoTimeFromDatabase(ctx.Event.UserID)
 		if userInfo+(12*60*60) > time.Now().Unix() {
@@ -47,10 +48,14 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请求Hash中QQ号不一致，请使用自己的号重新申请"))
 			return
 		}
+		if utf8.RuneCountInString(getSessionID) != 25 {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Session 传入数值出现错误，请重新绑定"))
+			return
+		}
 		_ = FormatUserDataBase(getQQID, getSessionID, time.Now().Unix()).BindUserDataBase()
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("绑定成功～"))
 	})
-	engine.OnFullMatch("!pgr b19").SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^[! ！]pgr\sb19$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		data := GetUserInfoFromDatabase(ctx.Event.UserID)
 		getDataSession := data.PhiSession
 		if getDataSession == "" {
