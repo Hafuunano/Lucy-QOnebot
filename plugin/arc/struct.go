@@ -36,6 +36,7 @@ var (
 	exoMidFace        font.Face
 	exoMidFaceLs      font.Face
 	exoMidFaceLL      font.Face
+	exoMidFaceLLs     font.Face
 	exoSemiBoldFace   font.Face
 	exoSmallFaceSS    font.Face
 )
@@ -202,7 +203,7 @@ type arcaea struct {
 func init() {
 	// main pg user b30
 	// Handle font (should deal it before the function runs.)
-	sans = LoadFontFace(arcaeaRes+"/resource/font/NotoSansCJKsc-Regular.otf", 30, 72) // sans-serif regular font
+	sans = LoadFontFace(arcaeaRes+"/resource/font/NotoSansCJKsc-Regular.otf", 35, 67) // sans-serif regular font
 	exoMidFaces = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 40, 72)
 	exoSmallFace = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 25, 80)
 	exoSmallFaceSS = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 15, 72)
@@ -214,14 +215,15 @@ func init() {
 	exoMidFace = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 45, 72)
 	exoMidFaceLs = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 60, 72)
 	exoMidFaceLL = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 100, 72)
+	exoMidFaceLLs = LoadFontFace(arcaeaRes+"/resource/font/Exo-Medium.ttf", 65, 65)
 	exoSemiBoldFace = LoadFontFace(arcaeaRes+"/resource/font/Exo-SemiBold.ttf", 20, 72)
 }
 
 // StrokeStringWithOtherColor make the text shade?
 func StrokeStringWithOtherColor(text string, color color.Color, h float64, w float64, bg *gg.Context) {
 	bg.SetColor(color)
-	for i := 1; i < 3; i++ {
-		for j := 1; j < 3; j++ {
+	for i := 1; i < 2; i++ {
+		for j := 1; j < 2; j++ {
 			bg.DrawString(text, h-float64(i), w-float64(j))
 		}
 	}
@@ -406,10 +408,10 @@ func DrawScoreCard(songCover image.Image, songNum int, r arcaea, b40 bool) image
 	// check the bg is dark? if false, use black color font, else use white color font.
 	var setMainColor color.NRGBA
 	if IsDark(color.RGBA{R: uint8(R), G: uint8(G), B: uint8(B), A: 255}) {
-		setMainColor = color.NRGBA{R: uint8(255), G: uint8(255), B: uint8(255), A: 205}
+		setMainColor = color.NRGBA{R: uint8(255), G: uint8(255), B: uint8(255), A: 235}
 		mainPicHandler.SetColor(setMainColor)
 	} else {
-		setMainColor = color.NRGBA{R: uint8(0), G: uint8(0), B: uint8(0), A: 205}
+		setMainColor = color.NRGBA{R: uint8(0), G: uint8(0), B: uint8(0), A: 235}
 		mainPicHandler.SetColor(setMainColor)
 	}
 	mainPicHandler.DrawString(getSongName, 45, 52) // Write song name.
@@ -552,6 +554,21 @@ func DrawMainUserB30(mainBg image.Image, r arcaea) image.Image {
 	StrokeStringWithOtherColor(rating, color.Black, 215, 385, mainBGHandler)
 	mainBGHandler.SetColor(color.NRGBA{R: uint8(255), G: uint8(255), B: uint8(255), A: 255})
 	mainBGHandler.DrawString(rating, 215, 385)
+	mainBGHandler.FillPreserve()
+	mainBGHandler.SetFontFace(exoMidFaceLLs)
+	// get theory ptt.
+	var theoryBest30 float64
+	var theoryBest30OverFlow float64
+	var theoryNumber float64
+	for i := 0; i < len(r.Content.Best30List); i++ {
+		theoryBest30 += r.Content.Best30List[i].Rating
+	}
+	for render := 0; render < len(r.Content.Best30Overflow); render++ {
+		theoryBest30OverFlow += r.Content.Best30List[render].Rating
+	}
+	theoryNumber = (theoryBest30 + theoryBest30OverFlow) / 40
+	theoryNumberStr := strconv.FormatFloat(theoryNumber, 'f', 3, 64)
+	mainBGHandler.DrawStringAnchored("MAX: "+theoryNumberStr, 320, 460, 0, 0)
 	mainBGHandler.FillPreserve()
 	mainBGHandler.SetFontFace(exoMidFaceLL)
 	mainBGHandler.DrawString("Best 30:"+strconv.FormatFloat(r.Content.Best30Avg, 'f', 3, 64), 200, 560)
@@ -742,12 +759,12 @@ func PerdictUserWaitTime(rawWaitLine int64) string {
 	var waitTime string
 	switch {
 	case (getPersentTime > 0 && getPersentTime < 10) || (getPersentTime > 14 && getPersentTime < 21):
-		waitTime = strconv.Itoa(int(7*rawWaitLine + 5))
+		waitTime = strconv.Itoa(int(7*(5-rawWaitLine) + 5))
 		return waitTime + "分钟，现在处于非调用频繁时间段，可能相对来说时间会更久"
-	case (getPersentTime > 10 && getPersentTime < 14) || (getPersentTime > 20 && getPersentTime < 24):
-		waitTime = strconv.Itoa(int(3*rawWaitLine + 5))
+	case (getPersentTime > 10 && getPersentTime < 14) || (getPersentTime > 18 && getPersentTime < 24):
+		waitTime = strconv.Itoa(int(3*(5-rawWaitLine) + 5))
 		return waitTime + "分钟，目前调用人数相对较多，预计会比等待时间要快"
 	}
-	waitTime = strconv.Itoa(int(5*rawWaitLine + 5))
+	waitTime = strconv.Itoa(int(4*(5-rawWaitLine) + 5))
 	return waitTime + "分钟"
 }

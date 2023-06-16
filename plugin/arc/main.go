@@ -42,7 +42,7 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-31]+getChartNumber+"\n预计等待时间：1-3 分钟"))
 			return
 		case getPlayerReplyStatusId == -32:
-			getUserSessionWaitList := gjson.Get(string(playerdataByte), "current_account").Int()
+			getUserSessionWaitList := gjson.Get(string(playerdataByte), "content.current_account").Int()
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-32]+strconv.FormatInt(getUserSessionWaitList, 10)+"\n预计等待时间："+PerdictUserWaitTime(getUserSessionWaitList)))
 			return
 		case getPlayerReplyStatusId != 0 && getPlayerReplyStatusId != -33:
@@ -107,7 +107,7 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-31]+getChartNumber+"\n预计等待时间：1-3 分钟"))
 			return
 		case getPlayerReplyStatusId == -32:
-			getUserSessionWaitList := gjson.Get(string(playerdataByte), "current_account").Int()
+			getUserSessionWaitList := gjson.Get(string(playerdataByte), "content.current_account").Int()
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-32]+strconv.FormatInt(getUserSessionWaitList, 10)+"\n预计等待时间："+PerdictUserWaitTime(getUserSessionWaitList)))
 			return
 		case getPlayerReplyStatusId != 0 && getPlayerReplyStatusId != -33:
@@ -209,6 +209,19 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误: ", err))
 			return
 		}
+		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
+	})
+
+	engine.OnFullMatch("!arc example render", zero.SuperUserPermission).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		getjson := engine.DataFolder() + "example.json"
+		getdata, _ := os.ReadFile(getjson)
+		_ = json.Unmarshal(getdata, &r)
+		mainBGDecoded, _, _ := image.Decode(bytes.NewReader(mainBG))
+		basicBG := DrawMainUserB30(mainBGDecoded, r)
+		tureResult := FinishedFullB30(basicBG, r)
+		var buf bytes.Buffer
+		_ = jpeg.Encode(&buf, tureResult, nil)
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})

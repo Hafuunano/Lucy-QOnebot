@@ -29,7 +29,7 @@ var (
 )
 
 func init() {
-	engine.OnRegex(`^\/pgr\sbind\s(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^!/pgr\sbind\s(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		hash := ctx.State["regex_matched"].([]string)[1]
 		userInfo := GetUserInfoTimeFromDatabase(ctx.Event.UserID)
 		if userInfo+(12*60*60) > time.Now().Unix() {
@@ -50,7 +50,7 @@ func init() {
 		_ = FormatUserDataBase(getQQID, getSessionID, time.Now().Unix()).BindUserDataBase()
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("绑定成功～"))
 	})
-	engine.OnFullMatch("/pgr b19").SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnFullMatch("!pgr b19").SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		data := GetUserInfoFromDatabase(ctx.Event.UserID)
 		getDataSession := data.PhiSession
 		if getDataSession == "" {
