@@ -170,8 +170,8 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 	var referceLength = 0
 	var referceWidth = 300 // + 1280
 	var isRight = false
-	// background render path.
 	var i int
+	// background render path.
 	_ = json.Unmarshal(dataOrigin, &phigrosB19)
 	i = 0
 	if phigrosB19.Content.BestList.Phi == true { // while render the first set this change To Phi
@@ -324,7 +324,7 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		}
 	}
 	canvas.Fill()
-	// just like a piece of shit. same codes use it by using the fucking way.
+	// just like a piece of shit. same codes was used in a fucking way.
 	/*
 		if phigrosB19.Content.BestList.Phi == true {
 			referceLength += 150
