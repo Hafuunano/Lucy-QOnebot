@@ -411,10 +411,10 @@ func GetUserChallengeMode(num int) (challenge string, link string) {
 				colors = "Blue"
 				link = strconv.Itoa(num - (i-1)*100)
 			case getCurrentRankLevel == 3:
-				colors = "Gold"
+				colors = "Red"
 				link = strconv.Itoa(num - (i-1)*100)
 			case getCurrentRankLevel == 4:
-				colors = "Red"
+				colors = "Gold"
 				link = strconv.Itoa(num - (i-1)*100)
 			case getCurrentRankLevel == 5:
 				colors = "Rainbow"
