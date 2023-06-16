@@ -452,9 +452,7 @@ func DrawParallelogram(img image.Image) image.Image {
 // GetRank get this rank.
 func GetRank(num int, isFC bool) string {
 	var rankPicName string
-	if isFC == true {
-		rankPicName = "fc"
-	}
+	
 	switch {
 	case num == 1000000:
 		rankPicName = "phi"
@@ -470,6 +468,9 @@ func GetRank(num int, isFC bool) string {
 		rankPicName = "c"
 	default:
 		rankPicName = "f"
+	}
+	if isFC == true && num != 1000000 {
+		rankPicName = "fc"
 	}
 	return rankPicName
 }
