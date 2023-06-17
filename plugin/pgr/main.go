@@ -73,7 +73,6 @@ func init() {
 			panic(err)
 		}
 		_ = json.Unmarshal(phidata, &phigrosB19)
-
 		if phigrosB19.Status != true {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w? 貌似出现了一些问题x"))
 			return
