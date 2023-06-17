@@ -22,8 +22,7 @@ import (
 )
 
 var (
-	rateLimit = rate.NewManager[int64](time.Second*60, 12) // time setup
-	engine    = control.Register("score", &ctrl.Options[*zero.Ctx]{
+	engine = control.Register("score", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
 		Help:              "Hi NekoPachi!\n说明书: https://lucy.impart.icu",
 		PrivateDataFolder: "score",

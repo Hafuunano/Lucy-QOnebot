@@ -162,7 +162,6 @@ func drawTriAngle(canvas *gg.Context, angle, x, y, w, l float64) {
 	canvas.LineTo(x2, y2)
 	canvas.LineTo(x3, y3)
 	canvas.ClosePath()
-	return
 }
 
 // CardRender Render By Original Image,so it's single work and do slowly.
@@ -174,7 +173,7 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 	// background render path.
 	_ = json.Unmarshal(dataOrigin, &phigrosB19)
 	i = 0
-	if phigrosB19.Content.BestList.Phi == true { // while render the first set this change To Phi
+	if phigrosB19.Content.BestList.Phi { // while render the first set this change To Phi
 		renderImage := phigrosB19.Content.BestList.Best[i].Songid
 		getRenderImage := background + renderImage[:len(renderImage)-2] + ".png"
 		getImage, _ := gg.LoadImage(getRenderImage)
@@ -237,16 +236,9 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		canvas.DrawStringAnchored(getAcc, float64(referceWidth+760), float64(referceLength+1020), 0.5, 0.5)
 		canvas.Fill()
 		// width = referceWidth | height = 800+ referenceLength
-		if isRight != true {
-			referceWidth = referceWidth + 1280
-			referceLength += 75
-			isRight = true
-		} else {
-			referceWidth = referceWidth - 1280
-			referceLength -= 75
-			isRight = false
-			referceLength += 400
-		}
+		referceWidth = referceWidth + 1280
+		referceLength += 75
+		isRight = true
 		i = i + 1
 	}
 	for ; i < len(phigrosB19.Content.BestList.Best); i++ {
@@ -312,7 +304,7 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		canvas.DrawStringAnchored(getAcc, float64(referceWidth+760), float64(referceLength+1020), 0.5, 0.5)
 		canvas.Fill()
 		// width = referceWidth | height = 800+ referenceLength
-		if isRight != true {
+		if !isRight {
 			referceWidth = referceWidth + 1280
 			referceLength += 75
 			isRight = true
@@ -324,6 +316,7 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		}
 	}
 	canvas.Fill()
+
 	// just like a piece of shit. same codes was used in a fucking way.
 	/*
 		if phigrosB19.Content.BestList.Phi == true {
@@ -452,7 +445,7 @@ func DrawParallelogram(img image.Image) image.Image {
 // GetRank get this rank.
 func GetRank(num int, isFC bool) string {
 	var rankPicName string
-	
+
 	switch {
 	case num == 1000000:
 		rankPicName = "phi"
@@ -469,7 +462,7 @@ func GetRank(num int, isFC bool) string {
 	default:
 		rankPicName = "f"
 	}
-	if isFC == true && num != 1000000 {
+	if isFC && num != 1000000 {
 		rankPicName = "fc"
 	}
 	return rankPicName
