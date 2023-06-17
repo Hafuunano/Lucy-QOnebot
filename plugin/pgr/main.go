@@ -72,7 +72,10 @@ func init() {
 		if err != nil {
 			panic(err)
 		}
-		_ = json.Unmarshal(phidata, &phigrosB19)
+		err = json.Unmarshal(phidata, &phigrosB19)
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生解析错误", err))
+		}
 		if phigrosB19.Status != true {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w? 貌似出现了一些问题x"))
 			return
