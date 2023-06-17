@@ -23,7 +23,7 @@ func init() {
 		getPatternInfo := ctx.State["regex_matched"].([]string)[1]
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ctx.CardOrNickName(ctx.Event.UserID)+getPatternInfo+"了他自己~"))
 	})
-	engine.OnRegex(`^(\[CQ:reply,id=(\d+)\])\s/(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^(\[CQ:reply,id=(.*)\])\s/(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		getPatternUserMessageID := ctx.State["regex_matched"].([]string)[2]
 		getPatternInfo := ctx.State["regex_matched"].([]string)[3]
 		getSplit := strings.Split(getPatternInfo, " ")
