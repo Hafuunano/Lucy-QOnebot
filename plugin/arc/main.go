@@ -78,7 +78,11 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("未知错误.", err))
 			return
 		}
-		_ = json.Unmarshal(dataBytes, &userinfo)
+		err = json.Unmarshal(dataBytes, &userinfo)
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据出现问题，", err))
+			return
+		}
 		checkStatus := userinfo.Status
 		if checkStatus != 0 {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("数据返回异常: ", m[checkStatus]))
