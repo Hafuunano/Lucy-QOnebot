@@ -77,11 +77,13 @@ func Initialize(dbpath string) *Scoredb {
 	return (*Scoredb)(gdb)
 }
 
+/*
 // Close ...
 func Close(sdb *Scoredb) error {
 	db := (*gorm.DB)(sdb)
 	return db.Close()
 }
+*/
 
 // GetScoreByUID 取得分数
 func GetScoreByUID(sdb *Scoredb, uid int64) (s Scoretable) {
