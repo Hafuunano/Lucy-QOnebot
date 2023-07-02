@@ -2,7 +2,9 @@
 package score
 
 import (
-	"github.com/wdvxdr1123/ZeroBot/extension/single"
+	ctrl "github.com/FloatTech/zbpctrl"
+	"github.com/FloatTech/zbputils/control"
+	"github.com/FloatTech/zbputils/ctxext"
 	"math/rand"
 	"strconv"
 	"sync"
@@ -14,9 +16,6 @@ import (
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/gg"
 	_ "github.com/FloatTech/sqlite" // import sql
-	ctrl "github.com/FloatTech/zbpctrl"
-	"github.com/FloatTech/zbputils/control"
-	"github.com/FloatTech/zbputils/ctxext"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
@@ -26,25 +25,15 @@ var (
 		DisableOnDefault:  false,
 		Help:              "Hi NekoPachi!\n说明书: https://lucy.impart.icu",
 		PrivateDataFolder: "score",
-	}).ApplySingle(ReverseSingle)
-	ReverseSingle = single.New(
-		single.WithKeyFn(func(ctx *zero.Ctx) int64 {
-			return ctx.Event.UserID
-		}),
-		single.WithPostFn[int64](func(ctx *zero.Ctx) {
-			if !MessageTickerLimiter.Load(ctx.Event.UserID).Acquire() {
-				return
-			}
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("正在操作哦～"))
-		}),
-	)
-	MessageTickerLimiter = rate.NewManager[int64](time.Minute*1, 2)
+	})
+	MessageTickerLimiter = rate.NewManager[int64](time.Minute*1, 1)
 )
 
 func init() {
 	cachePath := engine.DataFolder() + "scorecache/"
 	sdb := coins.Initialize("./data/score/score.db")
-	engine.OnFullMatchGroup([]string{"签到", "打卡"}, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).
+	ctxext.SetDefaultLimiterManagerParam(time.Second*10, 2)
+	engine.OnFullMatchGroup([]string{"签到", "打卡"}, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {
 			var mutex sync.RWMutex // 添加读写锁以保证稳定性
 			mutex.Lock()

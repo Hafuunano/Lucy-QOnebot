@@ -13,6 +13,7 @@ require (
 	github.com/FloatTech/zbputils v1.6.2-0.20230207084008-8c14cb9fcacb
 	github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230505093055-e0b9baf347a2
 	github.com/MoYoez/img_toolbox v0.0.0-20230403161424-c9a9cb5b3880
+	github.com/disintegration/imaging v1.6.2
 	github.com/fumiama/cron v1.3.0
 	github.com/fumiama/gotracemoe v0.0.3
 	github.com/jinzhu/gorm v1.9.16
@@ -21,7 +22,7 @@ require (
 	github.com/shirou/gopsutil/v3 v3.23.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/tidwall/gjson v1.14.4
-	github.com/wdvxdr1123/ZeroBot v1.6.9
+	github.com/wdvxdr1123/ZeroBot v1.6.11
 	golang.org/x/image v0.3.0
 )
 
@@ -29,7 +30,6 @@ require (
 	github.com/FloatTech/rendercard v0.0.9 // indirect
 	github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e // indirect
 	github.com/RomiChan/websocket v1.4.3-0.20220227141055-9b2c6168c9c5 // indirect
-	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4 // indirect
 	github.com/fumiama/go-base16384 v1.6.4 // indirect
 	github.com/fumiama/go-registry v0.2.5 // indirect

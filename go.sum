@@ -118,8 +118,8 @@ github.com/tklauser/go-sysconf v0.3.11 h1:89WgdJhk5SNwJfu+GKyYveZ4IaJ7xAkecBo+Kd
 github.com/tklauser/go-sysconf v0.3.11/go.mod h1:GqXfhXY3kiPa0nAXPDIQIWzJbMCB7AmcWpGR8lSZfqI=
 github.com/tklauser/numcpus v0.6.0 h1:kebhY2Qt+3U6RNK7UqpYNA+tJ23IBEGKkB7JQBfDYms=
 github.com/tklauser/numcpus v0.6.0/go.mod h1:FEZLMke0lhOUG6w2JadTzp0a+Nl8PF/GFkQ5UVIcaL4=
-github.com/wdvxdr1123/ZeroBot v1.6.9 h1:vaFqtIXpyeU60xEddg4EsN6cX6cpB3MKhLbe/MQ5OVw=
-github.com/wdvxdr1123/ZeroBot v1.6.9/go.mod h1:T5kD5vLi/YxL/fyDOCOaawi96LRBdJjcXh2CIjDyFfg=
+github.com/wdvxdr1123/ZeroBot v1.6.11 h1:44Wr6CsCtWlFensK5IhuVCWkosdRw0rA8SygVD8DgoI=
+github.com/wdvxdr1123/ZeroBot v1.6.11/go.mod h1:y29UIOy0RD3P+0meDNIWRhcJF3jtWPN9xP9hgt/AJAU=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 github.com/yusufpapurcu/wmi v1.2.2 h1:KBNDSne4vP5mbSWnJbO+51IMOXJB67QiYCSBrubbPRg=
 github.com/yusufpapurcu/wmi v1.2.2/go.mod h1:SBZ9tNy3G9/m5Oi98Zks0QjeHVDvuK0qfxQmPyzfmi0=
