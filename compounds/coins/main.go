@@ -13,6 +13,7 @@ var (
 )
 
 func init() {
+
 }
 
 // Scoredb 分数数据库
