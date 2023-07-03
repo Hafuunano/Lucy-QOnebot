@@ -759,12 +759,12 @@ func PerdictUserWaitTime(rawWaitLine int64) string {
 	var waitTime string
 	switch {
 	case (getPersentTime > 0 && getPersentTime < 10) || (getPersentTime > 14 && getPersentTime < 21):
-		waitTime = strconv.Itoa(int(7*(5-rawWaitLine) + 5))
+		waitTime = strconv.FormatFloat(2*(5-float64(rawWaitLine))+5, 'f', 1, 64)
 		return waitTime + "分钟，现在处于非调用频繁时间段，可能相对来说时间会更久"
 	case (getPersentTime > 10 && getPersentTime < 14) || (getPersentTime > 18 && getPersentTime < 24):
-		waitTime = strconv.Itoa(int(3*(5-rawWaitLine) + 5))
+		waitTime = strconv.FormatFloat(0.75*(5-float64(rawWaitLine))+5, 'f', 1, 64)
 		return waitTime + "分钟，目前调用人数相对较多，预计会比等待时间要快"
 	}
-	waitTime = strconv.Itoa(int(4*(5-rawWaitLine) + 5))
+	waitTime = strconv.FormatFloat(1*(5-float64(rawWaitLine))+5, 'f', 1, 64)
 	return waitTime + "分钟"
 }

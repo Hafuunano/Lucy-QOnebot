@@ -282,6 +282,44 @@ func init() {
 			return
 		}
 	})
+	engine.OnRegex(`[!！]coin\swager`).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
+		// 得到本身奖池大小，如果没有或者被get的情况下获胜
+		// this method should deal when we have less starter.(
+		// cost 50 one time.
+		getUserStatus := coins.GetSignInByUID(sdb, ctx.Event.UserID)
+		getUserCoins := getUserStatus.Coins
+		if getUserCoins-50 < 0 {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("没有足够的柠檬片可以参与奖池("))
+			return
+		}
+		// get wager
+		getWager := coins.GetWagerStatus(sdb)
+		GetStaus := getWager.Expected
+		if GetStaus == 0 {
+			// wager number random gen || init or done for one.
+			getGenOne := fcext.RandSenderPerDayN(time.Now().Unix(), 8500)
+			getGenTwo := rand.Intn(1605)
+			getGenThree := fcext.RandSenderPerDayN(time.Now().Unix(), 4626)
+			getRandNumber := getGenOne + getGenTwo + getGenThree
+			_ = coins.WagerCoinsInsert(sdb, getWager.Wagercount+50, 0, getRandNumber)
+			_ = coins.InsertUserCoins(sdb, getUserStatus.UID, getUserCoins-50)
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("没有中奖哦~，当前奖池为：50"))
+			return
+		}
+		getCoins := getWager.Wagercount
+		if getCoins+50 > GetStaus {
+			// you are winner!
+			_ = coins.InsertUserCoins(sdb, ctx.Event.UserID, getUserCoins+getCoins-50)
+			_ = coins.WagerCoinsInsert(sdb, 0, int(ctx.Event.UserID), 0)
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w！恭喜哦，奖池中奖了ww，一共获得 ", getCoins-50, " 个柠檬片，当前有 ", getUserCoins, " 个柠檬片"))
+			return
+		} else {
+			_ = coins.WagerCoinsInsert(sdb, getCoins+50, 0, GetStaus)
+			_ = coins.InsertUserCoins(sdb, ctx.Event.UserID, getUserCoins-50)
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("没有中奖哦~，当前奖池为: ", getWager.Wagercount))
+			return
+		}
+	})
 }
 
 func RobOrCatchLimitManager(ctx *zero.Ctx) (ticket int) {

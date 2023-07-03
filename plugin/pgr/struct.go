@@ -136,11 +136,11 @@ func DrawRequestPhigros(workurl string, token string, method string) (reply []by
 	}
 	resp, err := http.DefaultClient.Do(replyByte)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	replyBack, err := io.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	return replyBack, err
 }

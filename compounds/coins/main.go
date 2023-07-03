@@ -39,6 +39,17 @@ type Globaltable struct {
 	Times     string
 }
 
+// WagerTable wager Table Struct
+type WagerTable struct {
+	Wagercount int `gorm:"column:wagercount;default:0"`
+	Expected   int `gorm:"column:expected;default:0"`
+	Winner     int `gorm:"column:winner;default:0"`
+}
+
+func (WagerTable) TableName() string {
+	return "wagertable"
+}
+
 // TableName ...
 func (Globaltable) TableName() string {
 	return "global"
@@ -74,7 +85,7 @@ func Initialize(dbpath string) *Scoredb {
 	if err != nil {
 		panic(err)
 	}
-	gdb.AutoMigrate(&Scoretable{}).AutoMigrate(&Signintable{}).AutoMigrate(&Globaltable{})
+	gdb.AutoMigrate(&Scoretable{}).AutoMigrate(&Signintable{}).AutoMigrate(&Globaltable{}).AutoMigrate(&WagerTable{})
 	return (*Scoredb)(gdb)
 }
 
@@ -125,6 +136,13 @@ func GetSignInByUID(sdb *Scoredb, uid int64) (si Signintable) {
 func GetCurrentCount(sdb *Scoredb, times string) (si Globaltable) {
 	db := (*gorm.DB)(sdb)
 	db.Debug().Model(&Globaltable{}).FirstOrCreate(&si, "times = ? ", times)
+	return si
+}
+
+// GetWagerStatus Get Status
+func GetWagerStatus(sdb *Scoredb) (si WagerTable) {
+	db := (*gorm.DB)(sdb)
+	db.Debug().Model(&WagerTable{}).FirstOrCreate(&si, "winner = ? ", 0)
 	return si
 }
 
@@ -182,6 +200,23 @@ func UpdateUserTime(sdb *Scoredb, counttime int, times string) (err error) {
 	} else {
 		err = db.Debug().Model(&Globaltable{}).Where("times = ?", times).Update(map[string]interface{}{
 			"counttime": counttime,
+		}).Error
+	}
+	return err
+}
+
+func WagerCoinsInsert(sdb *Scoredb, modifyCoins int, winner int, expected int) (err error) {
+	db := (*gorm.DB)(sdb)
+	si := WagerTable{Wagercount: modifyCoins, Winner: winner, Expected: expected}
+	if err = db.Debug().Model(&WagerTable{}).First(&si, "winner = ? ", 0).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			db.Debug().Model(&WagerTable{}).Create(&si)
+		}
+	} else {
+		err = db.Debug().Model(&WagerTable{}).Where("winner = ? ", 0).Update(map[string]interface{}{
+			"wagercount": modifyCoins,
+			"expected":   expected,
+			"winner":     winner,
 		}).Error
 	}
 	return err

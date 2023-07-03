@@ -69,7 +69,7 @@ func init() {
 		userData := GetUserInfoFromDatabase(ctx.Event.UserID)
 		getFullLink := getPhigrosLink + "/user/best19?SessionToken=" + userData.PhiSession + "&withsonginfo=true&overflow=2"
 		phidata, err := DrawRequestPhigros(getFullLink, getPhigrosKey, "POST")
-		if err != nil {
+		if phidata == nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Phigros Unlimited API暂时无法工作 请过一段时候尝试"))
 			return
 		}
@@ -172,7 +172,7 @@ func init() {
 		}
 		getFullLink := getPhigrosLink + "/user/best19?SessionToken=" + userData.PhiSession + "&withsonginfo=true&overflow=" + strconv.Itoa(int(getOverFlowNumber))
 		phidata, err := DrawRequestPhigros(getFullLink, getPhigrosKey, "POST")
-		if err != nil {
+		if phidata == nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Phigros Unlimited API暂时无法工作 请过一段时候尝试"))
 			return
 		}
