@@ -13,8 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/wdvxdr1123/ZeroBot/extension/rate"
-
 	coins "github.com/FloatTech/ZeroBot-Plugin/compounds/coins"
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/gg"
@@ -29,7 +27,6 @@ var (
 		Help:              "Hi NekoPachi!\n说明书: https://lucy.impart.icu",
 		PrivateDataFolder: "score",
 	})
-	MessageTickerLimiter = rate.NewManager[int64](time.Minute*1, 1)
 )
 
 func init() {
@@ -40,7 +37,7 @@ func init() {
 		Handle(func(ctx *zero.Ctx) {
 			var mutex sync.Mutex // 添加读写锁以保证稳定性
 			uid := ctx.Event.UserID
-			getNowUnixFormatElevenThirten := time.Unix(time.Now().Unix()+60*30, 0).Format("20060102")
+			getNowUnixFormatElevenThirten := time.Unix(time.Now().Unix()-60*30, 0).Format("20060102")
 			today := time.Now().Format("20060102")
 			mutex.Lock()
 			si := coins.GetSignInByUID(sdb, uid)
@@ -160,6 +157,7 @@ func init() {
 				base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 				ctx.SendChain(message.At(uid), message.Text("[HiMoYoBot]签到成功\n"), message.Image("base64://"+base64Str))
 				_ = nightGround.SavePNG(drawedFile)
+
 			}
 
 		})

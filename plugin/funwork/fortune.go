@@ -120,11 +120,7 @@ func init() {
 				// avatar,name,desc
 				// draw third round rectangle
 				mainContext.SetRGBA255(91, 57, 83, 255)
-				err = mainContext.LoadFontFace(text.BoldFontFile, 25)
-				if err != nil {
-					ctx.SendChain(message.Text("Something wrong while rendering pic?"))
-					return
-				}
+				mainContext.LoadFontFace(text.BoldFontFile, 25)
 				nameLength, _ := mainContext.MeasureString(ctx.CardOrNickName(ctx.Event.UserID))
 				var renderLength float64
 				renderLength = nameLength + 160
@@ -194,11 +190,7 @@ func init() {
 				}
 				// output
 				mainContext.Stroke()
-				err = mainContext.SavePNG(engine.DataFolder() + "jrrp/" + userPic)
-				if err != nil {
-					ctx.SendChain(message.Text("Something wrong while rendering pic? save?", err))
-					return
-				}
+				mainContext.SavePNG(engine.DataFolder() + "jrrp/" + userPic)
 				ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + engine.DataFolder() + "jrrp/" + userPic))
 				signTF[si] = 1
 			} else {
