@@ -298,7 +298,7 @@ func init() {
 		if GetStaus == 0 {
 			// wager number random gen || init or done for one.
 			getGenOne := fcext.RandSenderPerDayN(time.Now().Unix(), 8500)
-			getGenTwo := rand.Intn(1605)
+			getGenTwo := rand.Intn(9605)
 			getGenThree := fcext.RandSenderPerDayN(time.Now().Unix(), 4626)
 			getRandNumber := getGenOne + getGenTwo + getGenThree
 			_ = coins.WagerCoinsInsert(sdb, getWager.Wagercount+50, 0, getRandNumber)

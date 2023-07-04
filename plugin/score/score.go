@@ -37,14 +37,19 @@ func init() {
 		Handle(func(ctx *zero.Ctx) {
 			var mutex sync.Mutex // 添加读写锁以保证稳定性
 			uid := ctx.Event.UserID
-			getNowUnixFormatElevenThirten := time.Unix(time.Now().Unix()-60*30, 0).Format("20060102")
-			today := time.Now().Format("20060102")
+			// save time data by add 30mins (database save it, not to handle it when it gets ready.)
+			// just handle data time when it on,make sure to decrease 30 mins when render the page(
+
+			// not sure what happened, // TODO: BUG HANDLER.
+			getNowUnixFormatElevenThirten := time.Now().Add(time.Minute * 30).Format("20060102")
+			//	today := time.Now().Format("20060102")
 			mutex.Lock()
 			si := coins.GetSignInByUID(sdb, uid)
 			mutex.Unlock()
-			drawedFile := cachePath + strconv.FormatInt(uid, 10) + today + "signin.png"
-			if si.UpdatedAt.Format("20060102") == getNowUnixFormatElevenThirten && si.Count != 0 {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("酱~ 你今天已经签到过了哦w"))
+			// in case
+			drawedFile := cachePath + strconv.FormatInt(uid, 10) + getNowUnixFormatElevenThirten + "signin.png"
+			if si.UpdatedAt.Add(time.Minute*30).Format("20060102") == getNowUnixFormatElevenThirten && si.Count != 0 {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w~ 你今天已经签到过了哦w"))
 				if file.IsExist(drawedFile) {
 					ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
 				}
@@ -59,8 +64,10 @@ func init() {
 			_ = coins.InsertOrUpdateScoreByUID(sdb, uid, score)
 			CurrentCountTable := coins.GetCurrentCount(sdb, getNowUnixFormatElevenThirten)
 			handledTodayNum := CurrentCountTable.Counttime + 1
-			_ = coins.UpdateUserTime(sdb, handledTodayNum, getNowUnixFormatElevenThirten) // 总体计算 隔日清零
+			_ = coins.UpdateUserTime(sdb, handledTodayNum, getNowUnixFormatElevenThirten)
+
 			mutex.Unlock()
+			time.Sleep(3 * time.Second) // wait three mins
 			if time.Now().Hour() > 6 && time.Now().Hour() < 19 {
 				// package for test draw.
 				getTimeReplyMsg := coins.GetHourWord(time.Now()) // get time and msg

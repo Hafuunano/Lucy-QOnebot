@@ -12,10 +12,6 @@ var (
 	LevelArray = [...]int{0, 1, 2, 5, 10, 20, 35, 55, 75, 100, 120, 180, 260, 360, 480, 600}
 )
 
-func init() {
-
-}
-
 // Scoredb 分数数据库
 type Scoredb gorm.DB
 

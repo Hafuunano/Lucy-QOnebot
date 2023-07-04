@@ -32,9 +32,9 @@ func init() {
 		}).Data.String()
 		sender := gjson.Get(rsp, "sender.user_id").Int()
 		if len(getSplit) == 2 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ctx.CardOrNickName(ctx.Event.UserID)+" "+getSplit[0]+" 了 "+ctx.CardOrNickName(sender)+" "+getSplit[1]))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ctx.CardOrNickName(ctx.Event.UserID)+" "+getSplit[0]+"了 "+ctx.CardOrNickName(sender)+" "+getSplit[1]))
 		} else {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ctx.CardOrNickName(ctx.Event.UserID)+" "+getPatternInfo+" 了 "+ctx.CardOrNickName(sender)))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ctx.CardOrNickName(ctx.Event.UserID)+" "+getPatternInfo+"了 "+ctx.CardOrNickName(sender)))
 		}
 	})
 }
