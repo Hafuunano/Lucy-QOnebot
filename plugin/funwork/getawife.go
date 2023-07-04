@@ -20,6 +20,7 @@ func init() {
 			wifes, err := os.ReadDir(cachePath)
 			if err != nil {
 				ctx.SendChain(message.Text("ERROR: ", err))
+				return
 			}
 			name := ctx.CardOrNickName(ctx.Event.UserID)
 			n := fcext.RandSenderPerDayN(ctx.Event.UserID, len(wifes))

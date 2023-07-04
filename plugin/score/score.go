@@ -57,6 +57,7 @@ func init() {
 			}
 			coinsGet := 300 + rand.Intn(200)
 			mutex.Lock()
+
 			_ = coins.InsertUserCoins(sdb, uid, si.Coins+coinsGet)
 			_ = coins.InsertOrUpdateSignInCountByUID(sdb, uid, si.Count+1) // 柠檬片获取
 			score := coins.GetScoreByUID(sdb, uid).Score
