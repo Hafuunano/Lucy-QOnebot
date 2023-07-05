@@ -16,24 +16,18 @@ import (
 	"image/jpeg"
 	"os"
 	"strconv"
-	"sync"
 )
 
 var (
-	userinfo user
-	r        arcaea
-	engine   = control.Register("arcaea", &ctrl.Options[*zero.Ctx]{
+	userinfo   user
+	recordinfo record
+	r          arcaea
+	engine     = control.Register("arcaea", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
 		Help:              "Hi NekoPachi!\n说明书: https://lucy.impart.icu",
 		PrivateDataFolder: "arcaea",
 	})
 )
-
-// Arcaea B30 Query
-type query struct {
-	queue []string // arc username
-	mutex sync.Mutex
-}
 
 func init() {
 	mainBG, _ := os.ReadFile(arcaeaRes + "/resource/b30/B30.png")
@@ -73,9 +67,9 @@ func init() {
 	})
 
 	engine.OnRegex(`[！! /](a|arc)\sbind\s(.*)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
-		getBindInfo := ctx.State["regex_matched"].([]string)[1]
+		getBindInfo := ctx.State["regex_matched"].([]string)[2]
 		context := IsAlphanumeric(getBindInfo)
-		var userinfo user
+
 		if !context {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("返回数据非法！"))
 			return
@@ -192,37 +186,39 @@ func init() {
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
+	/*
+		engine.OnRegex(`[！! /](a|arc)\sbest\s([^\]]+)\s+([^\]]+)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+			songName := ctx.State["regex_matched"].([]string)[2]
+			songDiff := ctx.State["regex_matched"].([]string)[3]
+			id, err := GetUserArcaeaInfo(arcAcc, ctx)
+			if err != nil || id == "" {
+				ctx.SendChain(message.Text("找不到用户信息，请检查你是否已经在Lucy端进行绑定，方式： “！arc bind {username | userid} ” "))
+				return
+			}
+			getData, err := aua.GetUserBest(os.Getenv("aualink"), os.Getenv("auakey"), id, songName, songDiff)
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误：", err))
+				return
+			}
+			_ = json.Unmarshal(getData, &recordinfo)
+			checkStatus := recordinfo.Status
+			if checkStatus != 0 {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误: ", m[checkStatus]))
+				return
+			}
+			replyImage := RenderUserBestLog(recordinfo)
+			var buf bytes.Buffer
+			err = jpeg.Encode(&buf, replyImage, nil)
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误: ", err))
+				return
+			}
+			base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
+		})
 
-	engine.OnRegex(`[！! /](a|arc)\sbest\s([^\]]+)\s+([^\]] +)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
-		songName := ctx.State["regex_matched"].([]string)[2]
-		songDiff := ctx.State["regex_matched"].([]string)[3]
-		id, err := GetUserArcaeaInfo(arcAcc, ctx)
-		if err != nil || id == "" {
-			ctx.SendChain(message.Text("找不到用户信息，请检查你是否已经在Lucy端进行绑定，方式： “！arc bind {username | userid} ” "))
-			return
-		}
-		getData, err := aua.GetUserBest(os.Getenv("aualink"), os.Getenv("auakey"), id, songName, songDiff)
-		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误：", err))
-			return
-		}
-		_ = json.Unmarshal(getData, &userinfo)
-		checkStatus := userinfo.Status
-		if checkStatus != 0 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误: ", m[checkStatus]))
-			return
-		}
-		replyImage := RenderUserRecentLog(userinfo)
-		var buf bytes.Buffer
-		err = jpeg.Encode(&buf, replyImage, nil)
-		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误: ", err))
-			return
-		}
-		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
-	})
 
+	*/
 	engine.OnFullMatch("!arc example render", zero.SuperUserPermission).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		getjson := engine.DataFolder() + "example.json"
 		getdata, _ := os.ReadFile(getjson)
@@ -235,53 +231,4 @@ func init() {
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
-}
-
-// AddToQueue Add Arcaea Name To Queue
-func (q *query) AddToQueue(username string) (action int) {
-	q.mutex.Lock()
-	defer q.mutex.Unlock()
-	if q.Contains(username) == true {
-		// already existed.
-		// user in the queue
-		return 1
-	}
-	q.queue = append(q.queue, username)
-	return 0
-}
-
-// Contains Contains
-func (q *query) Contains(item string) bool {
-	q.mutex.Lock()
-	defer q.mutex.Unlock()
-	for _, value := range q.queue {
-		if value == item {
-			return true
-		}
-	}
-	return false
-}
-
-// Remover Remove it.
-func (q *query) Remover(item string) int {
-	q.mutex.Lock()
-	defer q.mutex.Unlock()
-	if q.Contains(item) == false {
-		// not existed.
-		return 1
-	}
-	index := -1
-	for i, value := range q.queue {
-		if value == item {
-			index = i
-			break
-		}
-	}
-	if index >= 0 {
-		q.queue = append(q.queue[:index], q.queue[index+1:]...)
-		return 0
-	} else {
-		return 1
-	}
-
 }
