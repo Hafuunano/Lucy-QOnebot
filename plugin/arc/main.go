@@ -16,6 +16,7 @@ import (
 	"image/jpeg"
 	"os"
 	"strconv"
+	"sync"
 )
 
 var (
@@ -28,10 +29,16 @@ var (
 	})
 )
 
+// Arcaea B30 Query
+type query struct {
+	queue []string // arc username
+	mutex sync.Mutex
+}
+
 func init() {
 	mainBG, _ := os.ReadFile(arcaeaRes + "/resource/b30/B30.png")
 	// arc b30 is still in test(
-	engine.OnRegex(`^[！!]arc\s*(\d+)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^[！! /](a|arc)\s*(\d+)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		id := ctx.State["regex_matched"].([]string)[1]
 		sessionKey, sessionKeyInfo := aua.GetSessionQuery(os.Getenv("aualink"), os.Getenv("auakey"), id)
 		playerdataByte, _ := aua.DrawRequestArc(os.Getenv("aualink")+"/arcapi/user/bests/result?session_info="+sessionKey+"&overflow=10&with_recent=false&with_song_info=true", os.Getenv("auakey"))
@@ -39,7 +46,7 @@ func init() {
 		switch {
 		case getPlayerReplyStatusId == -31:
 			getChartNumber := gjson.Get(string(playerdataByte), "content.queried_charts").String()
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-31]+getChartNumber+"\n预计等待时间：1-3 分钟"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-31]+getChartNumber+"\n预计等待时间：1-5 分钟"))
 			return
 		case getPlayerReplyStatusId == -32:
 			getUserSessionWaitList := gjson.Get(string(playerdataByte), "content.current_account").Int()
@@ -65,7 +72,7 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("SessionKeyInfo: ", sessionKeyInfo), message.Image("base64://"+base64Str))
 	})
 
-	engine.OnRegex(`[！!]arc\sbind\s(.*)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`[！! /](a|arc)\sbind\s(.*)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		getBindInfo := ctx.State["regex_matched"].([]string)[1]
 		context := IsAlphanumeric(getBindInfo)
 		var userinfo user
@@ -96,7 +103,7 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", userinfo.Content.AccountInfo.Name, "` binded, id: ", userinfo.Content.AccountInfo.Code))
 	})
 
-	engine.OnRegex(`[！!]arc\sb30$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`[！! /](a|arc)\sb30$`).SetBlock(false).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		id, err := GetUserArcaeaInfo(arcAcc, ctx)
 		if err != nil || id == "" {
 			ctx.SendChain(message.Text("找不到用户信息，请检查你是否已经在Lucy端进行绑定，方式： “！arc bind {username | userid} ” "))
@@ -107,8 +114,8 @@ func init() {
 		getPlayerReplyStatusId := gjson.Get(string(playerdataByte), "status").Int()
 		switch {
 		case getPlayerReplyStatusId == -31:
-			getChartNumber := gjson.Get(string(playerdataByte), "content.queried_charts").String()
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-31]+getChartNumber+"\n预计等待时间：1-3 分钟"))
+			getChartNumber := gjson.Get(string(playerdataByte), "content.queried_charts").Int()
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-31]+strconv.FormatInt(getChartNumber, 10)+"\n预计等待时间：1-4.5 分钟"))
 			return
 		case getPlayerReplyStatusId == -32:
 			getUserSessionWaitList := gjson.Get(string(playerdataByte), "content.current_account").Int()
@@ -133,13 +140,12 @@ func init() {
 		if sessionKeyInfo != "" {
 			SessionKeyInfoFull = m[-33]
 		}
-
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(SessionKeyInfoFull), message.Image("base64://"+base64Str))
 	})
 
-	engine.OnRegex(`[！!]arc\schart\s([^\]]+)\s+([^\]] +)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
-		songName := ctx.State["regex_matched"].([]string)[1]
-		songDiff := ctx.State["regex_matched"].([]string)[2]
+	engine.OnRegex(`[！! /](a|arc)\schart\s([^\]]+)\s+([^\]] +)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+		songName := ctx.State["regex_matched"].([]string)[2]
+		songDiff := ctx.State["regex_matched"].([]string)[3]
 		resultPreview, err := aua.GetSongPreview(os.Getenv("aualink"), os.Getenv("auakey"), songName, songDiff)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Reply sent, but cannot find ", songName, " (", err))
@@ -156,7 +162,7 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
 
-	engine.OnRegex(`[！!]arc$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`[！! /](a|arc)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		// get info.
 		id, err := GetUserArcaeaInfo(arcAcc, ctx)
 		if err != nil || id == "" {
@@ -187,9 +193,9 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
 
-	engine.OnRegex(`[! !]arc\sbest\s([^\]]+)\s+([^\]] +)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
-		songName := ctx.State["regex_matched"].([]string)[1]
-		songDiff := ctx.State["regex_matched"].([]string)[2]
+	engine.OnRegex(`[！! /](a|arc)\sbest\s([^\]]+)\s+([^\]] +)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+		songName := ctx.State["regex_matched"].([]string)[2]
+		songDiff := ctx.State["regex_matched"].([]string)[3]
 		id, err := GetUserArcaeaInfo(arcAcc, ctx)
 		if err != nil || id == "" {
 			ctx.SendChain(message.Text("找不到用户信息，请检查你是否已经在Lucy端进行绑定，方式： “！arc bind {username | userid} ” "))
@@ -229,4 +235,53 @@ func init() {
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
+}
+
+// AddToQueue Add Arcaea Name To Queue
+func (q *query) AddToQueue(username string) (action int) {
+	q.mutex.Lock()
+	defer q.mutex.Unlock()
+	if q.Contains(username) == true {
+		// already existed.
+		// user in the queue
+		return 1
+	}
+	q.queue = append(q.queue, username)
+	return 0
+}
+
+// Contains Contains
+func (q *query) Contains(item string) bool {
+	q.mutex.Lock()
+	defer q.mutex.Unlock()
+	for _, value := range q.queue {
+		if value == item {
+			return true
+		}
+	}
+	return false
+}
+
+// Remover Remove it.
+func (q *query) Remover(item string) int {
+	q.mutex.Lock()
+	defer q.mutex.Unlock()
+	if q.Contains(item) == false {
+		// not existed.
+		return 1
+	}
+	index := -1
+	for i, value := range q.queue {
+		if value == item {
+			index = i
+			break
+		}
+	}
+	if index >= 0 {
+		q.queue = append(q.queue[:index], q.queue[index+1:]...)
+		return 0
+	} else {
+		return 1
+	}
+
 }

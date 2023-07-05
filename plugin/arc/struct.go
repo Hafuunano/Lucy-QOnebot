@@ -768,3 +768,17 @@ func PerdictUserWaitTime(rawWaitLine int64) string {
 	waitTime = strconv.FormatFloat(1*(5-float64(rawWaitLine))+5, 'f', 1, 64)
 	return waitTime + "分钟"
 }
+func PerdictUserWaitTimeOriginal(rawWaitLine int64) float64 {
+	getPersentTime := time.Now().Hour()
+	var waitTime float64
+	switch {
+	case (getPersentTime > 0 && getPersentTime < 10) || (getPersentTime > 14 && getPersentTime < 21):
+		waitTime = 2*(5-float64(rawWaitLine)) + 5
+		return waitTime
+	case (getPersentTime > 10 && getPersentTime < 14) || (getPersentTime > 18 && getPersentTime < 24):
+		waitTime = 0.75*(5-float64(rawWaitLine)) + 5
+		return waitTime
+	}
+	waitTime = 1*(5-float64(rawWaitLine)) + 5
+	return waitTime
+}
