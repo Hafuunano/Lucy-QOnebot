@@ -1,8 +1,8 @@
 # Lucy_ZeroBot
 
-Lucy's Ver.1.61 Designed with Zerobot-Plugin Project.
+Lucy |  Ver.1.61
 
-基于 [Zerobot-Plugin](https://github.com/FloatTech/ZeroBot-Plugin) 定制的 三方 Bot 计划 Lucy.ver 做了些相关的定制和维护
+基于 [Zerobot-Plugin](https://github.com/FloatTech/ZeroBot-Plugin) 定制的 三方 Bot 计划 Lucy 做了些相关的定制和维护
 
 具体可以去查看 > [Lucy's Doc.](https://lucy.impart.icu)
 
