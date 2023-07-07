@@ -1,12 +1,16 @@
 package mai
 
 import (
+	"bytes"
+	"encoding/base64"
+	"encoding/json"
 	"github.com/FloatTech/floatbox/binary"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/img/text"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
+	"image/jpeg"
 )
 
 var (
@@ -18,7 +22,7 @@ var (
 )
 
 func init() {
-	engine.OnRegex(`^[！!]mai$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	/* engine.OnRegex(`^[！!]mai\shard$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		uid := ctx.Event.UserID
 		dataPlayer, err := QueryMaiBotDataFromQQ(int(uid))
 		if err != nil {
@@ -33,6 +37,8 @@ func init() {
 		}
 		ctx.SendChain(message.Image("base64://" + binary.BytesToString(base64Font)))
 	})
+
+	*/
 	engine.OnRegex(`^[！!]chun$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		uid := ctx.Event.UserID
 		dataPlayer, err := QueryChunDataFromQQ(int(uid))
@@ -47,5 +53,24 @@ func init() {
 			return
 		}
 		ctx.SendChain(message.Image("base64://" + binary.BytesToString(base64Font)))
+	})
+	engine.OnRegex(`^[! ！/](mai|b50)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		uid := ctx.Event.UserID
+		dataPlayer, err := QueryMaiBotDataFromQQ(int(uid))
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			return
+		}
+		var data player
+		_ = json.Unmarshal(dataPlayer, &data)
+		renderImg := FullPageRender(data, ctx)
+		var buf bytes.Buffer
+		err = jpeg.Encode(&buf, renderImg, nil)
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			return
+		}
+		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
 }

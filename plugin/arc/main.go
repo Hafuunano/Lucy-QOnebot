@@ -97,7 +97,7 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", userinfo.Content.AccountInfo.Name, "` binded, id: ", userinfo.Content.AccountInfo.Code))
 	})
 
-	engine.OnRegex(`[！! /](a|arc)\sb30$`).SetBlock(false).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`[！! /](a|arc)\sb30$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		id, err := GetUserArcaeaInfo(arcAcc, ctx)
 		if err != nil || id == "" {
 			ctx.SendChain(message.Text("找不到用户信息，请检查你是否已经在Lucy端进行绑定，方式： “！arc bind {username | userid} ” "))
