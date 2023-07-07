@@ -326,7 +326,11 @@ func RenderCard(data playerData, num int) image.Image {
 	// draw name
 	drawBackGround.SetColor(color.White)
 	drawBackGround.SetFontFace(titleFont)
-	drawBackGround.DrawStringAnchored(data.Title, 250, 30, 0.5, 0.5)
+	getSongName := data.Title
+	if len(getSongName) > 30 {
+		getSongName = getSongName[:30] + "..."
+	}
+	drawBackGround.DrawStringAnchored(getSongName, 250, 30, 0.5, 0.5)
 	drawBackGround.Fill()
 	// draw acc
 	drawBackGround.SetFontFace(scoreFont)
