@@ -41,8 +41,8 @@ func QueryMaiBotDataFromQQ(qq int) (playerdata []byte, err error) {
 	if resp.StatusCode == 403 {
 		return nil, errors.New("403")
 	}
-	playerData, err := io.ReadAll(resp.Body)
-	return playerData, err
+	playerGetData, err := io.ReadAll(resp.Body)
+	return playerGetData, err
 }
 func QueryMaiBotDataFromUserName(username string) (playerdata []byte, err error) {
 	// packed json and sent.

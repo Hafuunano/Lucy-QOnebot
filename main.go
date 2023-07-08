@@ -31,6 +31,8 @@ import (
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/pgr" // pgr plugin
 
+	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/whitelist" // whitelist plugin
+
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/slash" // slash plugin
 
 	"github.com/FloatTech/floatbox/process"
