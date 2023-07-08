@@ -316,8 +316,11 @@ func init() {
 		} else {
 			_ = coins.WagerCoinsInsert(sdb, getCoins+50, 0, GetStaus)
 			_ = coins.InsertUserCoins(sdb, ctx.Event.UserID, getUserCoins-50)
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("没有中奖哦~，当前奖池为: ", getWager.Wagercount))
-			return
+			if rand.Intn(10) == 8 {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("呐～，不会还有大哥哥到现在 "+strconv.Itoa(getWager.Wagercount)+" 个柠檬片了都没中奖吧？杂鱼～❤，杂鱼～❤"))
+			} else {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("没有中奖哦~，当前奖池为: ", getWager.Wagercount))
+			}
 		}
 	})
 }
