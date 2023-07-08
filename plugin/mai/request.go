@@ -68,8 +68,8 @@ func QueryMaiBotDataFromUserName(username string) (playerdata []byte, err error)
 	if resp.StatusCode == 403 {
 		return nil, errors.New("403")
 	}
-	playerData, err := io.ReadAll(resp.Body)
-	return playerData, err
+	playerDataByte, err := io.ReadAll(resp.Body)
+	return playerDataByte, err
 }
 
 // https://www.diving-fish.com/api/chunithmprober/query/player

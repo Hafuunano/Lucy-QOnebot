@@ -21,6 +21,7 @@ var (
 )
 
 func init() {
+
 	/* engine.OnRegex(`^[！!]mai\shard$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		uid := ctx.Event.UserID
 		dataPlayer, err := QueryMaiBotDataFromQQ(int(uid))
@@ -65,5 +66,10 @@ func init() {
 		renderImg := FullPageRender(data, ctx)
 		_ = gg.NewContextForImage(renderImg).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image(Saved+strconv.Itoa(int(ctx.Event.UserID))+".png"))
+	})
+	engine.OnRegex(`^[! ！/](mai|b50)\splate\s(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		getPlateInfo := ctx.State["regex_matched"].([]string)[2]
+		_ = FormatUserDataBase(ctx.Event.UserID, getPlateInfo).BindUserDataBase()
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经将称号绑定上去了哦w"))
 	})
 }

@@ -264,8 +264,8 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 	b50Render.Fill()
 	b50Render.SetFontFace(titleFont)
 	// TODO: CUSTOM
-	if ctx.Event.UserID == 1292581422 {
-		data.Plate = "Lucy Kawaii~ ^^"
+	if GetUserInfoFromDatabase(ctx.Event.UserID) != "" {
+		data.Plate = GetUserInfoFromDatabase(ctx.Event.UserID)
 	}
 	b50Render.DrawStringAnchored(strings.Join(strings.Split(data.Plate, ""), " "), 1050, 207, 0.5, 0.5)
 	b50Render.Fill()
@@ -298,7 +298,7 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 	getDXinitX := 45
 	getDXinitY := 1225
 	for dx := 0; dx < getDXLength; dx++ {
-		b50Render.DrawImage(RenderCard(data.Charts.Sd[dx], dx+1), getDXinitX, getDXinitY)
+		b50Render.DrawImage(RenderCard(data.Charts.Dx[dx], dx+1), getDXinitX, getDXinitY)
 		getDXinitX += 400
 		if getDXinitX == 2045 {
 			getDXinitX = 45
