@@ -132,4 +132,8 @@ func init() {
 		FormatUserDataBasePic(ctx.Event.UserID, base64Str).BindUserDataBaseForPic()
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经存入了哦w"))
 	})
+	engine.OnRegex(`^[! ！/](mai|b50)\sremove`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		_ = DeleteUserDataPic(ctx.Event.UserID)
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经删掉了哦w"))
+	})
 }

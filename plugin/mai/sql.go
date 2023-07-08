@@ -77,3 +77,10 @@ func (info *DataHostPic) BindUserDataBaseForPic() error {
 	defer maiLocker.Unlock()
 	return maiDatabase.Insert("userpic", info)
 }
+
+func DeleteUserDataPic(userID int64) error {
+	maiLocker.Lock()
+	defer maiLocker.Unlock()
+	userIDStr := strconv.FormatInt(userID, 10)
+	return maiDatabase.Del("userpic", "where user_qq is "+userIDStr)
+}

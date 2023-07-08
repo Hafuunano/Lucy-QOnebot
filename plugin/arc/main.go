@@ -13,7 +13,7 @@ import (
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"image"
-	"image/jpeg"
+	"image/png"
 	"os"
 	"strconv"
 )
@@ -57,7 +57,7 @@ func init() {
 		basicBG := DrawMainUserB30(mainBGDecoded, r)
 		tureResult := FinishedFullB30(basicBG, r)
 		var buf bytes.Buffer
-		err := jpeg.Encode(&buf, tureResult, nil)
+		err := png.Encode(&buf, tureResult)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
 			return
@@ -124,7 +124,7 @@ func init() {
 		basicBG := DrawMainUserB30(mainBGDecoded, r)
 		tureResult := FinishedFullB30(basicBG, r)
 		var buf bytes.Buffer
-		err = jpeg.Encode(&buf, tureResult, nil)
+		err = png.Encode(&buf, tureResult)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
 			return
@@ -147,7 +147,7 @@ func init() {
 		}
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请等待一会哦~已经拿到图片请求了x"))
 		var buf bytes.Buffer
-		err = jpeg.Encode(&buf, resultPreview, nil)
+		err = png.Encode(&buf, resultPreview)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("错误: ", err))
 			return
@@ -178,7 +178,7 @@ func init() {
 		}
 		replyImage := RenderUserRecentLog(userinfo)
 		var buf bytes.Buffer
-		err = jpeg.Encode(&buf, replyImage, nil)
+		err = png.Encode(&buf, replyImage)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
 			return
@@ -227,7 +227,7 @@ func init() {
 		basicBG := DrawMainUserB30(mainBGDecoded, r)
 		tureResult := FinishedFullB30(basicBG, r)
 		var buf bytes.Buffer
-		_ = jpeg.Encode(&buf, tureResult, nil)
+		_ = png.Encode(&buf, tureResult)
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
