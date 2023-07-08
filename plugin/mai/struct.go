@@ -1,12 +1,14 @@
 package mai
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/gg"
 	"github.com/FloatTech/imgfactory"
 	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/message"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 	"image"
@@ -18,6 +20,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 type player struct {
@@ -119,7 +122,8 @@ var (
 	UniFontPath       = maifont + "Montserrat-Bold.ttf"
 	nameFont          = maifont + "NotoSansSC-Regular.otf"
 	maifont           = Root + "font/"
-	b50_bg            = loadMaiPic + "b50_bg.png"
+	b50bg             = loadMaiPic + "b50_bg.png"
+	b50Custom         = loadMaiPic + "b50_bg_custom.png"
 	Root              = engine.DataFolder() + "resources/maimai/"
 	Saved             = "file:///" + file.BOTPATH + "/" + engine.DataFolder() + "save/"
 	titleFont         font.Face
@@ -252,8 +256,22 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 	getAvatarFormat.DrawImage(avatarFormat.Image(), 0, 0)
 	getAvatarFormat.Fill()
 	// render Header.
-	getContent, _ := gg.LoadImage(b50_bg)
-	b50Render := gg.NewContextForImage(getContent)
+	b50Render := gg.NewContext(2090, 1660)
+	rawPlateData := GetUserInfoFromDatabaseForPic(ctx.Event.UserID)
+	if rawPlateData != "" {
+		b50bg = b50Custom
+		decoder, _ := base64.StdEncoding.DecodeString(rawPlateData)
+		imageReader := strings.NewReader(string(decoder))
+		rawRenderPlateData, _, err := image.Decode(imageReader)
+		if err != nil {
+			panic(err)
+		}
+		b50Render.DrawImage(rawRenderPlateData, 595, 30)
+		b50Render.Fill()
+	}
+	getContent, _ := gg.LoadImage(b50bg)
+	b50Render.DrawImage(getContent, 0, 0)
+	b50Render.Fill()
 	// render user info
 	b50Render.DrawImage(getAvatarFormat.Image(), 610, 50)
 	b50Render.Fill()
@@ -444,12 +462,12 @@ func LoadFontFace(filePath string, size float64) font.Face {
 
 // Inline Code.
 func saveImage(img image.Image, path string) {
-	file, err := os.Create(path)
+	files, err := os.Create(path)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer file.Close()
-	err = png.Encode(file, img)
+	defer files.Close()
+	err = png.Encode(files, img)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -499,4 +517,22 @@ func getRatingBg(rating int) string {
 		index++
 	}
 	return ratingBgFilenames[index]
+}
+
+// PictureHandler MaiPictureHandler Handler Mai Pic
+func PictureHandler(ctx *zero.Ctx) bool {
+	if zero.HasPicture(ctx) {
+		return true
+	}
+	// 没有图片就索取
+	ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请提供一张图片，图片大小比例适应为6:1 (1260x210) ,如果图片不适应将会自动剪辑到合适大小"))
+	next := zero.NewFutureEvent("message", 999, true, ctx.CheckSession(), zero.HasPicture).Next()
+	select {
+	case <-time.After(time.Second * 30):
+		return false
+	case newCtx := <-next:
+		ctx.State["image_url"] = newCtx.State["image_url"]
+		ctx.Event.MessageID = newCtx.Event.MessageID
+		return true
+	}
 }

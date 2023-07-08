@@ -16,7 +16,7 @@ Lucy |  Ver.1.70
 
 ## 关于 Arcaea B30 设计
 
-本项目其中包含的 Arcaea 插件 数据来源于 ArcaeaUnlimitedAPI(AUA)
+本项目其中包含的 Arcaea 插件 数据来源于 UnofficalArcaeaAPI(UAA)
 
 其卡片风格来源于 ChieriBOT B30 设计，主体风格参照 [Nonebot-Plugin-Arcaeabot](https://github.com/SEAFHMC/nonebot-plugin-arcaeabot) 样式，后期可能会有所改动.
 

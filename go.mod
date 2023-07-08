@@ -31,7 +31,7 @@ require (
 	github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e // indirect
 	github.com/RomiChan/websocket v1.4.3-0.20220227141055-9b2c6168c9c5 // indirect
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4 // indirect
-	github.com/fumiama/go-base16384 v1.6.4 // indirect
+	github.com/fumiama/go-base16384 v1.7.0 // indirect
 	github.com/fumiama/go-registry v0.2.5 // indirect
 	github.com/fumiama/go-simple-protobuf v0.1.0 // indirect
 	github.com/fumiama/gofastTEA v0.0.10 // indirect
@@ -52,8 +52,8 @@ require (
 	github.com/tklauser/numcpus v0.6.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/crypto v0.4.0 // indirect
-	golang.org/x/sys v0.4.0 // indirect
-	golang.org/x/text v0.6.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/text v0.11.0 // indirect
 	modernc.org/libc v1.21.5 // indirect
 	modernc.org/mathutil v1.5.0 // indirect
 	modernc.org/memory v1.4.0 // indirect
