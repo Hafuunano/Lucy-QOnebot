@@ -3,6 +3,7 @@ package mai
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/gg"
 	"github.com/FloatTech/imgfactory"
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -120,6 +121,7 @@ var (
 	maifont           = Root + "font/"
 	b50_bg            = loadMaiPic + "b50_bg.png"
 	Root              = engine.DataFolder() + "resources/maimai/"
+	Saved             = "file:///" + file.BOTPATH + "/" + engine.DataFolder() + "save/"
 	titleFont         font.Face
 	scoreFont         font.Face
 	rankFont          font.Face

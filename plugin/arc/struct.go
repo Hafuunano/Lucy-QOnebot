@@ -20,7 +20,8 @@ import (
 )
 
 var (
-	arcaeaRes         = "/root/Lucy_Project/workon/Lucy/data/arcaea"
+	arcaeaRes = "/root/Lucy_Project/workon/Lucy/data/arcaea"
+
 	diff              string
 	diffNum           int
 	getSongName       string

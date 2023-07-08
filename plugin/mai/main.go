@@ -1,16 +1,15 @@
 package mai
 
 import (
-	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"github.com/FloatTech/floatbox/binary"
+	"github.com/FloatTech/gg"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/img/text"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
-	"image/jpeg"
+	"strconv"
 )
 
 var (
@@ -37,8 +36,8 @@ func init() {
 		}
 		ctx.SendChain(message.Image("base64://" + binary.BytesToString(base64Font)))
 	})
-
 	*/
+
 	engine.OnRegex(`^[！!]chun$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		uid := ctx.Event.UserID
 		dataPlayer, err := QueryChunDataFromQQ(int(uid))
@@ -64,13 +63,7 @@ func init() {
 		var data player
 		_ = json.Unmarshal(dataPlayer, &data)
 		renderImg := FullPageRender(data, ctx)
-		var buf bytes.Buffer
-		err = jpeg.Encode(&buf, renderImg, nil)
-		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
-			return
-		}
-		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
+		_ = gg.NewContextForImage(renderImg).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image(Saved+strconv.Itoa(int(ctx.Event.UserID))+".png"))
 	})
 }
