@@ -75,6 +75,7 @@ func (info *DataHostSQL) BindUserDataBase() error {
 func (info *DataHostPic) BindUserDataBaseForPic() error {
 	maiLocker.Lock()
 	defer maiLocker.Unlock()
+	DeleteUserDataPic(info.QQ)
 	return maiDatabase.Insert("userpic", info)
 }
 
