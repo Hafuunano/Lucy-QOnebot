@@ -4,9 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/FloatTech/floatbox/web"
-	"image"
-	"image/png"
 	"io"
 	"net/http"
 )
@@ -126,19 +123,6 @@ func QueryChunDataFromUsername(username string) (playerdata []byte, err error) {
 	if resp.StatusCode == 403 {
 		return nil, errors.New("403")
 	}
-	playerData, err := io.ReadAll(resp.Body)
-	return playerData, err
-}
-
-func GetCoverByMusicID(id string) (image image.Image) {
-	data, err := web.GetData("https://www.diving-fish.com/covers/" + id + ".png")
-	if err != nil {
-		return nil
-	}
-	imageReader := bytes.NewReader(data)
-	image, err = png.Decode(imageReader)
-	if err != nil {
-		return nil
-	}
-	return image
+	playerReverseData, err := io.ReadAll(resp.Body)
+	return playerReverseData, err
 }

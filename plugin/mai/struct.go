@@ -1,16 +1,8 @@
 package mai
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/FloatTech/floatbox/file"
-	"github.com/FloatTech/gg"
-	"github.com/FloatTech/imgfactory"
-	zero "github.com/wdvxdr1123/ZeroBot"
-	"github.com/wdvxdr1123/ZeroBot/message"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
 	"image"
 	"image/color"
 	"image/png"
@@ -21,6 +13,14 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/FloatTech/floatbox/file"
+	"github.com/FloatTech/gg"
+	"github.com/FloatTech/imgfactory"
+	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/message"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 )
 
 type player struct {
@@ -125,6 +125,7 @@ var (
 	b50bg             = loadMaiPic + "b50_bg.png"
 	b50Custom         = loadMaiPic + "b50_bg_custom.png"
 	Root              = engine.DataFolder() + "resources/maimai/"
+	userPlate         = engine.DataFolder() + "user/"
 	Saved             = "file:///" + file.BOTPATH + "/" + engine.DataFolder() + "save/"
 	titleFont         font.Face
 	scoreFont         font.Face
@@ -185,6 +186,16 @@ func computeRa(ds, achievement float64) int {
 
 
 */
+
+func init() {
+	if _, err := os.Stat(userPlate); os.IsNotExist(err) {
+		err := os.MkdirAll(userPlate, 0777)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
 func HandleChunDataByUsingText(handleJson []byte) string {
 	var chunData chun
 	_ = json.Unmarshal(handleJson, &chunData)
@@ -243,6 +254,7 @@ func init() {
 // FullPageRender  Render Full Page
 func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 	// avatar Round Style
+	var getAvatarFormat *gg.Context
 	avatarByte, err := http.Get("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
 	// avatarByte, err := http.Get("https://cdn.sep.cc/avatar/22b242a28bb848f2629f2a636bba9c03?s=600")
 	if err != nil {
@@ -250,23 +262,17 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 	}
 	avatarByteUni, _, _ := image.Decode(avatarByte.Body)
 	avatarFormat := imgfactory.Size(avatarByteUni, 180, 180)
-	getAvatarFormat := gg.NewContext(180, 180)
+	getAvatarFormat = gg.NewContext(180, 180)
 	getAvatarFormat.DrawRoundedRectangle(0, 0, 178, 178, 20)
 	getAvatarFormat.Clip()
 	getAvatarFormat.DrawImage(avatarFormat.Image(), 0, 0)
 	getAvatarFormat.Fill()
 	// render Header.
 	b50Render := gg.NewContext(2090, 1660)
-	rawPlateData := GetUserInfoFromDatabaseForPic(ctx.Event.UserID)
-	if rawPlateData != "" {
+	rawPlateData, err := gg.LoadImage(userPlate + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
+	if err == nil {
 		b50bg = b50Custom
-		decoder, _ := base64.StdEncoding.DecodeString(rawPlateData)
-		imageReader := strings.NewReader(string(decoder))
-		rawRenderPlateData, _, err := image.Decode(imageReader)
-		if err != nil {
-			panic(err)
-		}
-		b50Render.DrawImage(rawRenderPlateData, 595, 30)
+		b50Render.DrawImage(rawPlateData, 595, 30)
 		b50Render.Fill()
 	}
 	getContent, _ := gg.LoadImage(b50bg)
@@ -281,7 +287,6 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 	b50Render.DrawStringAnchored(strings.Join(strings.Split(data.Nickname, ""), " "), 825, 160, 0, 0)
 	b50Render.Fill()
 	b50Render.SetFontFace(titleFont)
-	// TODO: CUSTOM
 	if GetUserInfoFromDatabase(ctx.Event.UserID) != "" {
 		data.Plate = GetUserInfoFromDatabase(ctx.Event.UserID)
 	}
@@ -302,9 +307,12 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 	// Render Card Type
 	getSDLength := len(data.Charts.Sd)
 	getDXLength := len(data.Charts.Dx)
+	getDXinitX := 45
+	getDXinitY := 1225
 	getInitX := 45
 	getInitY := 285
 	var i int
+
 	for i = 0; i < getSDLength; i++ {
 		b50Render.DrawImage(RenderCard(data.Charts.Sd[i], i+1), getInitX, getInitY)
 		getInitX += 400
@@ -313,8 +321,7 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 			getInitY += 125
 		}
 	}
-	getDXinitX := 45
-	getDXinitY := 1225
+
 	for dx := 0; dx < getDXLength; dx++ {
 		b50Render.DrawImage(RenderCard(data.Charts.Dx[dx], dx+1), getDXinitX, getDXinitY)
 		getDXinitX += 400
@@ -323,6 +330,7 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 			getDXinitY += 125
 		}
 	}
+
 	return b50Render.Image()
 }
 
@@ -407,7 +415,7 @@ func GetCover(id string) (image.Image, error) {
 	return Resize(img, 90, 90), nil
 }
 
-// Resize Image
+// Resize Image width height
 func Resize(image image.Image, w int, h int) image.Image {
 	return imgfactory.Size(image, w, h).Image()
 }
