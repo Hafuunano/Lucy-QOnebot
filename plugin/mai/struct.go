@@ -258,7 +258,7 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 	avatarByte, err := http.Get("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
 	// avatarByte, err := http.Get("https://cdn.sep.cc/avatar/22b242a28bb848f2629f2a636bba9c03?s=600")
 	if err != nil {
-		panic(err)
+		return nil
 	}
 	avatarByteUni, _, _ := image.Decode(avatarByte.Body)
 	avatarFormat := imgfactory.Size(avatarByteUni, 180, 180)
@@ -269,8 +269,8 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 	getAvatarFormat.Fill()
 	// render Header.
 	b50Render := gg.NewContext(2090, 1660)
-	rawPlateData, err := gg.LoadImage(userPlate + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
-	if err == nil {
+	if _, err := os.Stat(userPlate + strconv.Itoa(int(ctx.Event.UserID)) + ".png"); !os.IsNotExist(err) {
+		rawPlateData, _ := gg.LoadImage(userPlate + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
 		b50bg = b50Custom
 		b50Render.DrawImage(rawPlateData, 595, 30)
 		b50Render.Fill()
@@ -355,8 +355,8 @@ func RenderCard(data playerData, num int) image.Image {
 	drawBackGround.SetColor(color.White)
 	drawBackGround.SetFontFace(titleFont)
 	getSongName := data.Title
-	if len(getSongName) > 30 {
-		getSongName = getSongName[:30] + "..."
+	if len(getSongName) > 24 {
+		getSongName = getSongName[:24] + "..."
 	}
 	drawBackGround.DrawStringAnchored(getSongName, 250, 30, 0.5, 0.5)
 	drawBackGround.Fill()

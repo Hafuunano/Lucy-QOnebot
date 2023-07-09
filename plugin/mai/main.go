@@ -73,19 +73,19 @@ func init() {
 			panic(err)
 		}
 		// pic Handler
-		getRenderPlatePicRaw := gg.NewContext(1260, 205)
-		getRenderPlatePicRaw.DrawRoundedRectangle(0, 0, 1260, 205, 10)
+		getRenderPlatePicRaw := gg.NewContext(1260, 210)
+		getRenderPlatePicRaw.DrawRoundedRectangle(0, 0, 1260, 210, 10)
 		getRenderPlatePicRaw.Clip()
 		getHeight := getRaw.Bounds().Dy()
 		getLength := getRaw.Bounds().Dx()
 		var getHeightHandler, getLengthHandler int
 		switch {
-		case getHeight < 205 && getLength < 1260:
+		case getHeight < 210 && getLength < 1260:
 			getRaw = Resize(getRaw, 1260, 205)
 			getHeightHandler = 0
 			getLengthHandler = 0
-		case getHeight < 205:
-			getRaw = Resize(getRaw, getLength, 205)
+		case getHeight < 210:
+			getRaw = Resize(getRaw, getLength, 210)
 			getHeightHandler = 0
 			getLengthHandler = (getRaw.Bounds().Dx() - 1260) / 3 * -1
 		case getLength < 1260:
@@ -94,7 +94,7 @@ func init() {
 			getLengthHandler = 0
 		default:
 			getLengthHandler = (getRaw.Bounds().Dx() - 1260) / 3 * -1
-			getHeightHandler = (getRaw.Bounds().Dy() - 205) / 3 * -1
+			getHeightHandler = (getRaw.Bounds().Dy() - 210) / 3 * -1
 		}
 		getRenderPlatePicRaw.DrawImage(getRaw, getLengthHandler, getHeightHandler)
 		getRenderPlatePicRaw.Fill()
