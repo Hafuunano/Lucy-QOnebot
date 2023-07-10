@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"github.com/FloatTech/floatbox/file"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/ctxext"
@@ -19,10 +20,10 @@ import (
 )
 
 var (
-	userinfo   user
-	recordinfo record
-	r          arcaea
-	engine     = control.Register("arcaea", &ctrl.Options[*zero.Ctx]{
+	userinfo user
+	//	recordinfo record
+	r      arcaea
+	engine = control.Register("arcaea", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
 		Help:              "Hi NekoPachi!\n说明书: https://lucy.impart.icu",
 		PrivateDataFolder: "arcaea",
@@ -31,7 +32,7 @@ var (
 
 func init() {
 	mainBG, _ := os.ReadFile(arcaeaRes + "/resource/b30/B30.png")
-	// arc b30 is still in test(
+	// arc b30 still in test(
 	engine.OnRegex(`^[！! /](a|arc)\s*(\d+)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		id := ctx.State["regex_matched"].([]string)[1]
 		sessionKey, sessionKeyInfo := aua.GetSessionQuery(os.Getenv("aualink"), os.Getenv("auakey"), id)
@@ -119,22 +120,35 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w？貌似出现了一些问题：Code: ", getPlayerReplyStatusId, "信息：", m[int(getPlayerReplyStatusId)]))
 			return
 		}
+		if getPlayerReplyStatusId == -33 {
+			// check the file
+			generatedName := r.Content.AccountInfo.Name + FormatRawTimeStamp(int64(r.Content.QueryTime)) + ".png"
+			if file.IsExist(engine.DataFolder() + "save/" + generatedName) {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(m[-33]), message.Image("file:///"+file.BOTPATH+"/"+engine.DataFolder()+"save/"+r.Content.AccountInfo.Name+FormatRawTimeStamp(int64(r.Content.QueryTime))+".png"))
+				return
+			}
+		}
 		_ = json.Unmarshal(playerdataByte, &r)
 		mainBGDecoded, _, _ := image.Decode(bytes.NewReader(mainBG))
 		basicBG := DrawMainUserB30(mainBGDecoded, r)
 		tureResult := FinishedFullB30(basicBG, r)
-		var buf bytes.Buffer
-		err = png.Encode(&buf, tureResult)
+		getRawData, err := os.Create(engine.DataFolder() + "save/" + r.Content.AccountInfo.Name + FormatRawTimeStamp(int64(r.Content.QueryTime)) + ".png")
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("貌似图片保存失败了（"))
+			return
+		}
+		err = png.Encode(getRawData, tureResult)
+		// get link
+
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
 			return
 		}
-		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		var SessionKeyInfoFull string
 		if sessionKeyInfo != "" {
 			SessionKeyInfoFull = m[-33]
 		}
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(SessionKeyInfoFull), message.Image("base64://"+base64Str))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(SessionKeyInfoFull), message.Image("file:///"+file.BOTPATH+"/"+engine.DataFolder()+"save/"+r.Content.AccountInfo.Name+FormatRawTimeStamp(int64(r.Content.QueryTime))+".png"))
 	})
 
 	engine.OnRegex(`[！! /](a|arc)\schart\s([^\]]+)\s+([^\]] +)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {

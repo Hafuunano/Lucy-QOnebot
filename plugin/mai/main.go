@@ -81,7 +81,7 @@ func init() {
 		var getHeightHandler, getLengthHandler int
 		switch {
 		case getHeight < 210 && getLength < 1260:
-			getRaw = Resize(getRaw, 1260, 205)
+			getRaw = Resize(getRaw, 1260, 210)
 			getHeightHandler = 0
 			getLengthHandler = 0
 		case getHeight < 210:
@@ -90,7 +90,7 @@ func init() {
 			getLengthHandler = (getRaw.Bounds().Dx() - 1260) / 3 * -1
 		case getLength < 1260:
 			getRaw = Resize(getRaw, 1260, getHeight)
-			getHeightHandler = (getRaw.Bounds().Dy() - 205) / 3 * -1
+			getHeightHandler = (getRaw.Bounds().Dy() - 210) / 3 * -1
 			getLengthHandler = 0
 		default:
 			getLengthHandler = (getRaw.Bounds().Dx() - 1260) / 3 * -1

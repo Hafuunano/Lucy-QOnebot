@@ -109,6 +109,7 @@ type arcaea struct {
 	Message string `json:"message"`
 	Content struct {
 		Best30Avg   float64 `json:"best30_avg"`
+		QueryTime   int     `json:"query_time"`
 		Recent10Avg float64 `json:"recent10_avg"`
 		AccountInfo struct {
 			Code                   string `json:"code"`
@@ -386,6 +387,12 @@ func FormatNumber(number int) string {
 func FormatTimeStamp(timeStamp int64) string {
 	t := time.Unix(timeStamp/1000, 0)
 	return t.Format("2006-01-02 15:04:05")
+}
+
+// FormatRawTimeStamp Format Raw Time Stamp (millsecond to s)
+func FormatRawTimeStamp(timeStamp int64) string {
+	t := time.Unix(timeStamp/1000, 0)
+	return strconv.FormatInt(t.Unix(), 10)
 }
 
 // DrawScoreCard draw the detailed info of the score.

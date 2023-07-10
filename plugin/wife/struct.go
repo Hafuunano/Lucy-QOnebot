@@ -24,7 +24,6 @@ func init() {
 	// 启动一个 goroutine 监听定时器的到期事件
 	go func() {
 		for range timer.C {
-			fmt.Println("Executing task...")
 			ResetToInitalizeMode()
 			timer.Reset(time.Until(getNextExecutionTime()))
 		}
