@@ -57,6 +57,19 @@ func init() {
 		_ = gg.NewContextForImage(renderImg).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image(Saved+strconv.Itoa(int(ctx.Event.UserID))+".png"))
 	})
+	engine.OnRegex(`^[! ！/](mai|b50)\s(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		matched := ctx.State["regex_matched"].([]string)[2]
+		dataPlayer, err := QueryMaiBotDataFromUserName(matched)
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			return
+		}
+		var data player
+		_ = json.Unmarshal(dataPlayer, &data)
+		renderImg := FullPageRender(data, ctx)
+		_ = gg.NewContextForImage(renderImg).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image(Saved+strconv.Itoa(int(ctx.Event.UserID))+".png"))
+	})
 	engine.OnRegex(`^[! ！/](mai|b50)\splate\s(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		getPlateInfo := ctx.State["regex_matched"].([]string)[2]
 		_ = FormatUserDataBase(ctx.Event.UserID, getPlateInfo).BindUserDataBase()

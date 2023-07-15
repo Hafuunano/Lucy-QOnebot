@@ -269,7 +269,8 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 	getAvatarFormat.Fill()
 	// render Header.
 	b50Render := gg.NewContext(2090, 1660)
-	if _, err := os.Stat(userPlate + strconv.Itoa(int(ctx.Event.UserID)) + ".png"); !os.IsNotExist(err) {
+	info, _ := os.Stat(userPlate + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
+	if info != nil {
 		rawPlateData, _ := gg.LoadImage(userPlate + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
 		b50bg = b50Custom
 		b50Render.DrawImage(rawPlateData, 595, 30)
