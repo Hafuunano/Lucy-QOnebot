@@ -14,6 +14,11 @@ type DivingFishB50 struct {
 	B50      bool   `json:"b50"`
 }
 
+type DivingFishB50UserName struct {
+	Username string `json:"username"`
+	B50      bool   `json:"b50"`
+}
+
 func QueryMaiBotDataFromQQ(qq int) (playerdata []byte, err error) {
 	// packed json and sent.
 	jsonStruct := DivingFishB50{QQ: qq, B50: true}
@@ -33,17 +38,17 @@ func QueryMaiBotDataFromQQ(qq int) (playerdata []byte, err error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == 400 {
-		return nil, errors.New("400")
+		return nil, errors.New("未找到用户或者用户数据丢失")
 	}
 	if resp.StatusCode == 403 {
-		return nil, errors.New("403")
+		return nil, errors.New("该用户设置禁止查分")
 	}
 	playerGetData, err := io.ReadAll(resp.Body)
 	return playerGetData, err
 }
 func QueryMaiBotDataFromUserName(username string) (playerdata []byte, err error) {
 	// packed json and sent.
-	jsonStruct := DivingFishB50{Username: username, B50: true}
+	jsonStruct := DivingFishB50UserName{Username: username, B50: true}
 	jsonStructData, err := json.Marshal(jsonStruct)
 	if err != nil {
 		return nil, err
@@ -60,10 +65,10 @@ func QueryMaiBotDataFromUserName(username string) (playerdata []byte, err error)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == 400 {
-		return nil, errors.New("400")
+		return nil, errors.New("未找到用户或者用户数据丢失")
 	}
 	if resp.StatusCode == 403 {
-		return nil, errors.New("403")
+		return nil, errors.New("该用户设置禁止查分")
 	}
 	playerDataByte, err := io.ReadAll(resp.Body)
 	return playerDataByte, err
