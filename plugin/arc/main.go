@@ -68,7 +68,7 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("SessionKeyInfo: ", sessionKeyInfo), message.Image("base64://"+base64Str))
 	})
 
-	engine.OnRegex(`[！! /](a|arc)\sbind\s(.*)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^[！! /](a|arc)\sbind\s(.*)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		getBindInfo := ctx.State["regex_matched"].([]string)[2]
 		context := IsAlphanumeric(getBindInfo)
 
@@ -99,7 +99,7 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("User: `", userinfo.Content.AccountInfo.Name, "` binded, id: ", userinfo.Content.AccountInfo.Code))
 	})
 
-	engine.OnRegex(`[！! /](a|arc)\sb30$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^[！! /](a|arc)\sb30$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		id, err := GetUserArcaeaInfo(arcAcc, ctx)
 		if err != nil || id == "" {
 			ctx.SendChain(message.Text("找不到用户信息，请检查你是否已经在Lucy端进行绑定，方式： “！arc bind {username | userid} ” "))
@@ -152,7 +152,7 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(SessionKeyInfoFull), message.Image("file:///"+file.BOTPATH+"/"+engine.DataFolder()+"save/"+r.Content.AccountInfo.Name+FormatRawTimeStamp(int64(r.Content.QueryTime))+".png"))
 	})
 
-	engine.OnRegex(`[！! /](a|arc)\schart\s([^\]]+)\s+([^\]] +)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^[！! /](a|arc)\schart\s([^\]]+)\s+([^\]] +)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		songName := ctx.State["regex_matched"].([]string)[2]
 		songDiff := ctx.State["regex_matched"].([]string)[3]
 		resultPreview, err := aua.GetSongPreview(os.Getenv("aualink"), os.Getenv("auakey"), songName, songDiff)
@@ -171,7 +171,7 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
 
-	engine.OnRegex(`[！! /](a|arc)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^[！! /](a|arc)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		// get info.
 		id, err := GetUserArcaeaInfo(arcAcc, ctx)
 		if err != nil || id == "" {
