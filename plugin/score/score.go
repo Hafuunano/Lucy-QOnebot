@@ -4,14 +4,15 @@ package score
 import (
 	"bytes"
 	"encoding/base64"
-	ctrl "github.com/FloatTech/zbpctrl"
-	"github.com/FloatTech/zbputils/control"
-	"github.com/FloatTech/zbputils/ctxext"
 	"image/jpeg"
 	"math/rand"
 	"strconv"
 	"sync"
 	"time"
+
+	ctrl "github.com/FloatTech/zbpctrl"
+	"github.com/FloatTech/zbputils/control"
+	"github.com/FloatTech/zbputils/ctxext"
 
 	coins "github.com/FloatTech/ZeroBot-Plugin/compounds/coins"
 	"github.com/FloatTech/floatbox/file"
@@ -40,7 +41,7 @@ func init() {
 			// save time data by add 30mins (database save it, not to handle it when it gets ready.)
 			// just handle data time when it on,make sure to decrease 30 mins when render the page(
 
-			// not sure what happened, // TODO: BUG HANDLER.
+			// not sure what happened
 			getNowUnixFormatElevenThirten := time.Now().Add(time.Minute * 30).Format("20060102")
 			//	today := time.Now().Format("20060102")
 			mutex.Lock()
