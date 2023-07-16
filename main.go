@@ -3,10 +3,11 @@ package main
 
 import (
 	"flag"
-	"github.com/joho/godotenv"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/joho/godotenv"
 
 	"github.com/FloatTech/ZeroBot-Plugin/kanban"           // 在最前打印 banner
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/bottle"  // 漂流瓶
@@ -62,7 +63,7 @@ func init() {
 	url := flag.String("u", "ws://127.0.0.1:6700", "Set Url of WSClient.")
 	// 默认昵称
 	adana := flag.String("n", os.Getenv("name"), "Set default nickname.")
-	prefix := flag.String("p", "/", "Set command prefix.")
+	prefix := flag.String("p", "!", "Set command prefix.")
 	flag.Parse()
 
 	for _, s := range flag.Args() {
