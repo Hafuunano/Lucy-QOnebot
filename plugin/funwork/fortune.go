@@ -4,7 +4,6 @@ package funwork
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/FloatTech/zbputils/ctxext"
 	"image"
 	"net/http"
 	"os"
@@ -13,6 +12,8 @@ import (
 	"sync"
 	"time"
 	"unicode/utf8"
+
+	"github.com/FloatTech/zbputils/ctxext"
 
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/gg"
@@ -120,7 +121,7 @@ func init() {
 				// avatar,name,desc
 				// draw third round rectangle
 				mainContext.SetRGBA255(91, 57, 83, 255)
-				mainContext.LoadFontFace(text.BoldFontFile, 25)
+				_ = mainContext.LoadFontFace(text.BoldFontFile, 25)
 				nameLength, _ := mainContext.MeasureString(ctx.CardOrNickName(ctx.Event.UserID))
 				var renderLength float64
 				renderLength = nameLength + 160
@@ -190,7 +191,7 @@ func init() {
 				}
 				// output
 				mainContext.Stroke()
-				mainContext.SavePNG(engine.DataFolder() + "jrrp/" + userPic)
+				_ = mainContext.SavePNG(engine.DataFolder() + "jrrp/" + userPic)
 				ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + engine.DataFolder() + "jrrp/" + userPic))
 				signTF[si] = 1
 			} else {

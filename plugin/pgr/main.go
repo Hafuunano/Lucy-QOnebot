@@ -1,6 +1,12 @@
 package pgr // Package pgr hosted by Phigros-Library
 import (
 	"encoding/json"
+	"image/color"
+	"os"
+	"strconv"
+	"time"
+	"unicode/utf8"
+
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/gg"
 	ctrl "github.com/FloatTech/zbpctrl"
@@ -8,11 +14,6 @@ import (
 	"github.com/disintegration/imaging"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
-	"image/color"
-	"os"
-	"strconv"
-	"time"
-	"unicode/utf8"
 )
 
 // too lazy,so this way is to use thrift host server (Working on HiMoYo Cloud.) (replace: now use PUA API)
@@ -66,12 +67,12 @@ func init() {
 		getPhigrosKey := os.Getenv("puakey")
 		userData := GetUserInfoFromDatabase(ctx.Event.UserID)
 		getFullLink := getPhigrosLink + "/user/best19?SessionToken=" + userData.PhiSession + "&withsonginfo=true&overflow=2"
-		phidata, err := DrawRequestPhigros(getFullLink, getPhigrosKey, "POST")
+		phidata, _ := DrawRequestPhigros(getFullLink, getPhigrosKey, "POST")
 		if phidata == nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Phigros Unlimited API暂时无法工作 请过一段时候尝试"))
 			return
 		}
-		err = json.Unmarshal(phidata, &phigrosB19)
+		err := json.Unmarshal(phidata, &phigrosB19)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生解析错误", err))
 			return
@@ -162,7 +163,7 @@ func init() {
 			getOverFlowNumber = 0
 		}
 		getFullLink := getPhigrosLink + "/user/best19?SessionToken=" + userData.PhiSession + "&withsonginfo=true&overflow=" + strconv.Itoa(int(getOverFlowNumber))
-		phidata, err := DrawRequestPhigros(getFullLink, getPhigrosKey, "POST")
+		phidata, _ := DrawRequestPhigros(getFullLink, getPhigrosKey, "POST")
 		if phidata == nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Phigros Unlimited API暂时无法工作 请过一段时候尝试"))
 			return

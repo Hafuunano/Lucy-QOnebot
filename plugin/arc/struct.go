@@ -3,8 +3,6 @@ package arc
 import (
 	"bytes"
 	"fmt"
-	"github.com/MoYoez/img_toolbox/FrostedGlassLike"
-	"github.com/MoYoez/img_toolbox/imgCutter"
 	"image"
 	"image/color"
 	"math"
@@ -12,6 +10,9 @@ import (
 	"strconv"
 	"time"
 	"unicode"
+
+	"github.com/MoYoez/img_toolbox/FrostedGlassLike"
+	"github.com/MoYoez/img_toolbox/imgCutter"
 
 	"github.com/FloatTech/gg"
 	"github.com/FloatTech/imgfactory"
@@ -202,38 +203,39 @@ type arcaea struct {
 	} `json:"content"`
 }
 
-type record struct {
-	Status  int `json:"status"`
-	Content struct {
-		AccountInfo struct {
-			Code                   string `json:"code"`
-			Name                   string `json:"name"`
-			UserId                 int    `json:"user_id"`
-			IsMutual               bool   `json:"is_mutual"`
-			IsCharUncappedOverride bool   `json:"is_char_uncapped_override"`
-			IsCharUncapped         bool   `json:"is_char_uncapped"`
-			IsSkillSealed          bool   `json:"is_skill_sealed"`
-			Rating                 int    `json:"rating"`
-			Character              int    `json:"character"`
-		} `json:"account_info"`
-		Record struct {
-			Score             int     `json:"score"`
-			Health            int     `json:"health"`
-			Rating            float64 `json:"rating"`
-			SongId            string  `json:"song_id"`
-			Modifier          int     `json:"modifier"`
-			Difficulty        int     `json:"difficulty"`
-			ClearType         int     `json:"clear_type"`
-			BestClearType     int     `json:"best_clear_type"`
-			TimePlayed        int64   `json:"time_played"`
-			NearCount         int     `json:"near_count"`
-			MissCount         int     `json:"miss_count"`
-			PerfectCount      int     `json:"perfect_count"`
-			ShinyPerfectCount int     `json:"shiny_perfect_count"`
-		} `json:"record"`
-	} `json:"content"`
-}
-
+/*
+	type record struct {
+		Status  int `json:"status"`
+		Content struct {
+			AccountInfo struct {
+				Code                   string `json:"code"`
+				Name                   string `json:"name"`
+				UserId                 int    `json:"user_id"`
+				IsMutual               bool   `json:"is_mutual"`
+				IsCharUncappedOverride bool   `json:"is_char_uncapped_override"`
+				IsCharUncapped         bool   `json:"is_char_uncapped"`
+				IsSkillSealed          bool   `json:"is_skill_sealed"`
+				Rating                 int    `json:"rating"`
+				Character              int    `json:"character"`
+			} `json:"account_info"`
+			Record struct {
+				Score             int     `json:"score"`
+				Health            int     `json:"health"`
+				Rating            float64 `json:"rating"`
+				SongId            string  `json:"song_id"`
+				Modifier          int     `json:"modifier"`
+				Difficulty        int     `json:"difficulty"`
+				ClearType         int     `json:"clear_type"`
+				BestClearType     int     `json:"best_clear_type"`
+				TimePlayed        int64   `json:"time_played"`
+				NearCount         int     `json:"near_count"`
+				MissCount         int     `json:"miss_count"`
+				PerfectCount      int     `json:"perfect_count"`
+				ShinyPerfectCount int     `json:"shiny_perfect_count"`
+			} `json:"record"`
+		} `json:"content"`
+	}
+*/
 func init() {
 	// main pg user b30
 	// Handle font (should deal it before the function runs.)

@@ -3,6 +3,13 @@ package mai
 import (
 	"bytes"
 	"encoding/json"
+	"image"
+	"image/color"
+	"net/http"
+	"os"
+	"strconv"
+	"strings"
+
 	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/gg"
@@ -12,12 +19,6 @@ import (
 	"github.com/FloatTech/zbputils/img/text"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
-	"image"
-	"image/color"
-	"net/http"
-	"os"
-	"strconv"
-	"strings"
 )
 
 var (
@@ -111,7 +112,7 @@ func init() {
 		}
 		getRenderPlatePicRaw.DrawImage(getRaw, getLengthHandler, getHeightHandler)
 		getRenderPlatePicRaw.Fill()
-		getRenderPlatePicRaw.SavePNG(userPlate + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
+		_ = getRenderPlatePicRaw.SavePNG(userPlate + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经存入了哦w"))
 	})
 	engine.OnRegex(`^[! ！/](mai|b50)\sremove`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
@@ -197,7 +198,7 @@ func init() {
 				getDXinitY += 125
 			}
 		}
-		b50Render.SavePNG(engine.DataFolder() + "save/" + "example.png")
+		_ = b50Render.SavePNG(engine.DataFolder() + "save/" + "example.png")
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image(Saved+"example.png"))
 	})
 }
