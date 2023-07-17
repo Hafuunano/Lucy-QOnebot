@@ -30,7 +30,7 @@ func init() {
 			/rua [CQ:at,qq=123123] || match1 = /rua | match2 = cq... | match3 = id
 			match4 match 5 match 6
 	*/
-	engine.OnRegex(`(/.*)(\[CQ:at,qq=(.*)\])|(\[CQ:at,qq=(.*)\])\s(/.*)`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^(/.*)(\[CQ:at,qq=(.*)\])|^(\[CQ:at,qq=(.*)\])\s(/.*)`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		getMatchedQID := ctx.State["regex_matched"].([]string)[3]
 		var getMatchedInfo string
 		if getMatchedQID == "" {

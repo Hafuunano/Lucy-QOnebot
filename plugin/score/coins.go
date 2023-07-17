@@ -183,7 +183,7 @@ func init() {
 		getTicket := RobOrCatchLimitManager(ctx)
 		var remindTicket string
 		if getTicket == 3 {
-			remindTicket = "目前已经达到疲倦状态，成功率下调到15%，或许考虑一下不要做一个坏人呢～ ^^ "
+			remindTicket = "目前已经达到疲倦状态，成功率下调本身概率的15%，或许考虑一下不要做一个坏人呢～ ^^ "
 		}
 		getTargetChanceToDealPossibilityKey := rand.Intn(102 / getTicket)
 		if getTargetChanceToDealPossibilityKey < int(getTargetChanceToDealRaw) { // failed
@@ -238,8 +238,8 @@ func init() {
 		_ = coins.InsertUserCoins(sdb, TargetInt, unModifyCoins+modifyCoins)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Handle Coins Successfully.\n"))
 	})
-	engine.OnRegex(`^丢弃(\d+)个柠檬片$`).SetBlock(true).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		modifyCoins, _ := strconv.Atoi(ctx.State["regex_matched"].([]string)[1])
+	engine.OnRegex(`^(丢弃|扔掉)(\d+)个柠檬片$`).SetBlock(true).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
+		modifyCoins, _ := strconv.Atoi(ctx.State["regex_matched"].([]string)[2])
 		handleUser := coins.GetSignInByUID(sdb, ctx.Event.UserID)
 		currentUserCoins := handleUser.Coins
 		if currentUserCoins-modifyCoins < 0 {
@@ -282,40 +282,85 @@ func init() {
 			return
 		}
 	})
-	engine.OnRegex(`[!！]coin\swager`).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
+	// I thought I just write a piece of shit. 💩
+	engine.OnRegex(`^[!！]coin\swager\s?(\d*)`).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
 		// 得到本身奖池大小，如果没有或者被get的情况下获胜
-		// this method should deal when we have less starter.(
-		// cost 50 one time.
-		getUserStatus := coins.GetSignInByUID(sdb, ctx.Event.UserID)
-		getUserCoins := getUserStatus.Coins
-		if getUserCoins-50 < 0 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("没有足够的柠檬片可以参与奖池("))
+		// this method should deal when we have less starter.
+		rawNumber := ctx.State["regex_matched"].([]string)[1]
+		if rawNumber == "" {
+			rawNumber = "50"
+		}
+		modifyCoins, _ := strconv.Atoi(rawNumber)
+		if modifyCoins > 1000 || modifyCoins < 50 {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("一次性最大投入为1k，最少投入50"))
+			return
+		}
+		handleUser := coins.GetSignInByUID(sdb, ctx.Event.UserID)
+		currentUserCoins := handleUser.Coins
+		if currentUserCoins-modifyCoins < 0 {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("貌似你的柠檬片不够处理呢("))
+			return
+		}
+		// first of all , check the user status
+		handlerWagerUser := coins.GetWagerUserStatus(sdb, ctx.Event.UserID)
+		if handlerWagerUser.UserExistedStoppedTime > time.Now().Add(-time.Hour*12).Unix() {
+			// then not pass | in the freeze time.
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前在冷却时间，距离下个可用时间为: ", time.Unix(handlerWagerUser.UserExistedStoppedTime, 0).Add(time.Hour*12).Format(time.DateTime)))
+			return
+		}
+		// passed,delete this one and continue || before max is 3500.
+		checkUserWagerCoins := handlerWagerUser.InputCountNumber
+		if int64(modifyCoins)+checkUserWagerCoins > 3500 {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("达到冷却最大值，您目前可投入："+strconv.Itoa(int(3500-checkUserWagerCoins))))
 			return
 		}
 		// get wager
 		getWager := coins.GetWagerStatus(sdb)
-		GetStaus := getWager.Expected
-		if GetStaus == 0 {
-			// wager number random gen || init or done for one.
-			getGenOne := fcext.RandSenderPerDayN(time.Now().Unix(), 8500)
-			getGenTwo := rand.Intn(9605)
-			getGenThree := fcext.RandSenderPerDayN(time.Now().Unix(), 4626)
-			getRandNumber := getGenOne + getGenTwo + getGenThree
-			_ = coins.WagerCoinsInsert(sdb, getWager.Wagercount+50, 0, getRandNumber)
-			_ = coins.InsertUserCoins(sdb, getUserStatus.UID, getUserCoins-50)
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("没有中奖哦~，当前奖池为：50"))
+		if getWager.Expected == 0 {
+			// it shows that no condition happened.
+			// if not maxzine
+			// in the wager mode. || start to load
+			getGenOne := fcext.RandSenderPerDayN(time.Now().Unix(), 18500)
+			getRandNumber := getGenOne + fcext.RandSenderPerDayN(time.Now().Unix()+ctx.Event.UserID, 6500)
+			_ = coins.WagerCoinsInsert(sdb, modifyCoins, 0, getRandNumber)
+			if int64(modifyCoins)+checkUserWagerCoins == 3500 {
+				_ = coins.UpdateWagerUserStatus(sdb, ctx.Event.UserID, time.Now().Unix(), 0)
+			} else {
+				_ = coins.UpdateWagerUserStatus(sdb, ctx.Event.UserID, 0, int64(modifyCoins)+checkUserWagerCoins)
+			}
+			if getRandNumber <= modifyCoins {
+				// winner, he | she is so lucky.^^
+				// Lucy will cost 10 percent Coins.
+				willRunCoins := strconv.FormatFloat(float64(modifyCoins)*0.9, 'f', 2, 64)
+				getWinnerCoins, _ := strconv.ParseInt(willRunCoins, 10, 64)
+				_ = coins.InsertUserCoins(sdb, ctx.Event.UserID, handleUser.Coins+int(getWinnerCoins)-modifyCoins)
+				_ = coins.WagerCoinsInsert(sdb, 0, int(ctx.Event.UserID), 0)
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w！恭喜哦，奖池中奖了ww，一共获得 ", getWinnerCoins, " 个柠檬片，当前有 ", handleUser.Coins+int(getWinnerCoins)-modifyCoins, " 个柠檬片 (获胜者得到奖池 x0.9的柠檬片总数)"))
+				return
+			}
+			// not winner
+			_ = coins.InsertUserCoins(sdb, handleUser.UID, handleUser.Coins-modifyCoins)
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("没有中奖哦~，当前奖池为："+strconv.Itoa(modifyCoins)))
 			return
 		}
-		getCoins := getWager.Wagercount
-		if getCoins+50 > GetStaus {
+		// not init,start to add.
+		getExpected := getWager.Expected
+		if int64(modifyCoins)+checkUserWagerCoins == 3500 {
+			_ = coins.UpdateWagerUserStatus(sdb, ctx.Event.UserID, time.Now().Unix(), 0)
+		} else {
+			_ = coins.UpdateWagerUserStatus(sdb, ctx.Event.UserID, 0, int64(modifyCoins)+checkUserWagerCoins)
+		}
+		if handleUser.Coins+modifyCoins >= getExpected {
 			// you are winner!
-			_ = coins.InsertUserCoins(sdb, ctx.Event.UserID, getUserCoins+getCoins-50)
+			willRunCoins := strconv.FormatFloat(float64(modifyCoins)*0.9, 'f', 2, 64)
+			getWinnerCoins, _ := strconv.ParseInt(willRunCoins, 10, 64)
+			_ = coins.InsertUserCoins(sdb, ctx.Event.UserID, handleUser.Coins+int(getWinnerCoins)-modifyCoins)
 			_ = coins.WagerCoinsInsert(sdb, 0, int(ctx.Event.UserID), 0)
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w！恭喜哦，奖池中奖了ww，一共获得 ", getCoins-50, " 个柠檬片，当前有 ", getUserCoins, " 个柠檬片"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w！恭喜哦，奖池中奖了ww，一共获得 ", getWinnerCoins, " 个柠檬片，当前有 ", handleUser.Coins+int(getWinnerCoins)-modifyCoins, " 个柠檬片 (获胜者得到奖池 x0.9的柠檬片总数)"))
 			return
 		} else {
-			_ = coins.WagerCoinsInsert(sdb, getCoins+50, 0, GetStaus)
-			_ = coins.InsertUserCoins(sdb, ctx.Event.UserID, getUserCoins-50)
+			_ = coins.WagerCoinsInsert(sdb, getWager.Wagercount+modifyCoins, 0, getExpected)
+			_ = coins.InsertUserCoins(sdb, ctx.Event.UserID, handleUser.Coins-modifyCoins)
 			if rand.Intn(10) == 8 {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("呐～，不会还有大哥哥到现在 "+strconv.Itoa(getWager.Wagercount)+" 个柠檬片了都没中奖吧？杂鱼～❤，杂鱼～❤"))
 			} else {

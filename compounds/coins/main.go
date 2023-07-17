@@ -42,6 +42,13 @@ type WagerTable struct {
 	Winner     int `gorm:"column:winner;default:0"`
 }
 
+// WagerUserInputTable Get Wager Table User Input In Times
+type WagerUserInputTable struct {
+	UID                    int64 `gorm:"column:uid;primary_key"`
+	InputCountNumber       int64 `gorm:"column:coin;default:0"`
+	UserExistedStoppedTime int64 `gorm:"column:time;default:0"`
+}
+
 func (WagerTable) TableName() string {
 	return "wagertable"
 }
@@ -59,6 +66,10 @@ func (Scoretable) TableName() string {
 // TableName ...
 func (Signintable) TableName() string {
 	return "sign_in"
+}
+
+func (WagerUserInputTable) TableName() string {
+	return "wager_user"
 }
 
 // Initialize 初始化ScoreDB数据库
@@ -81,7 +92,7 @@ func Initialize(dbpath string) *Scoredb {
 	if err != nil {
 		panic(err)
 	}
-	gdb.AutoMigrate(&Scoretable{}).AutoMigrate(&Signintable{}).AutoMigrate(&Globaltable{}).AutoMigrate(&WagerTable{})
+	gdb.AutoMigrate(&Scoretable{}).AutoMigrate(&Signintable{}).AutoMigrate(&Globaltable{}).AutoMigrate(&WagerTable{}).AutoMigrate(&WagerUserInputTable{})
 	return (*Scoredb)(gdb)
 }
 
@@ -140,6 +151,37 @@ func GetWagerStatus(sdb *Scoredb) (si WagerTable) {
 	db := (*gorm.DB)(sdb)
 	db.Debug().Model(&WagerTable{}).FirstOrCreate(&si, "winner = ? ", 0)
 	return si
+}
+
+// GetWagerUserStatus Get Status
+func GetWagerUserStatus(sdb *Scoredb, uid int64) (si WagerUserInputTable) {
+	db := (*gorm.DB)(sdb)
+	db.Debug().Model(&WagerUserInputTable{}).FirstOrCreate(&si, "uid = ? ", uid)
+	return si
+}
+
+// UpdateWagerUserStatus update WagerUserStatus
+func UpdateWagerUserStatus(sdb *Scoredb, uid int64, time int64, coins int64) (err error) {
+	db := (*gorm.DB)(sdb)
+	si := WagerUserInputTable{
+		UID:                    uid,
+		UserExistedStoppedTime: time,
+		InputCountNumber:       coins,
+	}
+	if err = db.Debug().Model(&WagerUserInputTable{}).First(&si, "uid = ? ", uid).Error; err != nil {
+		// error handling...
+		if gorm.IsRecordNotFoundError(err) {
+			db.Debug().Model(&WagerUserInputTable{}).Create(&si) // newUser not user
+		}
+	} else {
+		err = db.Debug().Model(&Signintable{}).Where("uid = ? ", uid).Update(
+			map[string]interface{}{
+				"uid":  uid,
+				"time": time,
+				"coin": coins,
+			}).Error
+	}
+	return
 }
 
 // InsertOrUpdateSignInCountByUID 插入或更新签到次数
