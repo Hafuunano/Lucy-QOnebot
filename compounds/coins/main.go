@@ -174,7 +174,7 @@ func UpdateWagerUserStatus(sdb *Scoredb, uid int64, time int64, coins int64) (er
 			db.Debug().Model(&WagerUserInputTable{}).Create(&si) // newUser not user
 		}
 	} else {
-		err = db.Debug().Model(&Signintable{}).Where("uid = ? ", uid).Update(
+		err = db.Debug().Model(&WagerUserInputTable{}).Where("uid = ? ", uid).Update(
 			map[string]interface{}{
 				"uid":  uid,
 				"time": time,
