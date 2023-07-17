@@ -291,8 +291,8 @@ func init() {
 			rawNumber = "50"
 		}
 		modifyCoins, _ := strconv.Atoi(rawNumber)
-		if modifyCoins > 1000 || modifyCoins < 50 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("一次性最大投入为1k，最少投入50"))
+		if modifyCoins > 1000 {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("一次性最大投入为1k"))
 			return
 		}
 		handleUser := coins.GetSignInByUID(sdb, ctx.Event.UserID)
@@ -331,11 +331,10 @@ func init() {
 			if getRandNumber <= modifyCoins {
 				// winner, he | she is so lucky.^^
 				// Lucy will cost 10 percent Coins.
-				willRunCoins := strconv.FormatFloat(float64(modifyCoins)*0.9, 'f', 2, 64)
-				getWinnerCoins, _ := strconv.ParseInt(willRunCoins, 10, 64)
-				_ = coins.InsertUserCoins(sdb, ctx.Event.UserID, handleUser.Coins+int(getWinnerCoins)-modifyCoins)
+				willRunCoins := math.Round(float64(modifyCoins+getWager.Wagercount) * 0.9)
+				_ = coins.InsertUserCoins(sdb, ctx.Event.UserID, handleUser.Coins+int(willRunCoins)-modifyCoins)
 				_ = coins.WagerCoinsInsert(sdb, 0, int(ctx.Event.UserID), 0)
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w！恭喜哦，奖池中奖了ww，一共获得 ", getWinnerCoins, " 个柠檬片，当前有 ", handleUser.Coins+int(getWinnerCoins)-modifyCoins, " 个柠檬片 (获胜者得到奖池 x0.9的柠檬片总数)"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w！恭喜哦，奖池中奖了ww，一共获得 ", willRunCoins, " 个柠檬片，当前有 ", handleUser.Coins+int(willRunCoins)-modifyCoins, " 个柠檬片 (获胜者得到奖池 x0.9的柠檬片总数)"))
 				return
 			}
 			// not winner
@@ -350,13 +349,12 @@ func init() {
 		} else {
 			_ = coins.UpdateWagerUserStatus(sdb, ctx.Event.UserID, 0, int64(modifyCoins)+checkUserWagerCoins)
 		}
-		if handleUser.Coins+modifyCoins >= getExpected {
+		if getWager.Wagercount+modifyCoins >= getExpected {
 			// you are winner!
-			willRunCoins := strconv.FormatFloat(float64(modifyCoins)*0.9, 'f', 2, 64)
-			getWinnerCoins, _ := strconv.ParseInt(willRunCoins, 10, 64)
-			_ = coins.InsertUserCoins(sdb, ctx.Event.UserID, handleUser.Coins+int(getWinnerCoins)-modifyCoins)
+			willRunCoins := math.Round(float64(modifyCoins+getWager.Wagercount) * 0.9)
+			_ = coins.InsertUserCoins(sdb, ctx.Event.UserID, handleUser.Coins+int(willRunCoins)-modifyCoins)
 			_ = coins.WagerCoinsInsert(sdb, 0, int(ctx.Event.UserID), 0)
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w！恭喜哦，奖池中奖了ww，一共获得 ", getWinnerCoins, " 个柠檬片，当前有 ", handleUser.Coins+int(getWinnerCoins)-modifyCoins, " 个柠檬片 (获胜者得到奖池 x0.9的柠檬片总数)"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w！恭喜哦，奖池中奖了ww，一共获得 ", willRunCoins, " 个柠檬片，当前有 ", handleUser.Coins+int(willRunCoins)-modifyCoins, " 个柠檬片 (获胜者得到奖池 x0.9的柠檬片总数)"))
 			return
 		} else {
 			_ = coins.WagerCoinsInsert(sdb, getWager.Wagercount+modifyCoins, 0, getExpected)
