@@ -122,6 +122,7 @@ var (
 	UniFontPath       = maifont + "Montserrat-Bold.ttf"
 	nameFont          = maifont + "NotoSansSC-Regular.otf"
 	maifont           = Root + "font/"
+	b50bgOriginal     = loadMaiPic + "b50_bg.png"
 	b50bg             = loadMaiPic + "b50_bg.png"
 	b50Custom         = loadMaiPic + "b50_bg_custom.png"
 	Root              = engine.DataFolder() + "resources/maimai/"
@@ -269,12 +270,13 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 	getAvatarFormat.Fill()
 	// render Header.
 	b50Render := gg.NewContext(2090, 1660)
-	info, _ := os.Stat(userPlate + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
-	if info != nil {
-		rawPlateData, _ := gg.LoadImage(userPlate + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
+	rawPlateData, errs := gg.LoadImage(userPlate + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
+	if errs == nil {
 		b50bg = b50Custom
 		b50Render.DrawImage(rawPlateData, 595, 30)
 		b50Render.Fill()
+	} else {
+		b50bg = b50bgOriginal
 	}
 	getContent, _ := gg.LoadImage(b50bg)
 	b50Render.DrawImage(getContent, 0, 0)
