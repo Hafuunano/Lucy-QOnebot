@@ -4,7 +4,10 @@ package funwork
 import (
 	"encoding/json"
 	"fmt"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 	"image"
+	"math"
 	"net/http"
 	"os"
 	"regexp"
@@ -18,8 +21,6 @@ import (
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/gg"
 	"github.com/FloatTech/imgfactory"
-	"github.com/FloatTech/zbputils/img/text"
-
 	"math/rand"
 
 	fcext "github.com/FloatTech/floatbox/ctxext"
@@ -91,37 +92,40 @@ func init() {
 			userS := strconv.FormatInt(user, 10)
 			now := time.Now().Format("20060102")
 			// modify this possibility to 40-100, don't be to low.
-			randEveryone := fcext.RandSenderPerDayN(ctx.Event.UserID, 60)
-			var si = now + userS // 合成
+			randEveryone := fcext.RandSenderPerDayN(ctx.Event.UserID, 50)
+			var si = now + userS // use map to store.
+			loadNotoSans := engine.DataFolder() + "NotoSansCJKsc-Regular.otf"
 			if signTF[si] == 0 {
-				result[user] = randEveryone + 40
+				result[user] = randEveryone + 50
 				// background
 				img, err := gg.LoadImage(engine.DataFolder() + "randpic" + "/" + list[0] + ".png")
 				if err != nil {
 					panic(err)
 				}
-				bgFormat := imgfactory.Limit(img, 1280, 720)
+				bgFormat := imgfactory.Limit(img, 1920, 1080)
+				getBackGroundMainColorR, getBackGroundMainColorG, getBackGroundMainColorB := GetAverageColorAndMakeAdjust(bgFormat)
 				mainContext := gg.NewContext(bgFormat.Bounds().Dx(), bgFormat.Bounds().Dy())
 				mainContextWidth := mainContext.Width()
 				mainContextHight := mainContext.Height()
 				mainContext.DrawImage(bgFormat, 0, 0)
 				// draw Round rectangle
-				err = mainContext.LoadFontFace(text.BoldFontFile, 50)
+				mainContext.SetFontFace(LoadFontFace(loadNotoSans, 50))
 				if err != nil {
 					ctx.SendChain(message.Text("Something wrong while rendering pic? font"))
 					return
 				}
-				mainContext.SetLineWidth(3)
+				// shade mode || not bugs(
+				mainContext.SetLineWidth(4)
 				mainContext.SetRGBA255(255, 255, 255, 255)
 				mainContext.DrawRoundedRectangle(0, float64(mainContextHight-150), float64(mainContextWidth), 150, 16)
 				mainContext.Stroke()
-				mainContext.SetRGBA255(238, 211, 222, 225)
+				mainContext.SetRGBA255(255, 224, 216, 215)
 				mainContext.DrawRoundedRectangle(0, float64(mainContextHight-150), float64(mainContextWidth), 150, 16)
 				mainContext.Fill()
 				// avatar,name,desc
 				// draw third round rectangle
 				mainContext.SetRGBA255(91, 57, 83, 255)
-				_ = mainContext.LoadFontFace(text.BoldFontFile, 25)
+				mainContext.SetFontFace(LoadFontFace(loadNotoSans, 25))
 				nameLength, _ := mainContext.MeasureString(ctx.CardOrNickName(ctx.Event.UserID))
 				var renderLength float64
 				renderLength = nameLength + 160
@@ -135,43 +139,44 @@ func init() {
 					ctx.SendChain(message.Text("Something wrong while rendering pic? avatar IO err."))
 					return
 				}
+				// avatar
 				avatarByteUni, _, _ := image.Decode(avatarByte.Body)
 				avatarFormat := imgfactory.Size(avatarByteUni, 100, 100)
 				mainContext.DrawImage(avatarFormat.Circle(0).Image(), 60, int(float64(mainContextHight-150)+25))
-				defer avatarByte.Body.Close()
 				mainContext.SetRGBA255(255, 255, 255, 255)
 				mainContext.DrawString("User Info", 60, float64(mainContextHight-150)+10) // basic ui
 				mainContext.SetRGBA255(155, 121, 147, 255)
 				mainContext.DrawString(ctx.CardOrNickName(ctx.Event.UserID), 180, float64(mainContextHight-150)+50)
-				mainContext.DrawString(fmt.Sprintf("今日人品值: %d", randEveryone+40), 180, float64(mainContextHight-150)+100)
+				mainContext.DrawString(fmt.Sprintf("今日人品值: %d", randEveryone+50), 180, float64(mainContextHight-150)+100)
 				mainContext.Fill()
 				// AOSP time and date
-				mainContext.SetRGBA255(226, 184, 255, 255)
-				err = mainContext.LoadFontFace(text.BoldFontFile, 25)
+				mainContext.SetRGBA255(getBackGroundMainColorR, getBackGroundMainColorG, getBackGroundMainColorB, 220)
+				mainContext.SetFontFace(LoadFontFace(loadNotoSans, 25))
 				if err != nil {
 					ctx.SendChain(message.Text("Something wrong while rendering pic?"))
 					return
 				}
-				mainContext.SetLineWidth(3)
+				mainContext.Stroke()
 				formatTimeDate := time.Now().Format("2006/01/02")
 				formatTimeCurrent := time.Now().Format("15:04:05")
-				formatTimeLength, _ := mainContext.MeasureString(formatTimeDate)
+				//	formatTimeLength, _ := mainContext.MeasureString(formatTimeDate)
 				formatTimeWeek := time.Now().Weekday().String()
-				mainContext.DrawString(formatTimeCurrent, float64(mainContextWidth-10)-formatTimeLength, 50)
-				mainContext.DrawString(formatTimeDate, float64(mainContextWidth-50)-formatTimeLength, 90)
-				mainContext.DrawStringWrapped(formatTimeWeek, float64(mainContextWidth+70)-formatTimeLength, 110, 0, 0, 25, 0, gg.AlignRight)
-				mainContext.Stroke()
-				mainContext.SetRGBA255(152, 127, 176, 255)
-				err = mainContext.LoadFontFace(text.BoldFontFile, 150)
+				mainContext.SetFontFace(LoadFontFace(loadNotoSans, 30))
+				mainContext.DrawStringAnchored(formatTimeCurrent, float64(mainContextWidth-50), 40, 1, 0.5)
+				mainContext.DrawStringAnchored(formatTimeDate, float64(mainContextWidth-50), 90, 1, 0.5)
+				mainContext.DrawStringAnchored(formatTimeWeek, float64(mainContextWidth-50), 140, 1, 0.5)
+				mainContext.FillPreserve()
+				mainContext.SetRGBA255(getBackGroundMainColorR, getBackGroundMainColorG, getBackGroundMainColorB, 220)
+				mainContext.SetFontFace(LoadFontFace(loadNotoSans, 160))
 				if err != nil {
 					ctx.SendChain(message.Text("Something wrong while rendering pic?", err))
 					return
 				}
 				mainContext.SetLineWidth(3)
 				mainContext.DrawString("|", float64(mainContextWidth-40), 140)
-				mainContext.Stroke()
+				mainContext.Fill()
 				// throw tarot card
-				err = mainContext.LoadFontFace(text.BoldFontFile, 20)
+				mainContext.SetFontFace(LoadFontFace(loadNotoSans, 20))
 				if err != nil {
 					ctx.SendChain(message.Text("Something wrong while rendering pic?"))
 					return
@@ -190,7 +195,10 @@ func init() {
 					mainContext.DrawString(v, float64(mainContextWidth-300)+10, float64(mainContextHight-350)+90+float64(i*30))
 				}
 				// output
-				mainContext.Stroke()
+				mainContext.SetFontFace(LoadFontFace(loadNotoSans, 20))
+				mainContext.SetRGBA255(186, 163, 157, 255)
+				mainContext.DrawStringAnchored("Generated By Lucy (HiMoYo),Designed By MoeMagicMango", float64(mainContextWidth-20), float64(mainContextHight-30), 1, 1)
+				mainContext.Fill()
 				_ = mainContext.SavePNG(engine.DataFolder() + "jrrp/" + userPic)
 				ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + engine.DataFolder() + "jrrp/" + userPic))
 				signTF[si] = 1
@@ -216,4 +224,48 @@ func splitChineseString(s string, length int) []string {
 		result = append(result, string(runes))
 	}
 	return result
+}
+
+// LoadFontFace load font face once before running, to work it quickly and save memory.
+func LoadFontFace(filePath string, size float64) font.Face {
+	fontFile, _ := os.ReadFile(filePath)
+	fontFileParse, _ := opentype.Parse(fontFile)
+	fontFace, _ := opentype.NewFace(fontFileParse, &opentype.FaceOptions{Size: size, DPI: 72, Hinting: font.HintingFull})
+	return fontFace
+}
+
+// GetAverageColorAndMakeAdjust different from k-means algorithm,it uses origin plugin's algorithm.(Reduce the cost of averge color usage.)
+func GetAverageColorAndMakeAdjust(image image.Image) (int, int, int) {
+	var RList []int
+	var GList []int
+	var BList []int
+	width, height := image.Bounds().Size().X, image.Bounds().Size().Y
+	// use the center of the bg, to make it more quickly and save memory and usage.
+	for x := width / 6; x < width/2; x++ {
+		for y := height / 4; y < height/2; y++ {
+			r, g, b, _ := image.At(x, y).RGBA()
+			RList = append(RList, int(r>>8))
+			GList = append(GList, int(g>>8))
+			BList = append(BList, int(b>>8))
+		}
+	}
+	RAverage := int(Average(RList))
+	GAverage := int(Average(GList))
+	BAverage := int(Average(BList))
+	// get Average and make adjust
+	if BAverage > 200 {
+		BAverage = int(math.Round(float64(BAverage-BAverage/6))) - 15
+	} else {
+		BAverage = int(math.Round(float64(BAverage+BAverage/6))) + 15
+	}
+	return RAverage, GAverage, BAverage
+}
+
+// Average sum all the numbers and divide by the length of the list.
+func Average(numbers []int) float64 {
+	var sum float64
+	for _, num := range numbers {
+		sum += float64(num)
+	}
+	return math.Round(sum / float64(len(numbers)))
 }
