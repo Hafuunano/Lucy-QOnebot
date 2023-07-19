@@ -241,8 +241,8 @@ func GetAverageColorAndMakeAdjust(image image.Image) (int, int, int) {
 	var BList []int
 	width, height := image.Bounds().Size().X, image.Bounds().Size().Y
 	// use the center of the bg, to make it more quickly and save memory and usage.
-	for x := width / 6; x < width/2; x++ {
-		for y := height / 4; y < height/2; y++ {
+	for x := int(math.Round(float64(width) / 1.5)); x < int(math.Round(float64(width)/1.1)); x++ {
+		for y := height / 8; y < height/3; y++ {
 			r, g, b, _ := image.At(x, y).RGBA()
 			RList = append(RList, int(r>>8))
 			GList = append(GList, int(g>>8))
@@ -253,11 +253,22 @@ func GetAverageColorAndMakeAdjust(image image.Image) (int, int, int) {
 	GAverage := int(Average(GList))
 	BAverage := int(Average(BList))
 	// get Average and make adjust
-	if BAverage > 200 {
-		BAverage = int(math.Round(float64(BAverage-BAverage/6))) - 15
+	if BAverage > 210 {
+		BAverage = int(math.Round(float64(BAverage-BAverage/3))) - 30
 	} else {
-		BAverage = int(math.Round(float64(BAverage+BAverage/6))) + 15
+		BAverage = int(math.Round(float64(BAverage+BAverage/3))) + 30
 	}
+	if GAverage > 210 {
+		GAverage = int(math.Round(float64(GAverage - GAverage/3)))
+	} else {
+		GAverage = int(math.Round(float64(GAverage + GAverage/3)))
+	}
+	if RAverage > 130 {
+		RAverage = int(math.Round(float64(RAverage - RAverage/6)))
+	} else {
+		RAverage = int(math.Round(float64(RAverage + RAverage/6)))
+	}
+
 	return RAverage, GAverage, BAverage
 }
 
