@@ -258,17 +258,16 @@ func GetAverageColorAndMakeAdjust(image image.Image) (int, int, int) {
 	} else {
 		BAverage = int(math.Round(float64(BAverage+BAverage/3))) + 30
 	}
-	if GAverage > 210 {
+	if GAverage > 185 {
 		GAverage = int(math.Round(float64(GAverage - GAverage/3)))
 	} else {
 		GAverage = int(math.Round(float64(GAverage + GAverage/3)))
 	}
-	if RAverage > 130 {
-		RAverage = int(math.Round(float64(RAverage - RAverage/6)))
+	if BAverage > 120 {
+		BAverage = BAverage - 30
 	} else {
-		RAverage = int(math.Round(float64(RAverage + RAverage/6)))
+		BAverage = BAverage + 30
 	}
-
 	return RAverage, GAverage, BAverage
 }
 
