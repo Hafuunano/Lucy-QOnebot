@@ -46,7 +46,6 @@ var (
 // TODO:
 // 1. run faster(go func)
 // 2. minimize memory usage
-// 3. beautify b30.
 
 type user struct {
 	Status  int    `json:"status"`
@@ -203,39 +202,62 @@ type arcaea struct {
 	} `json:"content"`
 }
 
-/*
-	type record struct {
-		Status  int `json:"status"`
-		Content struct {
-			AccountInfo struct {
-				Code                   string `json:"code"`
-				Name                   string `json:"name"`
-				UserId                 int    `json:"user_id"`
-				IsMutual               bool   `json:"is_mutual"`
-				IsCharUncappedOverride bool   `json:"is_char_uncapped_override"`
-				IsCharUncapped         bool   `json:"is_char_uncapped"`
-				IsSkillSealed          bool   `json:"is_skill_sealed"`
-				Rating                 int    `json:"rating"`
-				Character              int    `json:"character"`
-			} `json:"account_info"`
-			Record struct {
-				Score             int     `json:"score"`
-				Health            int     `json:"health"`
-				Rating            float64 `json:"rating"`
-				SongId            string  `json:"song_id"`
-				Modifier          int     `json:"modifier"`
-				Difficulty        int     `json:"difficulty"`
-				ClearType         int     `json:"clear_type"`
-				BestClearType     int     `json:"best_clear_type"`
-				TimePlayed        int64   `json:"time_played"`
-				NearCount         int     `json:"near_count"`
-				MissCount         int     `json:"miss_count"`
-				PerfectCount      int     `json:"perfect_count"`
-				ShinyPerfectCount int     `json:"shiny_perfect_count"`
-			} `json:"record"`
-		} `json:"content"`
-	}
-*/
+type recordBest struct {
+	Status  int `json:"status"`
+	Content struct {
+		AccountInfo struct {
+			Code                   string `json:"code"`
+			Name                   string `json:"name"`
+			UserId                 int    `json:"user_id"`
+			IsMutual               bool   `json:"is_mutual"`
+			IsCharUncappedOverride bool   `json:"is_char_uncapped_override"`
+			IsCharUncapped         bool   `json:"is_char_uncapped"`
+			IsSkillSealed          bool   `json:"is_skill_sealed"`
+			Rating                 int    `json:"rating"`
+			JoinDate               int    `json:"join_date"`
+			Character              int    `json:"character"`
+		} `json:"account_info"`
+		Record struct {
+			Score             int     `json:"score"`
+			Health            int     `json:"health"`
+			Rating            float64 `json:"rating"`
+			SongId            string  `json:"song_id"`
+			Modifier          int     `json:"modifier"`
+			Difficulty        int     `json:"difficulty"`
+			ClearType         int     `json:"clear_type"`
+			BestClearType     int     `json:"best_clear_type"`
+			TimePlayed        int64   `json:"time_played"`
+			NearCount         int     `json:"near_count"`
+			MissCount         int     `json:"miss_count"`
+			PerfectCount      int     `json:"perfect_count"`
+			ShinyPerfectCount int     `json:"shiny_perfect_count"`
+		} `json:"record"`
+		SongInfo []struct {
+			NameEn         string  `json:"name_en"`
+			NameJp         string  `json:"name_jp"`
+			Artist         string  `json:"artist"`
+			Bpm            string  `json:"bpm"`
+			BpmBase        float64 `json:"bpm_base"`
+			Set            string  `json:"set"`
+			SetFriendly    string  `json:"set_friendly"`
+			Time           int     `json:"time"`
+			Side           int     `json:"side"`
+			WorldUnlock    bool    `json:"world_unlock"`
+			RemoteDownload bool    `json:"remote_download"`
+			Bg             string  `json:"bg"`
+			Date           int     `json:"date"`
+			Version        string  `json:"version"`
+			Difficulty     int     `json:"difficulty"`
+			Rating         int     `json:"rating"`
+			Note           int     `json:"note"`
+			ChartDesigner  string  `json:"chart_designer"`
+			JacketDesigner string  `json:"jacket_designer"`
+			JacketOverride bool    `json:"jacket_override"`
+			AudioOverride  bool    `json:"audio_override"`
+		} `json:"song_info"`
+	} `json:"content"`
+}
+
 func init() {
 	// main pg user b30
 	// Handle font (should deal it before the function runs.)
@@ -257,6 +279,26 @@ func init() {
 
 // GetAvatarForGetUserInfo and resize it to 90x90.
 func GetAvatarForGetUserInfo(userinfo user) (avatarByte image.Image) {
+	getUncappedStatus := userinfo.Content.AccountInfo.IsCharUncapped
+	getUncappedOverrideStatus := userinfo.Content.AccountInfo.IsCharUncappedOverride
+	getCharacterNum := userinfo.Content.AccountInfo.Character
+	// get avatar
+	if getUncappedStatus != getUncappedOverrideStatus {
+		// uncapped
+		avatarLocation, _ := os.ReadFile(arcaeaRes + "/assets/char/" + strconv.Itoa(getCharacterNum) + "u_icon.png")
+		avatarBytes, _, _ := image.Decode(bytes.NewReader(avatarLocation))
+		avatarByte = imgfactory.Size(avatarBytes, 90, 90).Image()
+		return
+	} else {
+		avatarLocation, _ := os.ReadFile(arcaeaRes + "/assets/char/" + strconv.Itoa(getCharacterNum) + "_icon.png")
+		avatarBytes, _, _ := image.Decode(bytes.NewReader(avatarLocation))
+		avatarByte = imgfactory.Size(avatarBytes, 90, 90).Image()
+		return
+	}
+}
+
+// GetBestInfoAvatarForGetUserInfo and resize it to 90x90.
+func GetBestInfoAvatarForGetUserInfo(userinfo recordBest) (avatarByte image.Image) {
 	getUncappedStatus := userinfo.Content.AccountInfo.IsCharUncapped
 	getUncappedOverrideStatus := userinfo.Content.AccountInfo.IsCharUncappedOverride
 	getCharacterNum := userinfo.Content.AccountInfo.Character
@@ -304,6 +346,22 @@ func GetB30RecentSongLocation(userinfo user) (currentSonglocation string) {
 	)
 	songID = userinfo.Content.RecentScore[0].SongId
 	dl = userinfo.Content.Songinfo[0].RemoteDownload
+	if dl {
+		currentSonglocation = arcaeaRes + "/assets/song/dl_" + songID + "/base.jpg"
+	} else {
+		currentSonglocation = arcaeaRes + "/assets/song/" + songID + "/base.jpg"
+	}
+	return currentSonglocation
+}
+
+// GetInfoRecentSongLocation find recent song location, you need to Unmarshal json file first.
+func GetInfoRecentSongLocation(data recordBest) (currentSonglocation string) {
+	var (
+		songID string
+		dl     bool
+	)
+	songID = data.Content.Record.SongId
+	dl = data.Content.SongInfo[0].RemoteDownload
 	if dl {
 		currentSonglocation = arcaeaRes + "/assets/song/dl_" + songID + "/base.jpg"
 	} else {
@@ -814,4 +872,113 @@ func DrawBorderString(page *gg.Context, s string, size int, x float64, y float64
 	}
 	page.SetColor(inlineRGB)
 	page.DrawStringAnchored(s, x, y, ax, ay)
+}
+
+// RenderUserBestInfo Render User's best chart info.
+func RenderUserBestInfo(render recordBest) image.Image {
+	// first of all, get raw and format it.
+	var rawFormatUserPic string
+	if render.Content.SongInfo[0].Side == 0 {
+		rawFormatUserPic = arcaeaRes + "/resource/recent/RawV3Bg_0.png"
+	} else {
+		rawFormatUserPic = arcaeaRes + "/resource/recent/RawV3Bg_1.png"
+	}
+	dataRawResize := FastResizeImage(rawFormatUserPic, 540, 781)
+	// frostlike bg
+	bgLocation, err := os.ReadFile(GetInfoRecentSongLocation(render))  // get pic and render it as frost like(Blur.)
+	imageBgLocation, _, _ := image.Decode(bytes.NewReader(bgLocation)) // decode it.
+	resultimg := FrostedGlassLike.FrostedGlassLike(imageBgLocation, 10, err)
+	handledImg := imgCutter.CropImage(resultimg, 600, 867)
+	mainBG := gg.NewContextForImage(handledImg)
+	mainBG.DrawImage(dataRawResize, 160, 86)
+	// render image(e.g. Track Lost,ACC,so on.)
+	avatarimg := GetBestInfoAvatarForGetUserInfo(render)
+	mainBG.DrawImage(avatarimg, 220, 170)
+	pttImage, _ := os.ReadFile(arcaeaRes + "/resource/ptt/" + ChoicePttBackground(float64(render.Content.AccountInfo.Rating)))
+	pttImageFormat, _, _ := image.Decode(bytes.NewReader(pttImage))
+	mainBG.DrawImage(imgfactory.Size(pttImageFormat, 70, 70).Image(), 260, 210)
+	if render.Content.AccountInfo.Rating == -1 {
+		rating = "--"
+	} else {
+		rating = strconv.FormatFloat(float64(render.Content.AccountInfo.Rating)/100, 'f', 2, 64)
+	}
+	mainBG.SetFontFace(exoSemiBoldFace)
+	// draw black, then draw white.
+	DrawBorderString(mainBG, rating, 2, 275, 252, 0, 0, color.White, color.Black)
+	mainBG.SetColor(color.Black)
+	mainBG.DrawString("ArcID: "+render.Content.AccountInfo.Code, 330, 240)
+	mainBG.SetFontFace(sans)
+	mainBG.DrawString(render.Content.AccountInfo.Name, 330, 210)
+	mainBG.DrawImage(imgfactory.Limit(imageBgLocation, 230, 230), 315, 306)
+	mainBG.SetFontFace(AndrealFaceL)
+	var userRecentSongName string
+	userRecentSongName = render.Content.SongInfo[0].NameJp
+	if userRecentSongName == "" {
+		userRecentSongName = render.Content.SongInfo[0].NameEn
+	}
+	mainBG.DrawStringAnchored(userRecentSongName, 435, 555, 0.5, 0.5)
+	getRecentDiffStatus := render.Content.SongInfo[0].Difficulty
+	var replyRecentDiffStatus string
+	var replyRecentDIffStatusColor color.Color
+	switch {
+	case getRecentDiffStatus == 0:
+		replyRecentDiffStatus = "Past"
+		replyRecentDIffStatusColor = color.NRGBA{R: uint8(20), G: uint8(165), B: uint8(215), A: uint8(255)}
+	case getRecentDiffStatus == 1:
+		replyRecentDiffStatus = "Present"
+		replyRecentDIffStatusColor = color.NRGBA{R: uint8(120), G: uint8(155), B: uint8(80), A: uint8(255)}
+	case getRecentDiffStatus == 2:
+		replyRecentDiffStatus = "Future"
+		replyRecentDIffStatusColor = color.NRGBA{R: uint8(115), G: uint8(35), B: uint8(100), A: uint8(255)}
+	case getRecentDiffStatus == 3:
+		replyRecentDiffStatus = "Beyond"
+		replyRecentDIffStatusColor = color.NRGBA{R: uint8(166), G: uint8(20), B: uint8(49), A: uint8(255)}
+	}
+	mainBG.SetFontFace(kazeRegularFaceSl)
+	mainBG.SetColor(replyRecentDIffStatusColor)
+	mainBG.DrawStringAnchored(fmt.Sprintf("%s | %s", replyRecentDiffStatus, strconv.FormatFloat(float64(render.Content.SongInfo[0].Rating)/10, 'f', 1, 64)), 435, 590, 0.5, 0.5)
+	var getClearType map[int]string
+	var getClearTypeNum int
+	var getTypeLocation string
+	getClearType = map[int]string{
+		0: "TL",
+		1: "NC",
+		2: "FR",
+		3: "PM",
+		4: "EC",
+		5: "HC",
+	}
+	getClearTypeNum = render.Content.Record.BestClearType
+	switch {
+	case getClearTypeNum == 1 || getClearTypeNum == 4 || getClearTypeNum == 5:
+		getTypeLocation = arcaeaRes + "/resource/recent/clear_normal.png"
+	case getClearTypeNum == 2:
+		getTypeLocation = arcaeaRes + "/resource/recent/clear_full.png"
+	case getClearTypeNum == 3:
+		getTypeLocation = arcaeaRes + "/resource/recent/clear_pure.png"
+	case getClearTypeNum == 0:
+		getTypeLocation = arcaeaRes + "/resource/recent/clear_fail.png"
+	}
+	typeFileByte, err := os.ReadFile(getTypeLocation)
+	if err != nil {
+		panic(err)
+	}
+	typeFileByteImage, _, _ := image.Decode(bytes.NewReader(typeFileByte))
+	typeFileByteImageContext := gg.NewContextForImage(typeFileByteImage)
+	typeCovert2Image := imgfactory.Size(typeFileByteImage, 400, 400/typeFileByteImageContext.W()/typeFileByteImageContext.H()).Image()
+	mainBG.DrawImage(typeCovert2Image, 240, 635)
+	mainBG.SetFontFace(exoMidFaces)
+	mainBG.SetColor(color.Black)
+	mainBG.DrawStringAnchored(fmt.Sprintf("%s [%s]", FormatNumber(render.Content.Record.Score), getClearType[getClearTypeNum]), 440, 700, 0.5, 0.5)
+	// draw rest of them, fuck.
+	mainBG.SetFontFace(exoSmallFaceSS)
+	mainBG.DrawStringAnchored(fmt.Sprintf("Play PTT:  %s", strconv.FormatFloat(render.Content.Record.Rating, 'f', 1, 64)), 220, 800, 0, 0)
+	mainBG.DrawStringAnchored(fmt.Sprintf("Play Time: %s", FormatTimeStamp(render.Content.Record.TimePlayed)), 220, 830, 0, 0)
+	// status.
+	mainBG.SetFontFace(exoSemiBoldFace)
+	mainBG.DrawStringAnchored(fmt.Sprintf("Pure:  %d(+%d)", render.Content.Record.PerfectCount, render.Content.Record.ShinyPerfectCount), 490, 780, 0, 0)
+	mainBG.DrawStringAnchored(fmt.Sprintf("Far:  %d", render.Content.Record.NearCount), 490, 810, 0, 0)
+	mainBG.DrawStringAnchored(fmt.Sprintf("Lost:  %d", render.Content.Record.MissCount), 490, 840, 0, 0)
+	mainBG.Fill()
+	return mainBG.Image()
 }

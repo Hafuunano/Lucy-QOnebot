@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"image"
+	"image/jpeg"
 	"image/png"
 	"net/url"
 	"os"
@@ -153,9 +154,13 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(SessionKeyInfoFull), message.Image("file:///"+file.BOTPATH+"/"+engine.DataFolder()+"save/"+r.Content.AccountInfo.Name+FormatRawTimeStamp(int64(r.Content.QueryTime))+".png"))
 	})
 
-	engine.OnRegex(`^[！! /](a|arc)\schart\s([^\]]+)\s+([^\]]+)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^[！! /](a|arc)\spreview\s(\w+)(?:\s(\w+))?$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		songName := ctx.State["regex_matched"].([]string)[2]
 		songDiff := ctx.State["regex_matched"].([]string)[3]
+		// default is ftr
+		if songDiff == "" {
+			songDiff = "ftr"
+		}
 		// render , Chinese Words may cause unsafe when requesting,
 		EscapeNameCN := url.QueryEscape(songName)
 		replyImage, err := aua.GetSongPreview(os.Getenv("aualink"), os.Getenv("auakey"), EscapeNameCN, songDiff)
@@ -168,6 +173,8 @@ func init() {
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
 			return
+		} else {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经拿到图片数据~"))
 		}
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
@@ -203,39 +210,41 @@ func init() {
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
-	/*
-		engine.OnRegex(`[！! /](a|arc)\sbest\s([^\]]+)\s+([^\]]+)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
-			songName := ctx.State["regex_matched"].([]string)[2]
-			songDiff := ctx.State["regex_matched"].([]string)[3]
-			id, err := GetUserArcaeaInfo(arcAcc, ctx)
-			if err != nil || id == "" {
-				ctx.SendChain(message.Text("找不到用户信息，请检查你是否已经在Lucy端进行绑定，方式： “！arc bind {username | userid} ” "))
-				return
-			}
-			getData, err := aua.GetUserBest(os.Getenv("aualink"), os.Getenv("auakey"), id, songName, songDiff)
-			if err != nil {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误：", err))
-				return
-			}
-			_ = json.Unmarshal(getData, &recordinfo)
-			checkStatus := recordinfo.Status
-			if checkStatus != 0 {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误: ", m[checkStatus]))
-				return
-			}
-			replyImage := RenderUserBestLog(recordinfo)
-			var buf bytes.Buffer
-			err = jpeg.Encode(&buf, replyImage, nil)
-			if err != nil {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误: ", err))
-				return
-			}
-			base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
-		})
 
+	engine.OnRegex(`^[！! /](a|arc)\sinfo\s(\w+)(?:\s(\w+))?$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+		songName := ctx.State["regex_matched"].([]string)[2]
+		songDiff := ctx.State["regex_matched"].([]string)[3]
+		id, err := GetUserArcaeaInfo(arcAcc, ctx)
+		if err != nil || id == "" {
+			ctx.SendChain(message.Text("找不到用户信息，请检查你是否已经在Lucy端进行绑定，方式： “！arc bind {username | userid} ” "))
+			return
+		}
+		if songDiff == "" {
+			songDiff = "ftr"
+		}
+		getData, err := aua.GetUserBest(os.Getenv("aualink"), os.Getenv("auakey"), id, url.QueryEscape(songName), songDiff)
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误：", err))
+			return
+		}
+		var record recordBest
+		_ = json.Unmarshal(getData, &record)
+		checkStatus := record.Status
+		if checkStatus != 0 {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误: ", m[checkStatus]))
+			return
+		}
+		replyImage := RenderUserBestInfo(record)
+		var buf bytes.Buffer
+		err = jpeg.Encode(&buf, replyImage, nil)
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误: ", err))
+			return
+		}
+		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
+	})
 
-	*/
 	engine.OnFullMatch("!arc example render", zero.SuperUserPermission).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		getjson := engine.DataFolder() + "example.json"
 		getdata, _ := os.ReadFile(getjson)
