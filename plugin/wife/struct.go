@@ -143,7 +143,7 @@ func GenerateMD5(userID int64, targetID int64, groupID int64) string {
 	return hashString
 }
 
-// CheckTheUserStatusAndDoRepeat If ture, means it no others (Only defer to current user.)
+// CheckTheUserStatusAndDoRepeat If ture, means it no others (Only Refer to current user.)
 func CheckTheUserStatusAndDoRepeat(ctx *zero.Ctx) bool {
 	getStatusCode, getOtherUserData := CheckTheUserIsTargetOrUser(marryList, ctx, ctx.Event.UserID) // 判断这个user是否已经和别人在一起了，同时判断Type3
 	switch {
