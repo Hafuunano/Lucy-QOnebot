@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"image"
 	"image/png"
+	"net/url"
 	"os"
 	"strconv"
 
@@ -152,19 +153,20 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(SessionKeyInfoFull), message.Image("file:///"+file.BOTPATH+"/"+engine.DataFolder()+"save/"+r.Content.AccountInfo.Name+FormatRawTimeStamp(int64(r.Content.QueryTime))+".png"))
 	})
 
-	engine.OnRegex(`^[！! /](a|arc)\schart\s([^\]]+)\s+([^\]] +)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^[！! /](a|arc)\schart\s([^\]]+)\s+([^\]]+)$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		songName := ctx.State["regex_matched"].([]string)[2]
 		songDiff := ctx.State["regex_matched"].([]string)[3]
-		resultPreview, err := aua.GetSongPreview(os.Getenv("aualink"), os.Getenv("auakey"), songName, songDiff)
+		// render , Chinese Words may cause unsafe when requesting,
+		EscapeNameCN := url.QueryEscape(songName)
+		replyImage, err := aua.GetSongPreview(os.Getenv("aualink"), os.Getenv("auakey"), EscapeNameCN, songDiff)
 		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Reply sent, but cannot find ", songName, " (", err))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(err))
 			return
 		}
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请等待一会哦~已经拿到图片请求了x"))
 		var buf bytes.Buffer
-		err = png.Encode(&buf, resultPreview)
+		err = png.Encode(&buf, replyImage)
 		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("错误: ", err))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
 			return
 		}
 		base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
