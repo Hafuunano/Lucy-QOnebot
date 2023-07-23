@@ -255,16 +255,6 @@ func init() {
 	exoSemiBoldFace = LoadFontFace(arcaeaRes+"/resource/font/Exo-SemiBold.ttf", 20, 72)
 }
 
-// StrokeStringWithOtherColor make the text shade?
-func StrokeStringWithOtherColor(text string, color color.Color, h float64, w float64, bg *gg.Context) {
-	bg.SetColor(color)
-	for i := 1; i < 2; i++ {
-		for j := 1; j < 2; j++ {
-			bg.DrawString(text, h-float64(i), w-float64(j))
-		}
-	}
-}
-
 // GetAvatarForGetUserInfo and resize it to 90x90.
 func GetAvatarForGetUserInfo(userinfo user) (avatarByte image.Image) {
 	getUncappedStatus := userinfo.Content.AccountInfo.IsCharUncapped
@@ -444,9 +434,8 @@ func DrawScoreCard(songCover image.Image, songNum int, r arcaea, b40 bool) image
 	// Handle font (should deal it before the function runs.)
 	// font part end.
 	mainPicHandler.SetFontFace(sans)
-	StrokeStringWithOtherColor("#"+strconv.Itoa(songNum+1), color.Black, 590, 45, mainPicHandler)
+	DrawBorderString(mainPicHandler, "#"+strconv.Itoa(songNum+1), 2, 590, 45, 0, 0, color.White, color.Black)
 	mainPicHandler.SetColor(color.White)
-	mainPicHandler.DrawString("#"+strconv.Itoa(songNum+1), 590, 45) // Write nums
 	// check the bg is dark? if false, use black color font, else use white color font.
 	var setMainColor color.NRGBA
 	if IsDark(color.RGBA{R: uint8(R), G: uint8(G), B: uint8(B), A: 255}) {
@@ -593,9 +582,7 @@ func DrawMainUserB30(mainBg image.Image, r arcaea) image.Image {
 	} else {
 		rating = strconv.FormatFloat(float64(r.Content.AccountInfo.Rating)/100, 'f', 2, 64)
 	}
-	StrokeStringWithOtherColor(rating, color.Black, 215, 385, mainBGHandler)
-	mainBGHandler.SetColor(color.NRGBA{R: uint8(255), G: uint8(255), B: uint8(255), A: 255})
-	mainBGHandler.DrawString(rating, 215, 385)
+	DrawBorderString(mainBGHandler, rating, 2, 215, 385, 0, 0, color.White, color.Black)
 	mainBGHandler.FillPreserve()
 	mainBGHandler.SetFontFace(exoMidFaceLLs)
 	// get theory ptt.
@@ -715,9 +702,7 @@ func RenderUserRecentLog(userinfo user) image.Image {
 	}
 	mainBG.SetFontFace(exoSemiBoldFace)
 	// draw black, then draw white.
-	StrokeStringWithOtherColor(rating, color.Black, 270, 252, mainBG)
-	mainBG.SetColor(color.White)
-	mainBG.DrawString(rating, 270, 252)
+	DrawBorderString(mainBG, rating, 2, 270, 252, 0, 0, color.White, color.Black)
 	mainBG.SetColor(color.Black)
 	mainBG.DrawString("ArcID: "+userinfo.Content.AccountInfo.Code, 330, 240)
 	mainBG.SetFontFace(sans)
@@ -796,7 +781,7 @@ func RenderUserRecentLog(userinfo user) image.Image {
 	return mainBG.Image()
 }
 
-// PerdictUserWaitTime Predict Time
+// PerdictUserWaitTime Predict Time, maybe it not works well()
 func PerdictUserWaitTime(rawWaitLine int64) string {
 	getPersentTime := time.Now().Hour()
 	var waitTime string
@@ -810,4 +795,22 @@ func PerdictUserWaitTime(rawWaitLine int64) string {
 	}
 	waitTime = strconv.FormatFloat(1*(5-float64(rawWaitLine))+5, 'f', 1, 64)
 	return waitTime + "分钟"
+}
+
+// DrawBorderString GG Package Not support The string render, so I write this (^^)
+func DrawBorderString(page *gg.Context, s string, size int, x float64, y float64, ax float64, ay float64, inlineRGB color.Color, outlineRGB color.Color) {
+	page.SetColor(outlineRGB)
+	n := size
+	for dy := -n; dy <= n; dy++ {
+		for dx := -n; dx <= n; dx++ {
+			if dx*dx+dy*dy >= n*n {
+				continue
+			}
+			renderX := x + float64(dx)
+			renderY := y + float64(dy)
+			page.DrawStringAnchored(s, renderX, renderY, ax, ay)
+		}
+	}
+	page.SetColor(inlineRGB)
+	page.DrawStringAnchored(s, x, y, ax, ay)
 }
