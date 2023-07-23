@@ -579,10 +579,11 @@ func DrawMainUserB30(mainBg image.Image, r arcaea) image.Image {
 	mainBGHandler.DrawImage(imgfactory.Size(pttImageFormat, 150, 150).Image(), 195, 295)
 	if r.Content.AccountInfo.Rating == -1 {
 		rating = "--"
+		mainBGHandler.DrawString(rating, 255, 385)
 	} else {
 		rating = strconv.FormatFloat(float64(r.Content.AccountInfo.Rating)/100, 'f', 2, 64)
+		DrawBorderString(mainBGHandler, rating, 2, 215, 385, 0, 0, color.White, color.Black)
 	}
-	DrawBorderString(mainBGHandler, rating, 2, 215, 385, 0, 0, color.White, color.Black)
 	mainBGHandler.FillPreserve()
 	mainBGHandler.SetFontFace(exoMidFaceLLs)
 	// get theory ptt.
@@ -702,7 +703,7 @@ func RenderUserRecentLog(userinfo user) image.Image {
 	}
 	mainBG.SetFontFace(exoSemiBoldFace)
 	// draw black, then draw white.
-	DrawBorderString(mainBG, rating, 2, 270, 252, 0, 0, color.White, color.Black)
+	DrawBorderString(mainBG, rating, 2, 275, 252, 0, 0, color.White, color.Black)
 	mainBG.SetColor(color.Black)
 	mainBG.DrawString("ArcID: "+userinfo.Content.AccountInfo.Code, 330, 240)
 	mainBG.SetFontFace(sans)
