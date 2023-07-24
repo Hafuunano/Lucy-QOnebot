@@ -24,14 +24,15 @@ import (
 
 var (
 	userinfo user
-	//	recordinfo record
-	r      arcaea
-	engine = control.Register("arcaea", &ctrl.Options[*zero.Ctx]{
+	r        arcaea
+	engine   = control.Register("arcaea", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
 		Help:              "Hi NekoPachi!\n说明书: https://lucy.impart.icu",
 		PrivateDataFolder: "arcaea",
 	})
 )
+
+// TODO: NO RANDOM | Song Info ==>  DUE TO MY LAZYNESS.
 
 func init() {
 	mainBG, _ := os.ReadFile(arcaeaRes + "/resource/b30/B30.png")
@@ -154,7 +155,7 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(SessionKeyInfoFull), message.Image("file:///"+file.BOTPATH+"/"+engine.DataFolder()+"save/"+r.Content.AccountInfo.Name+FormatRawTimeStamp(int64(r.Content.QueryTime))+".png"))
 	})
 
-	engine.OnRegex(`^[！! /](a|arc)\spreview\s(\w+)(?:\s(\w+))?$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^[！! /](a|arc)\spreview\s(\S+)(?:\s(\w+))?$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		songName := ctx.State["regex_matched"].([]string)[2]
 		songDiff := ctx.State["regex_matched"].([]string)[3]
 		// default is ftr
@@ -211,7 +212,7 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("base64://"+base64Str))
 	})
 
-	engine.OnRegex(`^[！! /](a|arc)\sinfo\s(\w+)(?:\s(\w+))?$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^[！! /](a|arc)\sinfo\s(\S+)(?:\s(\w+))?$`).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		songName := ctx.State["regex_matched"].([]string)[2]
 		songDiff := ctx.State["regex_matched"].([]string)[3]
 		id, err := GetUserArcaeaInfo(arcAcc, ctx)
@@ -234,6 +235,7 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生错误: ", m[checkStatus]))
 			return
 		}
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("拿到数据部分x 开始渲染~"))
 		replyImage := RenderUserBestInfo(record)
 		var buf bytes.Buffer
 		err = jpeg.Encode(&buf, replyImage, nil)

@@ -917,7 +917,7 @@ func RenderUserBestInfo(render recordBest) image.Image {
 		userRecentSongName = render.Content.SongInfo[0].NameEn
 	}
 	mainBG.DrawStringAnchored(userRecentSongName, 435, 555, 0.5, 0.5)
-	getRecentDiffStatus := render.Content.SongInfo[0].Difficulty
+	getRecentDiffStatus := render.Content.Record.Difficulty
 	var replyRecentDiffStatus string
 	var replyRecentDIffStatusColor color.Color
 	switch {
