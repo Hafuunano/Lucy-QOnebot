@@ -68,7 +68,7 @@ func init() {
 		// getPhigrosKey := os.Getenv("puakey")
 		userData := GetUserInfoFromDatabase(ctx.Event.UserID)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("好哦~正在帮你请求，请稍等一下啦w"))
-		getFullLink := getPhigrosLink + "/api/phi/bests?session=" + userData.PhiSession + "&overflow=1"
+		getFullLink := getPhigrosLink + "/api/phi/bests?session=" + userData.PhiSession + "&overflow=2"
 		phidata, _ := web.GetData(getFullLink)
 		if phidata == nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Unoffical Phigros API 暂时无法工作 请过一段时候尝试"))
