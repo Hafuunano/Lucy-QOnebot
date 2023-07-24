@@ -2,7 +2,6 @@ package pgr // Package pgr hosted by Phigros-Library
 import (
 	"encoding/json"
 	"image/color"
-	"os"
 	"strconv"
 	"time"
 	"unicode/utf8"
@@ -63,13 +62,14 @@ func init() {
 		}
 		// tips 2 cannot work,then use tips 1.
 		//	GetSessionByPhigrosLibraryProject(getDataSession, ctx)
-		getPhigrosLink := os.Getenv("pualink")
-		getPhigrosKey := os.Getenv("puakey")
+		// getPhigrosLink := os.Getenv("pualink")
+		getPhigrosLink := "https://pgrapi.impart.icu"
+		// getPhigrosKey := os.Getenv("puakey")
 		userData := GetUserInfoFromDatabase(ctx.Event.UserID)
-		getFullLink := getPhigrosLink + "/user/best19?SessionToken=" + userData.PhiSession + "&withsonginfo=true&overflow=2"
-		phidata, _ := DrawRequestPhigros(getFullLink, getPhigrosKey, "POST")
+		getFullLink := getPhigrosLink + "/api/phi/bests?session=" + userData.PhiSession + "&overflow=1"
+		phidata, _ := DrawRequestPhigros(getFullLink, "", "GET")
 		if phidata == nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Phigros Unlimited API暂时无法工作 请过一段时候尝试"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Unoffical Phigros API暂时无法工作 请过一段时候尝试"))
 			return
 		}
 		err := json.Unmarshal(phidata, &phigrosB19)
@@ -77,7 +77,7 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生解析错误", err))
 			return
 		}
-		if !phigrosB19.Status {
+		if phigrosB19.Status == "false" {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w? 貌似出现了一些问题x"))
 			return
 		}
@@ -85,7 +85,7 @@ func init() {
 		getRawBackground, _ := gg.LoadImage(backgroundRender)
 		getMainBgRender := gg.NewContextForImage(imaging.Resize(getRawBackground, 2750, 5500, imaging.Lanczos))
 		_ = getMainBgRender.LoadFontFace(font, 30)
-		if !phigrosB19.Status {
+		if phigrosB19.Status == "false" {
 			return
 		}
 		_ = getMainBgRender.LoadFontFace(font, 30)
@@ -145,8 +145,8 @@ func init() {
 		}
 		// tips 2 cannot work,then use tips 1.
 		//	GetSessionByPhigrosLibraryProject(getDataSession, ctx)
-		getPhigrosLink := os.Getenv("pualink")
-		getPhigrosKey := os.Getenv("puakey")
+		getPhigrosLink := "https://pgrapi.impart.icu"
+		// getPhigrosKey := os.Getenv("puakey")
 		userData := GetUserInfoFromDatabase(ctx.Event.UserID)
 		getRoll := ctx.State["regex_matched"].([]string)[1]
 		getRollInt, err := strconv.ParseInt(getRoll, 10, 64)
@@ -162,8 +162,8 @@ func init() {
 		if getOverFlowNumber <= 0 {
 			getOverFlowNumber = 0
 		}
-		getFullLink := getPhigrosLink + "/user/best19?SessionToken=" + userData.PhiSession + "&withsonginfo=true&overflow=" + strconv.Itoa(int(getOverFlowNumber))
-		phidata, _ := DrawRequestPhigros(getFullLink, getPhigrosKey, "POST")
+		getFullLink := getPhigrosLink + "/api/phi/bests?session=" + userData.PhiSession + "&overflow=" + strconv.Itoa(int(getOverFlowNumber))
+		phidata, _ := DrawRequestPhigros(getFullLink, "", "GET")
 		if phidata == nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Phigros Unlimited API暂时无法工作 请过一段时候尝试"))
 			return
@@ -173,7 +173,7 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生解析错误", err))
 			return
 		}
-		if !phigrosB19.Status {
+		if phigrosB19.Status == "false" {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w? 貌似出现了一些问题x"))
 			return
 		}
@@ -181,7 +181,7 @@ func init() {
 		getRawBackground, _ := gg.LoadImage(backgroundRender)
 		getMainBgRender := gg.NewContextForImage(imaging.Resize(getRawBackground, 2750, int(5250+getOverFlowNumber*200), imaging.Lanczos))
 		_ = getMainBgRender.LoadFontFace(font, 30)
-		if !phigrosB19.Status {
+		if phigrosB19.Status == "false" {
 			return
 		}
 		_ = getMainBgRender.LoadFontFace(font, 30)

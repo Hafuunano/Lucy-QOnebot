@@ -23,38 +23,22 @@ var (
 )
 
 type PhigrosStruct struct {
-	Status  bool `json:"status"`
+	Status  string `json:"status"`
 	Content struct {
-		RankingScore      float64 `json:"RankingScore"`
-		ChallengeModeRank int     `json:"ChallengeModeRank"`
+		Phi      string `json:"phi"`
+		BestList []struct {
+			Score      int     `json:"score"`
+			Acc        float64 `json:"acc"`
+			Level      string  `json:"level"`
+			Fc         bool    `json:"fc"`
+			SongId     string  `json:"songId"`
+			Songname   string  `json:"songname"`
+			Difficulty float64 `json:"difficulty"`
+			Rks        float64 `json:"rks"`
+		} `json:"bests"`
 		PlayerID          string  `json:"PlayerID"`
-		BestList          struct {
-			Phi  bool `json:"phi"`
-			Best []struct {
-				Songid   string  `json:"songid"`
-				Level    string  `json:"level"`
-				Songname string  `json:"songname"`
-				Rating   float64 `json:"rating"`
-				Rks      float64 `json:"rks"`
-				Score    int     `json:"score"`
-				Acc      float64 `json:"acc"`
-				Isfc     bool    `json:"isfc"`
-			} `json:"best"`
-		} `json:"best_list"`
-		BestSonginfo []struct {
-			Songid      string `json:"songid"`
-			Level       string `json:"level"`
-			ChartDetail struct {
-				Rating     float64 `json:"rating"`
-				Charter    string  `json:"charter"`
-				NumOfNotes int     `json:"numOfNotes"`
-			} `json:"chartDetail"`
-			ChapterCode string `json:"chapterCode"`
-			UnlockType  int    `json:"unlockType"`
-			SongsName   string `json:"songsName"`
-			Composer    string `json:"composer"`
-			Illustrator string `json:"illustrator"`
-		} `json:"best_songinfo"`
+		ChallengeModeRank int     `json:"ChallengeModeRank"`
+		RankingScore      float64 `json:"RankingScore"`
 	} `json:"content"`
 }
 
@@ -106,9 +90,9 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 	// background render path.
 	_ = json.Unmarshal(dataOrigin, &phigrosB19)
 	i = 0
-	if phigrosB19.Content.BestList.Phi { // while render the first set this change To Phi
-		renderImage := phigrosB19.Content.BestList.Best[i].Songid
-		getRenderImage := background + renderImage[:len(renderImage)-2] + ".png"
+	if phigrosB19.Content.Phi == "true" { // while render the first set this change To Phi
+		renderImage := phigrosB19.Content.BestList[i].SongId
+		getRenderImage := background + renderImage + ".png"
 		getImage, _ := gg.LoadImage(getRenderImage)
 		// get background
 		cardBackGround := DrawParallelogram(getImage)
@@ -131,13 +115,13 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		canvas.DrawString("Phi", float64(referceWidth-20), float64(referceLength+840))
 		canvas.Fill()
 		// render Diff.
-		getDiff := phigrosB19.Content.BestList.Best[i].Level
+		getDiff := phigrosB19.Content.BestList[i].Level
 		SetDiffColor(getDiff, canvas)
 		drawTriAngle(canvas, 77, float64(referceWidth-65), float64(referceLength+992), 150, 80)
 		canvas.Fill()
 		// render Text
-		getRKS := strconv.FormatFloat(phigrosB19.Content.BestList.Best[i].Rating, 'f', 1, 64)
-		getRating := strconv.FormatFloat(phigrosB19.Content.BestList.Best[i].Rks, 'f', 2, 64)
+		getRKS := strconv.FormatFloat(phigrosB19.Content.BestList[i].Difficulty, 'f', 1, 64)
+		getRating := strconv.FormatFloat(phigrosB19.Content.BestList[i].Rks, 'f', 2, 64)
 		canvas.SetColor(color.White)
 		_ = canvas.LoadFontFace(font, 30)
 		canvas.DrawString(getDiff+" "+getRKS, float64(referceWidth-50), float64(referceLength+1019))
@@ -147,16 +131,16 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		canvas.DrawString(getRating, float64(referceWidth-60), float64(referceLength+1062))
 		canvas.Fill()
 		// render info (acc,score,name)
-		getRankLink := GetRank(phigrosB19.Content.BestList.Best[i].Score, phigrosB19.Content.BestList.Best[i].Isfc)
+		getRankLink := GetRank(phigrosB19.Content.BestList[i].Score, phigrosB19.Content.BestList[i].Fc)
 		loadRankImage, _ := gg.LoadImage(rank + getRankLink + ".png")
 		canvas.DrawImage(loadRankImage, referceWidth+500, referceLength+920)
 		canvas.Fill()
-		getName := phigrosB19.Content.BestList.Best[i].Songname
+		getName := phigrosB19.Content.BestList[i].Songname
 		_ = canvas.LoadFontFace(font, 35)
 		canvas.DrawStringAnchored(getName, float64(referceWidth+740), float64(referceLength+890), 0.5, 0.5)
 		canvas.SetColor(color.White)
 		canvas.Fill()
-		getScore := strconv.Itoa(phigrosB19.Content.BestList.Best[i].Score)
+		getScore := strconv.Itoa(phigrosB19.Content.BestList[i].Score)
 		_ = canvas.LoadFontFace(font, 50)
 		canvas.DrawStringAnchored(getScore, float64(referceWidth+740), float64(referceLength+950), 0.5, 0.5)
 		canvas.Fill()
@@ -165,7 +149,7 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		canvas.DrawLine(float64(referceWidth+630), float64(referceLength+990), float64(referceWidth+890), float64(referceLength+990))
 		canvas.Stroke()
 		_ = canvas.LoadFontFace(font, 40)
-		getAcc := strconv.FormatFloat(phigrosB19.Content.BestList.Best[i].Acc, 'f', 2, 64) + "%"
+		getAcc := strconv.FormatFloat(phigrosB19.Content.BestList[i].Acc, 'f', 2, 64) + "%"
 		canvas.DrawStringAnchored(getAcc, float64(referceWidth+760), float64(referceLength+1020), 0.5, 0.5)
 		canvas.Fill()
 		// width = referceWidth | height = 800+ referenceLength
@@ -174,9 +158,9 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		isRight = true
 		i = i + 1
 	}
-	for ; i < len(phigrosB19.Content.BestList.Best); i++ {
-		renderImage := phigrosB19.Content.BestList.Best[i].Songid
-		getRenderImage := background + renderImage[:len(renderImage)-2] + ".png"
+	for ; i < len(phigrosB19.Content.BestList); i++ {
+		renderImage := phigrosB19.Content.BestList[i].SongId
+		getRenderImage := background + renderImage + ".png"
 		getImage, _ := gg.LoadImage(getRenderImage)
 		// get background
 		cardBackGround := DrawParallelogram(getImage)
@@ -199,13 +183,13 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		canvas.DrawString("#"+strconv.Itoa(i), float64(referceWidth-20), float64(referceLength+840))
 		canvas.Fill()
 		// render Diff.
-		getDiff := phigrosB19.Content.BestList.Best[i].Level
+		getDiff := phigrosB19.Content.BestList[i].Level
 		SetDiffColor(getDiff, canvas)
 		drawTriAngle(canvas, 77, float64(referceWidth-65), float64(referceLength+992), 150, 80)
 		canvas.Fill()
 		// render Text
-		getRKS := strconv.FormatFloat(phigrosB19.Content.BestList.Best[i].Rating, 'f', 1, 64)
-		getRating := strconv.FormatFloat(phigrosB19.Content.BestList.Best[i].Rks, 'f', 2, 64)
+		getRKS := strconv.FormatFloat(phigrosB19.Content.BestList[i].Difficulty, 'f', 1, 64)
+		getRating := strconv.FormatFloat(phigrosB19.Content.BestList[i].Rks, 'f', 2, 64)
 		canvas.SetColor(color.White)
 		_ = canvas.LoadFontFace(font, 30)
 		canvas.DrawString(getDiff+" "+getRKS, float64(referceWidth-50), float64(referceLength+1019))
@@ -215,16 +199,16 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		canvas.DrawString(getRating, float64(referceWidth-60), float64(referceLength+1062))
 		canvas.Fill()
 		// render info (acc,score,name)
-		getRankLink := GetRank(phigrosB19.Content.BestList.Best[i].Score, phigrosB19.Content.BestList.Best[i].Isfc)
+		getRankLink := GetRank(phigrosB19.Content.BestList[i].Score, phigrosB19.Content.BestList[i].Fc)
 		loadRankImage, _ := gg.LoadImage(rank + getRankLink + ".png")
 		canvas.DrawImage(loadRankImage, referceWidth+500, referceLength+920)
 		canvas.Fill()
-		getName := phigrosB19.Content.BestList.Best[i].Songname
+		getName := phigrosB19.Content.BestList[i].Songname
 		_ = canvas.LoadFontFace(font, 35)
 		canvas.DrawStringAnchored(getName, float64(referceWidth+740), float64(referceLength+890), 0.5, 0.5)
 		canvas.SetColor(color.White)
 		canvas.Fill()
-		getScore := strconv.Itoa(phigrosB19.Content.BestList.Best[i].Score)
+		getScore := strconv.Itoa(phigrosB19.Content.BestList[i].Score)
 		_ = canvas.LoadFontFace(font, 50)
 		canvas.DrawStringAnchored(getScore, float64(referceWidth+740), float64(referceLength+950), 0.5, 0.5)
 		canvas.Fill()
@@ -233,7 +217,7 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		canvas.DrawLine(float64(referceWidth+630), float64(referceLength+990), float64(referceWidth+890), float64(referceLength+990))
 		canvas.Stroke()
 		_ = canvas.LoadFontFace(font, 40)
-		getAcc := strconv.FormatFloat(phigrosB19.Content.BestList.Best[i].Acc, 'f', 2, 64) + "%"
+		getAcc := strconv.FormatFloat(phigrosB19.Content.BestList[i].Acc, 'f', 2, 64) + "%"
 		canvas.DrawStringAnchored(getAcc, float64(referceWidth+760), float64(referceLength+1020), 0.5, 0.5)
 		canvas.Fill()
 		// width = referceWidth | height = 800+ referenceLength
