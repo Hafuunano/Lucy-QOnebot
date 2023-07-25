@@ -168,7 +168,7 @@ func init() {
 		}
 		err = json.Unmarshal(phidata, &phigrosB19)
 		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生解析错误\n", err))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生解析错误: \n", err))
 			return
 		}
 		if !phigrosB19.Status {
