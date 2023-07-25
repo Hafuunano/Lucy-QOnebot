@@ -79,7 +79,7 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生解析错误\n", err))
 			return
 		}
-		if phigrosB19.Status != "true" {
+		if !phigrosB19.Status {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w? 貌似出现了一些问题x"))
 			return
 		}
@@ -171,7 +171,7 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生解析错误\n", err))
 			return
 		}
-		if phigrosB19.Status != "true" {
+		if !phigrosB19.Status {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w? 貌似出现了一些问题x"))
 			return
 		}

@@ -5,9 +5,7 @@ import (
 	"github.com/FloatTech/gg"
 	"image"
 	"image/color"
-	"io"
 	"math"
-	"net/http"
 	"strconv"
 )
 
@@ -23,9 +21,9 @@ var (
 )
 
 type PhigrosStruct struct {
-	Status  string `json:"status"`
+	Status  bool `json:"status"`
 	Content struct {
-		Phi      string `json:"phi"`
+		Phi      bool `json:"phi"`
 		BestList []struct {
 			Score      int     `json:"score"`
 			Acc        float64 `json:"acc"`
@@ -43,24 +41,6 @@ type PhigrosStruct struct {
 }
 
 // TODO: Use Original Phigros Index Path
-
-// DrawRequestPhigros 发送请求结构体
-func DrawRequestPhigros(workurl string, token string, method string) (reply []byte, err error) {
-	replyByte, err := http.NewRequest(method, workurl, nil)
-	replyByte.Header.Set("Authorization", "Bearer "+token)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := http.DefaultClient.Do(replyByte)
-	if err != nil {
-		return nil, err
-	}
-	replyBack, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return replyBack, err
-}
 
 // 绘制平行四边形 angle 角度 x, y 坐标 w 宽度 l 斜边长 (github.com/Jiang-red/go-phigros-b19 function.)
 func drawTriAngle(canvas *gg.Context, angle, x, y, w, l float64) {
@@ -90,7 +70,7 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 	// background render path.
 	_ = json.Unmarshal(dataOrigin, &phigrosB19)
 	i = 0
-	if phigrosB19.Content.Phi == "true" { // while render the first set this change To Phi
+	if phigrosB19.Content.Phi { // while render the first set this change To Phi
 		renderImage := phigrosB19.Content.BestList[i].SongId
 		getRenderImage := background + renderImage + ".png"
 		getImage, _ := gg.LoadImage(getRenderImage)
