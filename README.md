@@ -1,6 +1,6 @@
 # Lucy_ZeroBot
 
-Lucy |  Ver.1.80
+Lucy |  Ver.1.81
 
 基于 [Zerobot-Plugin](https://github.com/FloatTech/ZeroBot-Plugin) 定制的 三方 Bot 计划 Lucy 做了些相关的定制和维护
 

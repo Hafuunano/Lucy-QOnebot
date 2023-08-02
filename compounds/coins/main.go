@@ -49,6 +49,17 @@ type WagerUserInputTable struct {
 	UserExistedStoppedTime int64 `gorm:"column:time;default:0"`
 }
 
+// ProtectModeIndex Protect User From taking part in games, user can only change their mode in 24h.
+type ProtectModeIndex struct {
+	UID    int64 `gorm:"column:uid;primary_key"`
+	Time   int64 `gorm:"column:time;default:0"`
+	Status int64 `gorm:"column:status;default:0"` // 1 mean enabled || else none.
+}
+
+func (ProtectModeIndex) TableName() string {
+	return "protectmode"
+}
+
 func (WagerTable) TableName() string {
 	return "wagertable"
 }
@@ -92,7 +103,7 @@ func Initialize(dbpath string) *Scoredb {
 	if err != nil {
 		panic(err)
 	}
-	gdb.AutoMigrate(&Scoretable{}).AutoMigrate(&Signintable{}).AutoMigrate(&Globaltable{}).AutoMigrate(&WagerTable{}).AutoMigrate(&WagerUserInputTable{})
+	gdb.AutoMigrate(&Scoretable{}).AutoMigrate(&Signintable{}).AutoMigrate(&Globaltable{}).AutoMigrate(&WagerTable{}).AutoMigrate(&WagerUserInputTable{}).AutoMigrate(&ProtectModeIndex{})
 	return (*Scoredb)(gdb)
 }
 
@@ -109,6 +120,31 @@ func GetScoreByUID(sdb *Scoredb, uid int64) (s Scoretable) {
 	db := (*gorm.DB)(sdb)
 	db.Debug().Model(&Scoretable{}).FirstOrCreate(&s, "uid = ? ", uid)
 	return s
+}
+
+// GetProtectModeStatus Get Status
+func GetProtectModeStatus(sdb *Scoredb, uid int64) (s ProtectModeIndex) {
+	db := (*gorm.DB)(sdb)
+	db.Debug().Model(&ProtectModeIndex{}).FirstOrCreate(&s, "uid = ? ", uid)
+	return s
+}
+
+func ChangeProtectStatus(sdb *Scoredb, uid int64, statusID int64) (err error) {
+	db := (*gorm.DB)(sdb)
+	s := ProtectModeIndex{UID: uid, Status: statusID, Time: time.Now().Unix()}
+	if err = db.Debug().Model(&ProtectModeIndex{}).First(&s, "uid = ? ", uid).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			err = db.Debug().Model(&ProtectModeIndex{}).Create(&s).Error // newUser not user
+		} else {
+			err = db.Debug().Model(&ProtectModeIndex{}).Where("uid = ? ", uid).Update(
+				map[string]interface{}{
+					"uid":    uid,
+					"status": statusID,
+					"time":   time.Now().Unix(),
+				}).Error
+		}
+	}
+	return
 }
 
 // InsertOrUpdateScoreByUID 插入或更新打卡累计 初始化更新临时保存

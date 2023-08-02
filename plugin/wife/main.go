@@ -360,7 +360,7 @@ func init() {
 			return
 		}
 		// low possibility to get this chance.
-		if GlobalCDModelCostLeastReply(ctx) == 0 {
+		if LeaveCDModelCostLeastReply(ctx) <= 0 {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今日机会不够哦w，过段时间再来试试吧w"))
 			return
 		}
