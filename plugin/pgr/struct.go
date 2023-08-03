@@ -21,7 +21,8 @@ var (
 )
 
 type PhigrosStruct struct {
-	Status  bool `json:"status"`
+	Status  bool   `json:"status"`
+	Message string `json:"message"`
 	Content struct {
 		Phi      bool `json:"phi"`
 		BestList []struct {
@@ -160,7 +161,7 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		// draw number path
 		canvas.SetColor(color.Black)
 		_ = canvas.LoadFontFace(font, 35)
-		canvas.DrawString("#"+strconv.Itoa(i), float64(referceWidth-20), float64(referceLength+840))
+		canvas.DrawString("#"+strconv.Itoa(i+1), float64(referceWidth-20), float64(referceLength+840))
 		canvas.Fill()
 		// render Diff.
 		getDiff := phigrosB19.Content.BestList[i].Level

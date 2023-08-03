@@ -14,14 +14,3 @@ Lucy |  Ver.1.81
 
 **Copyright © 2021-2023 FloatTech. All Rights Reserved.**
 
-## 关于 Arcaea B30 设计
-
-本项目其中包含的 Arcaea 插件 数据来源于 UnofficalArcaeaAPI(UAA)
-
-其卡片风格来源于 ChieriBOT B30 设计，主体风格参照 [Nonebot-Plugin-Arcaeabot](https://github.com/SEAFHMC/nonebot-plugin-arcaeabot) 样式，后期可能会有所改动.
-
-其 背景(Background) 和 Header 设计来源于 [雨笙Hikari](https://space.bilibili.com/441390256)
-
-本项目跟随主线使用 AGPL3.0 开源协议
-
-

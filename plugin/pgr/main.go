@@ -140,7 +140,6 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请前往 https://pgr.impart.icu 获取绑定码进行绑定 "))
 			return
 		}
-		// tips 2 cannot work,then use tips 1.
 		//	GetSessionByPhigrosLibraryProject(getDataSession, ctx)
 		getPhigrosLink := "https://pgrapi.impart.icu"
 		// getPhigrosKey := os.Getenv("puakey")
@@ -163,7 +162,7 @@ func init() {
 		getFullLink := getPhigrosLink + "/api/phi/bests?session=" + userData.PhiSession + "&overflow=" + strconv.Itoa(int(getOverFlowNumber))
 		phidata, _ := web.GetData(getFullLink)
 		if phidata == nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Phigros Unlimited API暂时无法工作 请过一段时候尝试"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Phigros SelfBuild API暂时无法工作 请过一段时候尝试"))
 			return
 		}
 		err = json.Unmarshal(phidata, &phigrosB19)
@@ -172,7 +171,7 @@ func init() {
 			return
 		}
 		if !phigrosB19.Status {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w? 貌似出现了一些问题x"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w? 貌似出现了一些问题x\n", phigrosB19.Message))
 			return
 		}
 		getRawBackground, _ := gg.LoadImage(backgroundRender)
