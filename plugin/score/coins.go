@@ -74,7 +74,7 @@ func init() {
 			return
 		}
 		getProtectStatus := CheckUserIsEnabledProtectMode(ctx.Event.UserID, sdb)
-		if getProtectStatus == true {
+		if getProtectStatus {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经启动保护模式，不允许参与任何抽奖性质类互动"))
 			return
 		}
@@ -109,7 +109,7 @@ func init() {
 			return
 		}
 		getProtectStatus := CheckUserIsEnabledProtectMode(ctx.Event.UserID, sdb)
-		if getProtectStatus == true {
+		if getProtectStatus {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经启动保护模式，不允许参与任何抽奖性质类互动"))
 			return
 		}
@@ -119,7 +119,7 @@ func init() {
 			return
 		}
 		getProtectTargetStatus := CheckUserIsEnabledProtectMode(TargetInt, sdb)
-		if getProtectTargetStatus == true {
+		if getProtectTargetStatus {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("对方已经启动保护模式，不允许此处理操作"))
 			return
 		}
@@ -170,13 +170,13 @@ func init() {
 			return
 		}
 		getProtectStatus := CheckUserIsEnabledProtectMode(ctx.Event.UserID, sdb)
-		if getProtectStatus == true {
+		if getProtectStatus {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经启动保护模式，不允许参与任何抽奖性质类互动"))
 			return
 		}
 		TargetInt, _ := strconv.ParseInt(ctx.State["regex_matched"].([]string)[1], 10, 64)
 		getProtectTargetStatus := CheckUserIsEnabledProtectMode(TargetInt, sdb)
-		if getProtectTargetStatus == true {
+		if getProtectTargetStatus {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("对方已经启动保护模式，不允许此处理操作"))
 			return
 		}
@@ -238,13 +238,13 @@ func init() {
 			return
 		}
 		getProtectStatus := CheckUserIsEnabledProtectMode(ctx.Event.UserID, sdb)
-		if getProtectStatus == true {
+		if getProtectStatus {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经启动保护模式，不允许参与任何抽奖性质类互动"))
 			return
 		}
 		TargetInt, _ := strconv.ParseInt(ctx.State["regex_matched"].([]string)[1], 10, 64)
 		getProtectTargetStatus := CheckUserIsEnabledProtectMode(TargetInt, sdb)
-		if getProtectTargetStatus == true {
+		if getProtectTargetStatus {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("对方已经启动保护模式，不允许此处理操作"))
 			return
 		}
@@ -329,7 +329,7 @@ func init() {
 			rawNumber = "50"
 		}
 		getProtectStatus := CheckUserIsEnabledProtectMode(ctx.Event.UserID, sdb)
-		if getProtectStatus == true {
+		if getProtectStatus {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经启动保护模式，不允许参与任何抽奖性质类互动"))
 			return
 		}
@@ -415,7 +415,7 @@ func init() {
 		getCode := ctx.State["regex_matched"].([]string)[1]
 		if getCode == "禁用" {
 			getStatus := CheckUserIsEnabledProtectMode(ctx.Event.UserID, sdb)
-			if getStatus == true {
+			if getStatus {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你已经关闭了~"))
 				return
 			}
@@ -432,14 +432,14 @@ func init() {
 			return
 		}
 		getStatus := CheckUserIsEnabledProtectMode(ctx.Event.UserID, sdb)
-		if getStatus == false {
+		if !getStatus {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你已经启用了~"))
 			return
 		}
 		// start to handle
 		suser := coins.GetProtectModeStatus(sdb, ctx.Event.UserID)
 		boolStatus := suser.Time+60*60*24 < time.Now().Unix()
-		if boolStatus == false {
+		if !boolStatus {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("仅允许24小时修改一次"))
 			return
 		} // not the time
