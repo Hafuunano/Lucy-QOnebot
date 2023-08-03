@@ -422,7 +422,7 @@ func init() {
 			// start to handle
 			suser := coins.GetProtectModeStatus(sdb, ctx.Event.UserID)
 			boolStatus := suser.Time+60*60*24 < time.Now().Unix()
-			if boolStatus == false {
+			if !boolStatus {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("仅允许24小时修改一次"))
 				return
 			} // not the time
