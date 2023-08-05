@@ -16,10 +16,6 @@ github.com/FloatTech/zbpctrl v1.5.3-0.20230130095145-714ad318cd52 h1:BrStRXeosWh
 github.com/FloatTech/zbpctrl v1.5.3-0.20230130095145-714ad318cd52/go.mod h1:qqMLUwR7tKpqnAqsgI7aZbn0hbs2FEVF4ylMXqIpBdY=
 github.com/FloatTech/zbputils v1.6.2-0.20230207084008-8c14cb9fcacb h1:kykXPttDCbm/o63mp8GGbLJTvXJaxI/J0akB3XSkP+0=
 github.com/FloatTech/zbputils v1.6.2-0.20230207084008-8c14cb9fcacb/go.mod h1:Ekq++wMLm0jy9YcdCvQ7JbpypyIL1GGCvLIxPbEwqlE=
-github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230505093055-e0b9baf347a2 h1:Z/neeXfYnUB4xx8n69JWU27PstKM8epxA9PoiBY8fjU=
-github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230505093055-e0b9baf347a2/go.mod h1:YAZFt7N5J2CV9RqpMqjmbKBbOwmK6Dm0OA9V7/hZ97E=
-github.com/MoYoez/img_toolbox v0.0.0-20230403161424-c9a9cb5b3880 h1:MwCGFzrgCnTimPY1znUEFY+xwdYXCygZm3eWECQ4oLA=
-github.com/MoYoez/img_toolbox v0.0.0-20230403161424-c9a9cb5b3880/go.mod h1:7LJKaGNBDii5p7Ez60ywQt84Mf/CyYysC5ehzP8sFWU=
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
 github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e h1:wR3MXQ3VbUlPKOOUwLOYgh/QaJThBTYtsl673O3lqSA=
 github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e/go.mod h1:vD7Ra3Q9onRtojoY5sMCLQ7JBgjUsrXDnDKyFxqpf9w=
@@ -89,8 +85,6 @@ github.com/mattn/go-sqlite3 v1.14.0 h1:mLyGNKR8+Vv9CAU7PphKa2hkEqxxhn8i32J6FPj1/
 github.com/mattn/go-sqlite3 v1.14.0/go.mod h1:JIl7NbARA7phWnGvh0LKTyg7S9BA+6gx71ShQilpsus=
 github.com/mroth/weightedrand v1.0.0 h1:V8JeHChvl2MP1sAoXq4brElOcza+jxLkRuwvtQu8L3E=
 github.com/mroth/weightedrand v1.0.0/go.mod h1:3p2SIcC8al1YMzGhAIoXD+r9olo/g/cdJgAD905gyNE=
-github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 h1:zYyBkD/k9seD2A7fsi6Oo2LfFZAehjjQMERAvZLEDnQ=
-github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646/go.mod h1:jpp1/29i3P1S/RLdc7JQKbRpFeM1dOBd8T9ki5s+AY8=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c h1:ncq/mPwQF4JjgDlrVEn3C11VoGHZN7m8qihwgMEtzYw=

@@ -11,8 +11,6 @@ require (
 	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b
 	github.com/FloatTech/zbpctrl v1.5.3-0.20230130095145-714ad318cd52
 	github.com/FloatTech/zbputils v1.6.2-0.20230207084008-8c14cb9fcacb
-	github.com/MoYoez/Arcaea_auaAPI v0.0.0-20230505093055-e0b9baf347a2
-	github.com/MoYoez/img_toolbox v0.0.0-20230403161424-c9a9cb5b3880
 	github.com/disintegration/imaging v1.6.2
 	github.com/fumiama/cron v1.3.0
 	github.com/fumiama/gotracemoe v0.0.3
@@ -43,7 +41,6 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
-	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect

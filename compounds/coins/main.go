@@ -135,15 +135,16 @@ func ChangeProtectStatus(sdb *Scoredb, uid int64, statusID int64) (err error) {
 	if err = db.Debug().Model(&ProtectModeIndex{}).First(&s, "uid = ? ", uid).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			err = db.Debug().Model(&ProtectModeIndex{}).Create(&s).Error // newUser not user
-		} else {
-			err = db.Debug().Model(&ProtectModeIndex{}).Where("uid = ? ", uid).Update(
-				map[string]interface{}{
-					"uid":    uid,
-					"status": statusID,
-					"time":   time.Now().Unix(),
-				}).Error
 		}
+	} else {
+		err = db.Debug().Model(&ProtectModeIndex{}).Where("uid = ? ", uid).Update(
+			map[string]interface{}{
+				"uid":    uid,
+				"status": statusID,
+				"time":   time.Now().Unix(),
+			}).Error
 	}
+
 	return
 }
 
