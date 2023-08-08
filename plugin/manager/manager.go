@@ -3,7 +3,11 @@ package manager
 
 import (
 	"fmt"
+	"github.com/FloatTech/floatbox/web"
+	"github.com/tidwall/gjson"
+	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 	"math/rand"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -271,6 +275,25 @@ func init() { // 插件主体
 			)
 			ctx.SendChain(message.Text("嗯！不错的头衔呢~"))
 		})
+	engine.OnRegex(`^[！!]t(.*)`, zero.OnlyGroup).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		getUID := strconv.FormatInt(ctx.Event.UserID, 10)
+		getGroupId := strconv.FormatInt(ctx.Event.GroupID, 10)
+		getTitle := ctx.State["regex_matched"].([]string)[1]
+		// call action
+		// this method cation was called by my own account, so maybe not work(.
+		getTitleModified := url.QueryEscape(getTitle)
+		data, err := web.GetData("http://localhost:1380/set_group_special_title?group_id=" + getGroupId + "&user_id=" + getUID + "&special_title=" + getTitleModified)
+		getStatus := gjson.Get(helper.BytesToString(data), "status").String()
+		if err != nil {
+			ctx.SendChain(message.Text("a 貌似出现了一些问题哦~ 或许再试一下呢x"))
+			return
+		}
+		if getStatus == "ok" {
+			ctx.SendChain(message.Text("嗯！不错的头衔呢~"))
+		} else {
+			ctx.SendChain(message.Text("a 貌似出现了一些问题哦~ 或许再试一下呢x"))
+		}
+	})
 	// 定时提醒
 	engine.OnRegex(`^在(.{1,2})月(.{1,3}日|每?周.?)的(.{1,3})点(.{1,3})分时(用.+)?提醒大家(.*)`, zero.AdminPermission, zero.OnlyGroup).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {

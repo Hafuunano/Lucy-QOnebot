@@ -290,6 +290,7 @@ func init() {
 	})
 	engine.OnFullMatch("兑换涩图", zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
 		if !payLimit.Load(ctx.Event.UserID).Acquire() {
+			// 你 群 现 状
 			ctx.SendChain(message.Text("坏欸！为什么一个群有这么多人看涩图啊（晕"))
 			return
 		}

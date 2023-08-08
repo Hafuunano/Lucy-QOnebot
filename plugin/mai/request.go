@@ -103,31 +103,3 @@ func QueryChunDataFromQQ(qq int) (playerdata []byte, err error) {
 	playerData, err := io.ReadAll(resp.Body)
 	return playerData, err
 }
-
-func QueryChunDataFromUsername(username string) (playerdata []byte, err error) {
-	// packed json and sent.
-	jsonStruct := DivingFishB50{Username: username, B50: true}
-	jsonStructData, err := json.Marshal(jsonStruct)
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest("POST", "https://www.diving-fish.com/api/chunithmprober/query/player", bytes.NewBuffer(jsonStructData))
-	req.Header.Set("Content-Type", "application/json")
-	if err != nil {
-		panic(err)
-	}
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode == 400 {
-		return nil, errors.New("400")
-	}
-	if resp.StatusCode == 403 {
-		return nil, errors.New("403")
-	}
-	playerReverseData, err := io.ReadAll(resp.Body)
-	return playerReverseData, err
-}

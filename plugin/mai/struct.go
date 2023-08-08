@@ -393,7 +393,7 @@ func RenderCard(data playerData, num int) image.Image {
 	return drawBackGround.Image()
 }
 
-// GetCover CareFul The nil data
+// GetCover Careful The nil data
 func GetCover(id string) (image.Image, error) {
 	fileName := id + ".png"
 	filePath := Root + "cover/" + fileName
