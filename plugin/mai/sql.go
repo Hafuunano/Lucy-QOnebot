@@ -9,8 +9,9 @@ import (
 )
 
 type DataHostSQL struct {
-	QQ    int64  `db:"user_qq"` // qq nums
-	Plate string `db:"plate"`   // plate
+	QQ         int64  `db:"user_qq"` // qq nums
+	Plate      string `db:"plate"`   // plate
+	Background string `db:"bg"`      // bg
 }
 
 var (
@@ -27,8 +28,8 @@ func init() {
 	_ = InitDataBase()
 }
 
-func FormatUserDataBase(qq int64, plate string) *DataHostSQL {
-	return &DataHostSQL{QQ: qq, Plate: plate}
+func FormatUserDataBase(qq int64, plate string, bg string) *DataHostSQL {
+	return &DataHostSQL{QQ: qq, Plate: plate, Background: bg}
 }
 
 func InitDataBase() error {
@@ -44,6 +45,15 @@ func GetUserInfoFromDatabase(userID int64) string {
 	userIDStr := strconv.FormatInt(userID, 10)
 	_ = maiDatabase.Find("userinfo", &infosql, "where user_qq is "+userIDStr)
 	return infosql.Plate
+}
+
+func GetUserDefaultinfoFromDatabase(userID int64) string {
+	maiLocker.Lock()
+	defer maiLocker.Unlock()
+	var infosql DataHostSQL
+	userIDStr := strconv.FormatInt(userID, 10)
+	_ = maiDatabase.Find("userinfo", &infosql, "where user_qq is "+userIDStr)
+	return infosql.Background
 }
 
 func (info *DataHostSQL) BindUserDataBase() error {

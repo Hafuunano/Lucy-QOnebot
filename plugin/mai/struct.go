@@ -149,45 +149,6 @@ var (
 	}
 )
 
-// HandleChunDataByUsingText /*
-/*
-// computeRa MaiMai DX 2022 | 2023 New Dx Score Rating cla.
-func computeRa(ds, achievement float64) int {
-	baseRa := 22.4
-	if achievement < 50 {
-		baseRa = 7.0
-	} else if achievement < 60 {
-		baseRa = 8.0
-	} else if achievement < 70 {
-		baseRa = 9.6
-	} else if achievement < 75 {
-		baseRa = 11.2
-	} else if achievement < 80 {
-		baseRa = 12.0
-	} else if achievement < 90 {
-		baseRa = 13.6
-	} else if achievement < 94 {
-		baseRa = 15.2
-	} else if achievement < 97 {
-		baseRa = 16.8
-	} else if achievement < 98 {
-		baseRa = 20.0
-	} else if achievement < 99 {
-		baseRa = 20.3
-	} else if achievement < 99.5 {
-		baseRa = 20.8
-	} else if achievement < 100 {
-		baseRa = 21.1
-	} else if achievement < 100.5 {
-		baseRa = 21.6
-	}
-
-	return int(math.Floor(ds * (math.Min(100.5, achievement) / 100) * baseRa))
-}
-
-
-*/
-
 func init() {
 	if _, err := os.Stat(userPlate); os.IsNotExist(err) {
 		err := os.MkdirAll(userPlate, 0777)
@@ -253,13 +214,13 @@ func init() {
 }
 
 // FullPageRender  Render Full Page
-func FullPageRender(data player, ctx *zero.Ctx) image.Image {
+func FullPageRender(data player, ctx *zero.Ctx) (raw image.Image, stat bool) {
 	// avatar Round Style
 	var getAvatarFormat *gg.Context
 	avatarByte, err := http.Get("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
 	// avatarByte, err := http.Get("https://cdn.sep.cc/avatar/22b242a28bb848f2629f2a636bba9c03?s=600")
 	if err != nil {
-		return nil
+		return nil, false
 	}
 	avatarByteUni, _, _ := image.Decode(avatarByte.Body)
 	avatarFormat := imgfactory.Size(avatarByteUni, 180, 180)
@@ -276,7 +237,15 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 		b50Render.DrawImage(rawPlateData, 595, 30)
 		b50Render.Fill()
 	} else {
-		b50bg = b50bgOriginal
+		if GetUserDefaultinfoFromDatabase(ctx.Event.UserID) != "" {
+			b50bg = b50Custom
+			images, _ := GetDefaultPlate(GetUserDefaultinfoFromDatabase(ctx.Event.UserID))
+			b50Render.DrawImage(images, 595, 30)
+			b50Render.Fill()
+		} else {
+			// show nil
+			b50bg = b50bgOriginal
+		}
 	}
 	getContent, _ := gg.LoadImage(b50bg)
 	b50Render.DrawImage(getContent, 0, 0)
@@ -290,8 +259,13 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 	b50Render.DrawStringAnchored(strings.Join(strings.Split(data.Nickname, ""), " "), 825, 160, 0, 0)
 	b50Render.Fill()
 	b50Render.SetFontFace(titleFont)
-	if GetUserInfoFromDatabase(ctx.Event.UserID) != "" {
+	setPlateLocalStatus := GetUserInfoFromDatabase(ctx.Event.UserID)
+	var dataPlate bool
+	if setPlateLocalStatus != "" {
 		data.Plate = GetUserInfoFromDatabase(ctx.Event.UserID)
+		dataPlate = true
+	} else {
+		dataPlate = false
 	}
 	b50Render.DrawStringAnchored(strings.Join(strings.Split(data.Plate, ""), " "), 1050, 207, 0.5, 0.5)
 	b50Render.Fill()
@@ -301,6 +275,13 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 		panic(err)
 	}
 	b50Render.DrawImage(getRatingBG, 800, 40)
+	b50Render.Fill()
+	// render Rank
+	imgs, err := GetRankPicRaw(data.AdditionalRating)
+	if err != nil {
+		panic(err)
+	}
+	b50Render.DrawImage(imgs, 1040, 120)
 	b50Render.Fill()
 	// draw number
 	b50Render.SetFontFace(scoreFont)
@@ -315,7 +296,6 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 	getInitX := 45
 	getInitY := 285
 	var i int
-
 	for i = 0; i < getSDLength; i++ {
 		b50Render.DrawImage(RenderCard(data.Charts.Sd[i], i+1), getInitX, getInitY)
 		getInitX += 400
@@ -333,8 +313,7 @@ func FullPageRender(data player, ctx *zero.Ctx) image.Image {
 			getDXinitY += 125
 		}
 	}
-
-	return b50Render.Image()
+	return b50Render.Image(), dataPlate
 }
 
 // RenderCard Main Lucy Render Page
@@ -391,6 +370,33 @@ func RenderCard(data playerData, num int) image.Image {
 	}
 	drawBackGround.DrawImage(loadSongType, 68, 88)
 	return drawBackGround.Image()
+}
+
+func GetRankPicRaw(id int) (image.Image, error) {
+	var idStr string
+	if id < 10 {
+		idStr = "0" + strconv.FormatInt(int64(id), 10)
+	} else {
+		idStr = strconv.FormatInt(int64(id), 10)
+	}
+	if id == 22 {
+		idStr = "21"
+	}
+	data := Root + "rank/UI_CMN_DaniPlate_" + idStr + ".png"
+	imgRaw, err := gg.LoadImage(data)
+	if err != nil {
+		return nil, err
+	}
+	return imgRaw, nil
+}
+
+func GetDefaultPlate(id string) (image.Image, error) {
+	data := Root + "plate/plate_" + id + ".png"
+	imgRaw, err := gg.LoadImage(data)
+	if err != nil {
+		return nil, err
+	}
+	return imgRaw, nil
 }
 
 // GetCover Careful The nil data

@@ -54,9 +54,13 @@ func init() {
 		}
 		var data player
 		_ = json.Unmarshal(dataPlayer, &data)
-		renderImg := FullPageRender(data, ctx)
+		renderImg, plateStat := FullPageRender(data, ctx)
+		tipPlate := ""
+		if plateStat == false {
+			tipPlate = "tips: 可以使用 ！mai plate xxx 来绑定称号~"
+		}
 		_ = gg.NewContextForImage(renderImg).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image(Saved+strconv.Itoa(int(ctx.Event.UserID))+".png"))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Render User B50 : "+data.Username+"\n"+tipPlate+"\n"), message.Image(Saved+strconv.Itoa(int(ctx.Event.UserID))+".png"))
 	})
 	engine.OnRegex(`^[! ！/](mai|b50)\s(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		matched := ctx.State["regex_matched"].([]string)[2]
@@ -67,13 +71,18 @@ func init() {
 		}
 		var data player
 		_ = json.Unmarshal(dataPlayer, &data)
-		renderImg := FullPageRender(data, ctx)
+		renderImg, plateStat := FullPageRender(data, ctx)
+		tipPlate := ""
+		if plateStat == false {
+			tipPlate = "tips: 可以使用 ！mai plate xxx 来绑定称号~"
+		}
 		_ = gg.NewContextForImage(renderImg).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image(Saved+strconv.Itoa(int(ctx.Event.UserID))+".png"))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Render User B50 : "+data.Username+"\n"+tipPlate+"\n"), message.Image(Saved+strconv.Itoa(int(ctx.Event.UserID))+".png"))
+
 	})
 	engine.OnRegex(`^[! ！/](mai|b50)\splate\s(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		getPlateInfo := ctx.State["regex_matched"].([]string)[2]
-		_ = FormatUserDataBase(ctx.Event.UserID, getPlateInfo).BindUserDataBase()
+		_ = FormatUserDataBase(ctx.Event.UserID, getPlateInfo, GetUserDefaultinfoFromDatabase(ctx.Event.UserID)).BindUserDataBase()
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经将称号绑定上去了哦w"))
 	})
 	engine.OnRegex(`^[! ！/](mai|b50)\supload`, PictureHandler).SetBlock(true).Handle(func(ctx *zero.Ctx) {
@@ -116,8 +125,19 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经存入了哦w"))
 	})
 	engine.OnRegex(`^[! ！/](mai|b50)\sremove`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		os.Remove(userPlate + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
+		_ = os.Remove(userPlate + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经删掉了哦w"))
+	})
+	engine.OnRegex(`^[! ！/](mai|b50)\sdefault\splate\s(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		getDefaultInfo := ctx.State["regex_matched"].([]string)[2]
+		_, err := GetDefaultPlate(getDefaultInfo)
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("设定的预设不正确"))
+			return
+		}
+		_ = FormatUserDataBase(ctx.Event.UserID, GetUserInfoFromDatabase(ctx.Event.UserID), getDefaultInfo).BindUserDataBase()
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经设定好了哦~"))
+
 	})
 	engine.OnFullMatch("/mai example render", zero.SuperUserPermission).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		dataBytes, err := os.ReadFile(engine.DataFolder() + "example.json")
