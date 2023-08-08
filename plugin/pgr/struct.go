@@ -67,11 +67,13 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 	var referceLength = 0
 	var referceWidth = 300 // + 1280
 	var isRight = false
-	var i int
+	var i, renderPath int
 	// background render path.
 	_ = json.Unmarshal(dataOrigin, &phigrosB19)
 	i = 0
-	if phigrosB19.Content.Phi { // while render the first set this change To Phi
+	renderPath = 0
+	isPhi := phigrosB19.Content.Phi
+	if isPhi { // while render the first set this change To Phi
 		renderImage := phigrosB19.Content.BestList[i].SongId
 		getRenderImage := background + renderImage + ".png"
 		getImage, _ := gg.LoadImage(getRenderImage)
@@ -161,8 +163,9 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		// draw number path
 		canvas.SetColor(color.Black)
 		_ = canvas.LoadFontFace(font, 35)
-		canvas.DrawString("#"+strconv.Itoa(i+1), float64(referceWidth-20), float64(referceLength+840))
+		canvas.DrawString("#"+strconv.Itoa(renderPath+1), float64(referceWidth-20), float64(referceLength+840))
 		canvas.Fill()
+		renderPath = renderPath + 1
 		// render Diff.
 		getDiff := phigrosB19.Content.BestList[i].Level
 		SetDiffColor(getDiff, canvas)

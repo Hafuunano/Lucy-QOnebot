@@ -2,7 +2,9 @@ package pgr // Package pgr hosted by Phigros-Library
 import (
 	"encoding/json"
 	"github.com/FloatTech/floatbox/web"
+	"image"
 	"image/color"
+	"net/http"
 	"strconv"
 	"time"
 	"unicode/utf8"
@@ -123,6 +125,23 @@ func init() {
 		// white glow render
 		getMainBgRender.SetRGB(1, 1, 1)
 		getMainBgRender.DrawStringAnchored(getLink, 2021, 430, 0.4, 0.4)
+		// avatar
+		avatarByte, err := http.Get("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
+		if err != nil {
+			ctx.SendChain(message.Text("Something wrong while rendering pic? avatar IO err."))
+			return
+		}
+		// avatar
+		avatarByteUni, _, _ := image.Decode(avatarByte.Body)
+		showUserAvatar := imaging.Resize(avatarByteUni, 250, 250, imaging.Lanczos)
+		var getAvatarFormat *gg.Context
+		getAvatarFormat = gg.NewContext(250, 250)
+		getAvatarFormat.DrawRoundedRectangle(0, 0, 248, 248, 20)
+		getAvatarFormat.Clip()
+		getAvatarFormat.DrawImage(showUserAvatar, 0, 0)
+		getAvatarFormat.Fill()
+		getMainBgRender.DrawImage(getAvatarFormat.Image(), 2321, 230)
+		getMainBgRender.Fill()
 		// render
 		CardRender(getMainBgRender, phidata)
 		// draw bottom
@@ -214,6 +233,23 @@ func init() {
 		// white glow render
 		getMainBgRender.SetRGB(1, 1, 1)
 		getMainBgRender.DrawStringAnchored(getLink, 2021, 430, 0.4, 0.4)
+		// draw Avatar, avatar from qq.
+		avatarByte, err := http.Get("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
+		if err != nil {
+			ctx.SendChain(message.Text("Something wrong while rendering pic? avatar IO err."))
+			return
+		}
+		// avatar
+		avatarByteUni, _, _ := image.Decode(avatarByte.Body)
+		showUserAvatar := imaging.Resize(avatarByteUni, 250, 250, imaging.Lanczos)
+		var getAvatarFormat *gg.Context
+		getAvatarFormat = gg.NewContext(250, 250)
+		getAvatarFormat.DrawRoundedRectangle(0, 0, 248, 248, 20)
+		getAvatarFormat.Clip()
+		getAvatarFormat.DrawImage(showUserAvatar, 0, 0)
+		getAvatarFormat.Fill()
+		getMainBgRender.DrawImage(getAvatarFormat.Image(), 2321, 230)
+		getMainBgRender.Fill()
 		// render
 		CardRender(getMainBgRender, phidata)
 		// draw bottom
