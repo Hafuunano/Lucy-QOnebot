@@ -56,7 +56,7 @@ func init() {
 		_ = json.Unmarshal(dataPlayer, &data)
 		renderImg, plateStat := FullPageRender(data, ctx)
 		tipPlate := ""
-		if plateStat == false {
+		if !plateStat {
 			tipPlate = "tips: 可以使用 ！mai plate xxx 来绑定称号~"
 		}
 		_ = gg.NewContextForImage(renderImg).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
@@ -73,7 +73,7 @@ func init() {
 		_ = json.Unmarshal(dataPlayer, &data)
 		renderImg, plateStat := FullPageRender(data, ctx)
 		tipPlate := ""
-		if plateStat == false {
+		if !plateStat {
 			tipPlate = "tips: 可以使用 ！mai plate xxx 来绑定称号~"
 		}
 		_ = gg.NewContextForImage(renderImg).SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(ctx.Event.UserID)) + ".png")

@@ -134,8 +134,7 @@ func init() {
 		// avatar
 		avatarByteUni, _, _ := image.Decode(avatarByte.Body)
 		showUserAvatar := imaging.Resize(avatarByteUni, 250, 250, imaging.Lanczos)
-		var getAvatarFormat *gg.Context
-		getAvatarFormat = gg.NewContext(250, 250)
+		getAvatarFormat := gg.NewContext(250, 250)
 		getAvatarFormat.DrawRoundedRectangle(0, 0, 248, 248, 20)
 		getAvatarFormat.Clip()
 		getAvatarFormat.DrawImage(showUserAvatar, 0, 0)
@@ -242,8 +241,7 @@ func init() {
 		// avatar
 		avatarByteUni, _, _ := image.Decode(avatarByte.Body)
 		showUserAvatar := imaging.Resize(avatarByteUni, 250, 250, imaging.Lanczos)
-		var getAvatarFormat *gg.Context
-		getAvatarFormat = gg.NewContext(250, 250)
+		getAvatarFormat := gg.NewContext(250, 250)
 		getAvatarFormat.DrawRoundedRectangle(0, 0, 248, 248, 20)
 		getAvatarFormat.Clip()
 		getAvatarFormat.DrawImage(showUserAvatar, 0, 0)
