@@ -281,7 +281,7 @@ func FullPageRender(data player, ctx *zero.Ctx) (raw image.Image, stat bool) {
 	if err != nil {
 		panic(err)
 	}
-	b50Render.DrawImage(imgs, 1040, 120)
+	b50Render.DrawImage(imgs, 1080, 50)
 	b50Render.Fill()
 	// draw number
 	b50Render.SetFontFace(scoreFont)

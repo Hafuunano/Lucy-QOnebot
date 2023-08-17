@@ -364,8 +364,8 @@ func init() {
 			// it shows that no condition happened.
 			// if not maxzine
 			// in the wager mode. || start to load
-			getGenOne := fcext.RandSenderPerDayN(time.Now().Unix(), 18500)
-			getRandNumber := getGenOne + fcext.RandSenderPerDayN(time.Now().Unix()+ctx.Event.UserID, 6500) + 2000
+			getGenOne := fcext.RandSenderPerDayN(time.Now().Unix(), 16500)
+			getRandNumber := getGenOne + fcext.RandSenderPerDayN(time.Now().Unix()+ctx.Event.UserID, 5000) + 3000
 			_ = coins.WagerCoinsInsert(sdb, modifyCoins+wagerData["data"], 0, getRandNumber)
 			if int64(modifyCoins)+checkUserWagerCoins == 3500 {
 				_ = coins.UpdateWagerUserStatus(sdb, ctx.Event.UserID, time.Now().Unix(), 0)

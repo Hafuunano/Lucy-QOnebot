@@ -119,7 +119,7 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		canvas.DrawImage(loadRankImage, referceWidth+500, referceLength+920)
 		canvas.Fill()
 		getName := phigrosB19.Content.BestList[i].Songname
-		_ = canvas.LoadFontFace(font, 35)
+		_ = canvas.LoadFontFace(font, 34)
 		canvas.DrawStringAnchored(getName, float64(referceWidth+740), float64(referceLength+890), 0.5, 0.5)
 		canvas.SetColor(color.White)
 		canvas.Fill()
@@ -188,7 +188,7 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 		canvas.DrawImage(loadRankImage, referceWidth+500, referceLength+920)
 		canvas.Fill()
 		getName := phigrosB19.Content.BestList[i].Songname
-		_ = canvas.LoadFontFace(font, 35)
+		_ = canvas.LoadFontFace(font, 34)
 		canvas.DrawStringAnchored(getName, float64(referceWidth+740), float64(referceLength+890), 0.5, 0.5)
 		canvas.SetColor(color.White)
 		canvas.Fill()
