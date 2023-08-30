@@ -282,6 +282,9 @@ func init() { // 插件主体
 		// call action
 		// this method cation was called by my own account, so maybe not work(.
 		getTitleModified := url.QueryEscape(getTitle)
+		if getGroupId != "1019276136" {
+			return
+		}
 		data, err := web.GetData("http://localhost:1380/set_group_special_title?group_id=" + getGroupId + "&user_id=" + getUID + "&special_title=" + getTitleModified)
 		getStatus := gjson.Get(helper.BytesToString(data), "status").String()
 		if err != nil {
