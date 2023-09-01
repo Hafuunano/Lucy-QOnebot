@@ -79,8 +79,7 @@ func completions(messages []chatMessage, apiKey string) (*chatGPTResponseBody, e
 	if err != nil {
 		return nil, err
 	}
-	proxyURL := os.Getenv("gptweb")
-	req, err := http.NewRequest(http.MethodPost, proxyURL+"chat/completions", bytes.NewReader(body))
+	req, err := http.NewRequest(http.MethodPost, "https://api.openai.com/v1/chat/completions", bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +104,7 @@ func init() {
 	// trigger for chatgpt.
 	engine.OnRegex(`^/chat\s*(.*)$`, zero.OnlyToMe).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		if !ChatGPTPromptHandlerLimitedTimeManager.Load(ctx.Event.GroupID).Acquire() {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Too quick!慢一点再请求哦！"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Too quick! 慢一点再请求哦！"))
 			return
 		}
 		args := ctx.State["regex_matched"].([]string)[1]
