@@ -83,6 +83,11 @@ func init() {
 		uid := ctx.Event.UserID
 		si := coins.GetSignInByUID(sdb, uid) // 获取用户目前状况信息
 		userCurrentCoins := si.Coins         // loading coins status
+		if userCurrentCoins < 0 {
+			_ = coins.InsertUserCoins(sdb, uid, 0)
+			ctx.SendChain(message.Reply(uid), message.Text("本次参与的柠檬片不够哦~请多多打卡w"))
+			return
+		} // fix unexpected bug during the code error
 		checkEnoughCoins := coins.CheckUserCoins(userCurrentCoins)
 		if !checkEnoughCoins {
 			ctx.SendChain(message.Reply(uid), message.Text("本次参与的柠檬片不够哦~请多多打卡w"))
@@ -99,7 +104,7 @@ func init() {
 		msgid := ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(" 嗯哼~来玩抽奖了哦w 看看能抽到什么呢w"))
 		time.Sleep(time.Second * 3)
 		ctx.SendChain(message.Reply(msgid), message.Text("呼呼~让咱看看你抽到了什么东西ww\n"),
-			message.Text("你抽到的是~ ", getName, "\n", "获得了积分 ", getCoinsInt, "\n", getDesc, "\n目前的柠檬片总数为：", addNewCoins))
+			message.Text("你抽到的是~ ", getName, "\n", "获得了柠檬片 ", getCoinsInt, "\n", getDesc, "\n目前的柠檬片总数为：", addNewCoins))
 		mutex.Unlock()
 	})
 	// 一次最多骗 400 柠檬片,失败概率较大,失败会被反吞柠檬片
