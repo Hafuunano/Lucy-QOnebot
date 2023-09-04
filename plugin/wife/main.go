@@ -13,6 +13,7 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -219,15 +220,39 @@ func init() {
 			_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 6, generatePairKey)
 		}
 	})
-	engine.OnRegex(`^(娶|嫁)(\[CQ:at,qq=(\d+)\]|Lucy)`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
-		choice := ctx.State["regex_matched"].([]string)[1]
-		getStatus := ctx.State["regex_matched"].([]string)[2]
-		fianceeID, _ := strconv.ParseInt(ctx.State["regex_matched"].([]string)[3], 10, 64)
+	engine.OnRegex(`^(娶|嫁)(\[CQ:at,qq=(\d+)\])|^(娶|嫁)(Lucy)|^(娶|嫁)(.*)$`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+		getFullRegexIndex := ctx.MessageString()
+		// get Stat's situation.
 		var fiancee int64
-		if getStatus == "Lucy" {
+		var choice string
+		caseDefault := ctx.State["regex_matched"].([]string)[1]
+		switch {
+		case caseDefault != "":
+			choice = ctx.State["regex_matched"].([]string)[1]
+			getID, _ := strconv.ParseInt(ctx.State["regex_matched"].([]string)[3], 10, 64)
+			fiancee = getID
+		case ctx.State["regex_matched"].([]string)[4] != "":
+			choice = ctx.State["regex_matched"].([]string)[4]
 			fiancee = ctx.Event.SelfID
-		} else {
-			fiancee = fianceeID
+		default:
+			choice = ctx.State["regex_matched"].([]string)[6]
+			getid := SearchUserReferName(ctx.Event.UserID, ctx.State["regex_matched"].([]string)[7])
+			if getid == 0 {
+				ctx.SendChain(message.Text("找不到对应用户x"))
+				return
+			}
+			fiancee = getid
+		}
+		//
+		if caseDefault != "" {
+			// do split to text
+			getSlice := strings.Split(getFullRegexIndex, " ")
+			getAdditonName := getSlice[1]
+			if getAdditonName != "" {
+				// save it to data.
+				_ = SetUserReferName(ctx.Event.UserID, getAdditonName, fiancee)
+				ctx.SendChain(message.Text("已经存入用户名字为:" + getAdditonName))
+			}
 		}
 		if fiancee == 80000000 || ctx.Event.UserID == 80000000 {
 			ctx.SendChain(message.Reply(ctx.Event.UserID), message.Text("用户不合法"))

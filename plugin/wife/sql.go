@@ -39,6 +39,13 @@ type PairKeyStruct struct {
 	StatusID int64  `db:"statusid"`
 }
 
+// ChosenList User Refer To Theirs username and save it by using the quick additon (table: chosenList) be careful that it's global.
+type ChosenList struct {
+	UserID     int64  `db:"userid"`
+	TargetName string `db:"targetname"`
+	TargetID   int64  `db:"targetid"`
+}
+
 var (
 	marryList   = &sql.Sqlite{}
 	marryLocker = sync.Mutex{}
@@ -324,4 +331,29 @@ func GetTheGroupList(gid int64) (list [][2]string, num int) {
 		return nil
 	})
 	return list, getNum
+}
+
+func SetUserReferName(userid int64, name string, targetID int64) error {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	err := marryList.Find("chosenlist", nil, "WHERE targetname is "+name+" and userid="+strconv.FormatInt(userid, 10)) // cannot be same,
+	if err != nil {
+		// return nil means none data existed.
+		_ = marryList.Create("chosenlist", &ChosenList{})
+		return marryList.Insert("chosenlist", &ChosenList{UserID: userid, TargetID: targetID, TargetName: name})
+	}
+	_ = marryList.Del("chosenlist", "WHERE targetname is "+name+" and userid="+strconv.FormatInt(userid, 10))
+	return marryList.Insert("chosenlist", &ChosenList{UserID: userid, TargetID: targetID, TargetName: name})
+}
+
+func SearchUserReferName(userid int64, username string) int64 {
+	marryLocker.Lock()
+	defer marryLocker.Unlock()
+	var SearchUserListStruct ChosenList
+	err := marryList.Find("chosenlist", &SearchUserListStruct, "WHERE targetname=\""+username+"\" and userid is "+strconv.FormatInt(userid, 10)) // cannot be same,
+	if err != nil {
+		return 0
+	}
+	return SearchUserListStruct.TargetID
+
 }
