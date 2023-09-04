@@ -41,6 +41,7 @@ type PairKeyStruct struct {
 
 // ChosenList User Refer To Theirs username and save it by using the quick additon (table: chosenList) be careful that it's global.
 type ChosenList struct {
+	IdentifyID string `db:"id"`
 	UserID     int64  `db:"userid"`
 	TargetName string `db:"targetname"`
 	TargetID   int64  `db:"targetid"`
@@ -336,14 +337,18 @@ func GetTheGroupList(gid int64) (list [][2]string, num int) {
 func SetUserReferName(userid int64, name string, targetID int64) error {
 	marryLocker.Lock()
 	defer marryLocker.Unlock()
-	err := marryList.Find("chosenlist", nil, "WHERE targetname is "+name+" and userid="+strconv.FormatInt(userid, 10)) // cannot be same,
+	if !marryList.CanFind("chosenlist", "WHERE id = 0") {
+		_ = marryList.Create("chosenlist", &ChosenList{})
+	}
+	var marryExistedList ChosenList
+	id := GenerateMD5(userid, targetID, time.Now().Unix())
+	err := marryList.Find("chosenlist", &marryExistedList, "WHERE targetname is \""+name+"\" and userid = "+strconv.FormatInt(userid, 10)) // cannot be same,
 	if err != nil {
 		// return nil means none data existed.
-		_ = marryList.Create("chosenlist", &ChosenList{})
-		return marryList.Insert("chosenlist", &ChosenList{UserID: userid, TargetID: targetID, TargetName: name})
+		return marryList.Insert("chosenlist", &ChosenList{IdentifyID: id, TargetName: name, UserID: userid, TargetID: targetID})
 	}
-	_ = marryList.Del("chosenlist", "WHERE targetname is "+name+" and userid="+strconv.FormatInt(userid, 10))
-	return marryList.Insert("chosenlist", &ChosenList{UserID: userid, TargetID: targetID, TargetName: name})
+	_ = marryList.Del("chosenlist", "WHERE targetname is \""+name+"\" and userid = "+strconv.FormatInt(userid, 10))
+	return marryList.Insert("chosenlist", &ChosenList{IdentifyID: id, TargetName: name, UserID: userid, TargetID: targetID})
 }
 
 func SearchUserReferName(userid int64, username string) int64 {

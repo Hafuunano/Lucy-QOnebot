@@ -250,11 +250,15 @@ func init() {
 			getAdditonName := getSlice[1]
 			if getAdditonName != "" {
 				// save it to data.
-				_ = SetUserReferName(ctx.Event.UserID, getAdditonName, fiancee)
-				ctx.SendChain(message.Text("已经存入用户名字为:" + getAdditonName))
+				if getAdditonName == "Lucy" {
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("不可以使用 Lucy 这个名字"))
+				} else {
+					_ = SetUserReferName(ctx.Event.UserID, getAdditonName, fiancee)
+					ctx.SendChain(message.Text("已经存入用户名字为:" + getAdditonName))
+				}
 			}
 		}
-		if fiancee == 80000000 || ctx.Event.UserID == 80000000 {
+		if fiancee == 80000000 || ctx.Event.UserID == 80000000 || fiancee == 0 {
 			ctx.SendChain(message.Reply(ctx.Event.UserID), message.Text("用户不合法"))
 			return
 		}
