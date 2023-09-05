@@ -76,6 +76,119 @@ func init() {
 	dict["hide_mode"] = []string{"哼哼～ 哼唧", "喵喵喵？！"}
 
 	// main Class
+	engine.OnRegex(`^(娶|嫁)(\[CQ:at,qq=(\d+)\])|^(娶|嫁)(Lucy)|^(娶|嫁)(.*)$`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+		getFullRegexIndex := ctx.MessageString()
+		// get Stat's situation.
+		var fiancee int64
+		var choice string
+		caseDefault := ctx.State["regex_matched"].([]string)[1]
+		switch {
+		case caseDefault != "":
+			choice = ctx.State["regex_matched"].([]string)[1]
+			getID, _ := strconv.ParseInt(ctx.State["regex_matched"].([]string)[3], 10, 64)
+			fiancee = getID
+		case ctx.State["regex_matched"].([]string)[4] != "":
+			choice = ctx.State["regex_matched"].([]string)[4]
+			fiancee = ctx.Event.SelfID
+		default:
+			choice = ctx.State["regex_matched"].([]string)[6]
+			getid := SearchUserReferName(ctx.Event.UserID, ctx.State["regex_matched"].([]string)[7])
+			if getid == 0 {
+				ctx.SendChain(message.Text("找不到对应用户x"))
+				return
+			}
+			fiancee = getid
+		}
+		//
+		if caseDefault != "" {
+			// do split to text
+			getSlice := strings.Split(getFullRegexIndex, " ")
+			getAdditonName := getSlice[1]
+			if getAdditonName != "" {
+				// save it to data.
+				if getAdditonName == "Lucy" || getAdditonName == "群友" {
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("不可以使用 Lucy 或者 群友 这个名字"))
+				} else {
+					_ = SetUserReferName(ctx.Event.UserID, getAdditonName, fiancee)
+					ctx.SendChain(message.Text("已经存入用户名字为:" + getAdditonName))
+				}
+			}
+		}
+		if fiancee == 80000000 || ctx.Event.UserID == 80000000 || fiancee == 0 {
+			ctx.SendChain(message.Reply(ctx.Event.UserID), message.Text("用户不合法"))
+			return
+		}
+		uid := ctx.Event.UserID
+		if !CheckDisabledListIsExistedInThisGroup(marryList, uid, ctx.Event.GroupID) {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你已经禁用了被随机，所以不可以参与娶群友哦w"))
+			return
+		}
+		// fast check
+		if !CheckTheUserStatusAndDoRepeat(ctx) {
+			return
+		}
+		if !CheckTheTargetUserStatusAndDoRepeat(ctx, fiancee) {
+			return
+		}
+		// check the target status.
+		getStatusIfBannned := CheckTheUserIsInBlackListOrGroupList(fiancee, uid, ctx.Event.GroupID)
+		/*
+			disabled_Target
+			blacklist_Target
+		*/
+		if getStatusIfBannned {
+			// blocked.
+			GlobalCDModelCost(ctx)
+			getReply := dict["block"][rand.Intn(len(dict["block"]))]
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(getReply))
+			return
+		}
+		if GlobalCDModelCostLeastReply(ctx) == 0 {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天的机会已经使用完了哦～12小时后再来试试吧"))
+			return
+		}
+		// check others.
+		if uid == fiancee {
+			switch rand.Intn(5) {
+			case 1:
+				GlobalCDModelCost(ctx)
+				ctx.Send(ReplyMeantMode("貌似Lucy故意添加了 --force 的命令，成功了(笑 ", ctx.Event.UserID, 1, ctx))
+				generatePairKey := GenerateMD5(ctx.Event.UserID, ctx.Event.UserID, ctx.Event.GroupID)
+				err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 3, generatePairKey)
+				if err != nil {
+					panic(err)
+				}
+			default:
+				GlobalCDModelCost(ctx)
+				ctx.SendChain(message.Text("笨蛋！娶你自己干什么a"))
+			}
+			return
+		}
+		// However Lucy is only available to be married. LOL.
+		if fiancee == ctx.Event.SelfID {
+			// not work yet, so just the next path.
+			if rand.Intn(100) > 90 {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("笨蛋！不准娶~ ama"))
+				GlobalCDModelCost(ctx)
+				return
+			} else {
+				// do it.
+				GlobalCDModelCost(ctx)
+				getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
+				// normal mode. nothing happened.
+				ctx.Send(ReplyMeantMode(getSuccessMsg, fiancee, 1, ctx))
+				generatePairKey := GenerateMD5(ctx.Event.UserID, fiancee, ctx.Event.GroupID)
+				_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, fiancee, 1, generatePairKey)
+				return
+			}
+		}
+		switch {
+		case choice == "娶":
+			ResuitTheReferUserAndMakeIt(ctx, dict, uid, fiancee)
+		case choice == "嫁":
+			ResuitTheReferUserAndMakeIt(ctx, dict, fiancee, uid)
+		}
+	})
 	engine.OnFullMatch("娶群友", zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		/*
 			Work:
@@ -220,119 +333,7 @@ func init() {
 			_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 6, generatePairKey)
 		}
 	})
-	engine.OnRegex(`^(娶|嫁)(\[CQ:at,qq=(\d+)\])|^(娶|嫁)(Lucy)|^(娶|嫁)(.*)$`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
-		getFullRegexIndex := ctx.MessageString()
-		// get Stat's situation.
-		var fiancee int64
-		var choice string
-		caseDefault := ctx.State["regex_matched"].([]string)[1]
-		switch {
-		case caseDefault != "":
-			choice = ctx.State["regex_matched"].([]string)[1]
-			getID, _ := strconv.ParseInt(ctx.State["regex_matched"].([]string)[3], 10, 64)
-			fiancee = getID
-		case ctx.State["regex_matched"].([]string)[4] != "":
-			choice = ctx.State["regex_matched"].([]string)[4]
-			fiancee = ctx.Event.SelfID
-		default:
-			choice = ctx.State["regex_matched"].([]string)[6]
-			getid := SearchUserReferName(ctx.Event.UserID, ctx.State["regex_matched"].([]string)[7])
-			if getid == 0 {
-				ctx.SendChain(message.Text("找不到对应用户x"))
-				return
-			}
-			fiancee = getid
-		}
-		//
-		if caseDefault != "" {
-			// do split to text
-			getSlice := strings.Split(getFullRegexIndex, " ")
-			getAdditonName := getSlice[1]
-			if getAdditonName != "" {
-				// save it to data.
-				if getAdditonName == "Lucy" {
-					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("不可以使用 Lucy 这个名字"))
-				} else {
-					_ = SetUserReferName(ctx.Event.UserID, getAdditonName, fiancee)
-					ctx.SendChain(message.Text("已经存入用户名字为:" + getAdditonName))
-				}
-			}
-		}
-		if fiancee == 80000000 || ctx.Event.UserID == 80000000 || fiancee == 0 {
-			ctx.SendChain(message.Reply(ctx.Event.UserID), message.Text("用户不合法"))
-			return
-		}
-		uid := ctx.Event.UserID
-		if !CheckDisabledListIsExistedInThisGroup(marryList, uid, ctx.Event.GroupID) {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你已经禁用了被随机，所以不可以参与娶群友哦w"))
-			return
-		}
-		// fast check
-		if !CheckTheUserStatusAndDoRepeat(ctx) {
-			return
-		}
-		if !CheckTheTargetUserStatusAndDoRepeat(ctx, fiancee) {
-			return
-		}
-		// check the target status.
-		getStatusIfBannned := CheckTheUserIsInBlackListOrGroupList(fiancee, uid, ctx.Event.GroupID)
-		/*
-			disabled_Target
-			blacklist_Target
-		*/
-		if getStatusIfBannned {
-			// blocked.
-			GlobalCDModelCost(ctx)
-			getReply := dict["block"][rand.Intn(len(dict["block"]))]
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(getReply))
-			return
-		}
-		if GlobalCDModelCostLeastReply(ctx) == 0 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天的机会已经使用完了哦～12小时后再来试试吧"))
-			return
-		}
-		// check others.
-		if uid == fiancee {
-			switch rand.Intn(5) {
-			case 1:
-				GlobalCDModelCost(ctx)
-				ctx.Send(ReplyMeantMode("貌似Lucy故意添加了 --force 的命令，成功了(笑 ", ctx.Event.UserID, 1, ctx))
-				generatePairKey := GenerateMD5(ctx.Event.UserID, ctx.Event.UserID, ctx.Event.GroupID)
-				err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 3, generatePairKey)
-				if err != nil {
-					panic(err)
-				}
-			default:
-				GlobalCDModelCost(ctx)
-				ctx.SendChain(message.Text("笨蛋！娶你自己干什么a"))
-			}
-			return
-		}
-		// However Lucy is only available to be married. LOL.
-		if fiancee == ctx.Event.SelfID {
-			// not work yet, so just the next path.
-			if rand.Intn(100) > 90 {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("笨蛋！不准娶~ ama"))
-				GlobalCDModelCost(ctx)
-				return
-			} else {
-				// do it.
-				GlobalCDModelCost(ctx)
-				getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
-				// normal mode. nothing happened.
-				ctx.Send(ReplyMeantMode(getSuccessMsg, fiancee, 1, ctx))
-				generatePairKey := GenerateMD5(ctx.Event.UserID, fiancee, ctx.Event.GroupID)
-				_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, fiancee, 1, generatePairKey)
-				return
-			}
-		}
-		switch {
-		case choice == "娶":
-			ResuitTheReferUserAndMakeIt(ctx, dict, uid, fiancee)
-		case choice == "嫁":
-			ResuitTheReferUserAndMakeIt(ctx, dict, fiancee, uid)
-		}
-	})
+
 	engine.OnFullMatch("我要离婚", zero.OnlyToMe, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		getStatusCode, _ := CheckTheUserIsTargetOrUser(marryList, ctx, ctx.Event.UserID)
 		if getStatusCode == -1 {
