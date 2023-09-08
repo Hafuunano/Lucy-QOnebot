@@ -65,7 +65,7 @@ func init() {
 			return
 		}
 		userData := GetUserInfoFromDatabase(ctx.Event.UserID)
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("好哦~正在帮你请求，请稍等一下啦w"))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("好哦~正在帮你请求，请稍等一下啦w~大约需要1-2分钟"))
 		var dataWaiter sync.WaitGroup
 		var AvatarWaiter sync.WaitGroup
 		var getAvatarFormat *gg.Context
@@ -73,6 +73,7 @@ func init() {
 		AvatarWaiter.Add(1)
 		dataWaiter.Add(1)
 		go func() {
+			defer dataWaiter.Done()
 			getFullLink := "https://pgrapi.impart.icu/api/phi/bests?session=" + userData.PhiSession + "&overflow=2"
 			phidata, _ = web.GetData(getFullLink)
 			if phidata == nil {
@@ -105,7 +106,6 @@ func init() {
 			getAvatarFormat.DrawImage(showUserAvatar, 0, 0)
 			getAvatarFormat.Fill()
 		}()
-
 		getRawBackground, _ := gg.LoadImage(backgroundRender)
 		getMainBgRender := gg.NewContextForImage(imaging.Resize(getRawBackground, 2750, 5500, imaging.Lanczos))
 		_ = getMainBgRender.LoadFontFace(font, 30)
@@ -161,7 +161,6 @@ func init() {
 		_ = getMainBgRender.SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("file:///"+file.BOTPATH+"/"+engine.DataFolder()+"save/"+strconv.Itoa(int(ctx.Event.UserID))+".png"))
 	})
-
 	engine.OnRegex(`^[! ！/]pgr\sroll\s(\d+)`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		var wg sync.WaitGroup
 		var avatarWaitGroup sync.WaitGroup
@@ -197,7 +196,7 @@ func init() {
 		if getOverFlowNumber <= 0 {
 			getOverFlowNumber = 0
 		}
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("好哦~正在帮你请求，请稍等一下啦w"))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("好哦~正在帮你请求，请稍等一下啦w~大约需要1-2分钟"))
 		// data handling.
 		go func() {
 			defer dataWaiter.Done()
