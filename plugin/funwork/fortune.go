@@ -11,6 +11,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"sync"
 	"time"
 	"unicode/utf8"
 
@@ -52,6 +53,13 @@ var (
 func init() {
 	signTF = make(map[string]int)
 	result = make(map[int64]int)
+	picDir, err := os.ReadDir(engine.DataFolder() + "randpic")
+	if err != nil {
+		panic(err)
+	}
+	picDirNum := len(picDir)
+	reg := regexp.MustCompile(`[^.]+`)
+	loadNotoSans := engine.DataFolder() + "NotoSansCJKsc-Regular.otf"
 	getTarot := fcext.DoOnceOnSuccess(
 		func(ctx *zero.Ctx) bool { // 检查 塔罗牌文件是否存在
 			data, err := os.ReadFile(engine.DataFolder() + "tarots.json")
@@ -68,45 +76,63 @@ func init() {
 	)
 	engine.OnFullMatch("今日人品", getTarot).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
-			userPic := strconv.FormatInt(ctx.Event.UserID, 10) + time.Now().Format("20060102") + ".png"
-			picDir, err := os.ReadDir(engine.DataFolder() + "randpic")
-			if err != nil {
-				ctx.SendChain(message.Text("ERROR:", err))
-				return
-			}
-			picDirNum := len(picDir)
-			usersRandPic := fcext.RandSenderPerDayN(ctx.Event.UserID, picDirNum)
-			picDirName := picDir[usersRandPic].Name()
-			reg := regexp.MustCompile(`[^.]+`)
-			list := reg.FindAllString(picDirName, -1)
-			p := rand.Intn(2)
-			is := rand.Intn(77)
-			i := is + 1
-			card := cardMap[(strconv.Itoa(i))]
-			if p == 0 {
-				info = card.Info.Description
-			} else {
-				info = card.Info.ReverseDescription
-			}
 			user := ctx.Event.UserID
 			userS := strconv.FormatInt(user, 10)
 			now := time.Now().Format("20060102")
-			// modify this possibility to 40-100, don't be to low.
-			randEveryone := fcext.RandSenderPerDayN(ctx.Event.UserID, 50)
-			var si = now + userS // use map to store.
-			loadNotoSans := engine.DataFolder() + "NotoSansCJKsc-Regular.otf"
+			userPic := strconv.FormatInt(ctx.Event.UserID, 10) + time.Now().Format("20060102") + ".png"
+			var avatarFormat *imgfactory.Factory
+			var si = now + userS
 			if signTF[si] == 0 {
-				result[user] = randEveryone + 50
+				// use go func
+				var avatarWaiter sync.WaitGroup
+				avatarWaiter.Add(1)
+				usersRandPic := fcext.RandSenderPerDayN(ctx.Event.UserID, picDirNum)
+				picDirName := picDir[usersRandPic].Name()
+				list := reg.FindAllString(picDirName, -1)
+				getNickName := ctx.CardOrNickName(ctx.Event.UserID)
+				// remove emoji
+				emojiRegex := regexp.MustCompile(`[^\x00-\x7F]+`)
+				getNickName = emojiRegex.ReplaceAllString(getNickName, "")
+				// get name and other info.
+				p := rand.Intn(2)
+				is := rand.Intn(77)
+				i := is + 1
+				cards := cardMap[(strconv.Itoa(i))]
+				if p == 0 {
+					info = cards.Info.Description
+				} else {
+					info = cards.Info.ReverseDescription
+				}
+				// modify this possibility to 40-100, don't be to low.
+				randEveryone := fcext.RandSenderPerDayN(ctx.Event.UserID, 40)
+				// use map to store.
+				result[user] = randEveryone + 60
+				if len(getNickName) > 24 {
+					getNickName = getNickName[:24] + "..."
+				}
+				// get user avatar
+				go func() {
+					defer avatarWaiter.Done()
+					avatarByte, err := http.Get("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
+					if err != nil {
+						ctx.SendChain(message.Text("Something wrong while rendering pic? avatar IO err."))
+						return
+					}
+					avatarByteUni, _, _ := image.Decode(avatarByte.Body)
+					avatarFormat = imgfactory.Size(avatarByteUni, 100, 100)
+				}()
+				var getBackGroundMainColorR, getBackGroundMainColorG, getBackGroundMainColorB, mainContextWidth, mainContextHight int
+				var mainContext *gg.Context
 				// background
 				img, err := gg.LoadImage(engine.DataFolder() + "randpic" + "/" + list[0] + ".png")
 				if err != nil {
 					panic(err)
 				}
 				bgFormat := imgfactory.Limit(img, 1920, 1080)
-				getBackGroundMainColorR, getBackGroundMainColorG, getBackGroundMainColorB := GetAverageColorAndMakeAdjust(bgFormat)
-				mainContext := gg.NewContext(bgFormat.Bounds().Dx(), bgFormat.Bounds().Dy())
-				mainContextWidth := mainContext.Width()
-				mainContextHight := mainContext.Height()
+				getBackGroundMainColorR, getBackGroundMainColorG, getBackGroundMainColorB = GetAverageColorAndMakeAdjust(bgFormat)
+				mainContext = gg.NewContext(bgFormat.Bounds().Dx(), bgFormat.Bounds().Dy())
+				mainContextWidth = mainContext.Width()
+				mainContextHight = mainContext.Height()
 				mainContext.DrawImage(bgFormat, 0, 0)
 				// draw Round rectangle
 				mainContext.SetFontFace(LoadFontFace(loadNotoSans, 50))
@@ -126,7 +152,7 @@ func init() {
 				// draw third round rectangle
 				mainContext.SetRGBA255(91, 57, 83, 255)
 				mainContext.SetFontFace(LoadFontFace(loadNotoSans, 25))
-				nameLength, _ := mainContext.MeasureString(ctx.CardOrNickName(ctx.Event.UserID))
+				nameLength, _ := mainContext.MeasureString(getNickName)
 				var renderLength float64
 				renderLength = nameLength + 160
 				if nameLength+160 <= 450 {
@@ -134,19 +160,11 @@ func init() {
 				}
 				mainContext.DrawRoundedRectangle(50, float64(mainContextHight-175), renderLength, 250, 20)
 				mainContext.Fill()
-				avatarByte, err := http.Get("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
-				if err != nil {
-					ctx.SendChain(message.Text("Something wrong while rendering pic? avatar IO err."))
-					return
-				}
 				// avatar
-				avatarByteUni, _, _ := image.Decode(avatarByte.Body)
-				avatarFormat := imgfactory.Size(avatarByteUni, 100, 100)
-				mainContext.DrawImage(avatarFormat.Circle(0).Image(), 60, int(float64(mainContextHight-150)+25))
 				mainContext.SetRGBA255(255, 255, 255, 255)
 				mainContext.DrawString("User Info", 60, float64(mainContextHight-150)+10) // basic ui
 				mainContext.SetRGBA255(155, 121, 147, 255)
-				mainContext.DrawString(ctx.CardOrNickName(ctx.Event.UserID), 180, float64(mainContextHight-150)+50)
+				mainContext.DrawString(getNickName, 180, float64(mainContextHight-150)+50)
 				mainContext.DrawString(fmt.Sprintf("今日人品值: %d", randEveryone+50), 180, float64(mainContextHight-150)+100)
 				mainContext.Fill()
 				// AOSP time and date
@@ -157,24 +175,9 @@ func init() {
 				}
 				formatTimeDate := time.Now().Format("2006 / 01 / 02")
 				formatTimeCurrent := time.Now().Format("15 : 04 : 05")
-				//	formatTimeLength, _ := mainContext.MeasureString(formatTimeDate)
 				formatTimeWeek := time.Now().Weekday().String()
 				mainContext.SetFontFace(LoadFontFace(loadNotoSans, 35))
-				/*
-					var setOutlineColor color.Color
-					if IsDark(color.RGBA(setInlineColor)) {
-						setOutlineColor = color.White
-					} else {
-						setOutlineColor = color.Black
-					}
-
-				*/
 				setOutlineColor := color.White
-				/*
-					mainContext.DrawStringAnchored(formatTimeCurrent, float64(mainContextWidth-50), 40, 1, 0.5)
-					mainContext.DrawStringAnchored(formatTimeDate, float64(mainContextWidth-50), 90, 1, 0.5)
-					mainContext.DrawStringAnchored(formatTimeWeek, float64(mainContextWidth-50), 140, 1, 0.5)
-				*/
 				DrawBorderString(mainContext, formatTimeCurrent, 5, float64(mainContextWidth-80), 50, 1, 0.5, setInlineColor, setOutlineColor)
 				DrawBorderString(mainContext, formatTimeDate, 5, float64(mainContextWidth-80), 100, 1, 0.5, setInlineColor, setOutlineColor)
 				DrawBorderString(mainContext, formatTimeWeek, 5, float64(mainContextWidth-80), 150, 1, 0.5, setInlineColor, setOutlineColor)
@@ -197,16 +200,17 @@ func init() {
 				mainContext.SetLineWidth(3)
 				mainContext.DrawString("今日塔罗牌", float64(mainContextWidth-300)+10, float64(mainContextHight-350)+30)
 				mainContext.SetRGBA255(155, 121, 147, 255)
-				mainContext.DrawString(card.Name, float64(mainContextWidth-300)+10, float64(mainContextHight-350)+60)
+				mainContext.DrawString(cards.Name, float64(mainContextWidth-300)+10, float64(mainContextHight-350)+60)
 				mainContext.DrawString(fmt.Sprintf("- %s", position[p]), float64(mainContextWidth-300)+10, float64(mainContextHight-350)+280)
-				placedList := splitChineseString(info, 44)
+				placedList := SplitChineseString(info, 44)
 				for ist, v := range placedList {
 					mainContext.DrawString(v, float64(mainContextWidth-300)+10, float64(mainContextHight-350)+90+float64(ist*30))
 				}
-				// output
-				mainContext.SetFontFace(LoadFontFace(loadNotoSans, 20))
+				mainContext.SetFontFace(LoadFontFace(loadNotoSans, 16))
 				mainContext.SetRGBA255(186, 163, 157, 255)
-				mainContext.DrawStringAnchored("Generated By Lucy (HiMoYo), Design By MoeMagicMango", float64(mainContextWidth-15), float64(mainContextHight-30), 1, 1)
+				avatarWaiter.Wait()
+				mainContext.DrawImage(avatarFormat.Circle(0).Image(), 60, int(float64(mainContextHight-150)+25))
+				mainContext.DrawStringAnchored("Generated By Lucy (HiMoYo), Design By MoeMagicMango", float64(mainContextWidth-15), float64(mainContextHight-40), 1, 1)
 				mainContext.Fill()
 				_ = mainContext.SavePNG(engine.DataFolder() + "jrrp/" + userPic)
 				ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + engine.DataFolder() + "jrrp/" + userPic))
@@ -216,7 +220,9 @@ func init() {
 			}
 		})
 }
-func splitChineseString(s string, length int) []string {
+
+// SplitChineseString Split Chinsese String and make slice
+func SplitChineseString(s string, length int) []string {
 	results := make([]string, 0)
 	runes := []rune(s)
 	start := 0

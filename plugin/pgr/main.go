@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 	"unicode/utf8"
 
@@ -63,28 +64,48 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请前往 https://pgr.impart.icu 获取绑定码进行绑定 "))
 			return
 		}
-		// tips 2 cannot work,then use tips 1.
-		// GetSessionByPhigrosLibraryProject(getDataSession, ctx)
-		// getPhigrosLink := os.Getenv("pualink")
-		getPhigrosLink := "https://pgrapi.impart.icu"
-		// getPhigrosKey := os.Getenv("puakey")
 		userData := GetUserInfoFromDatabase(ctx.Event.UserID)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("好哦~正在帮你请求，请稍等一下啦w"))
-		getFullLink := getPhigrosLink + "/api/phi/bests?session=" + userData.PhiSession + "&overflow=2"
-		phidata, _ := web.GetData(getFullLink)
-		if phidata == nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Unoffical Phigros API 暂时无法工作 请过一段时候尝试"))
-			return
-		}
-		err := json.Unmarshal(phidata, &phigrosB19)
-		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生解析错误\n", err))
-			return
-		}
-		if !phigrosB19.Status {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w? 貌似出现了一些问题x"))
-			return
-		}
+		var dataWaiter sync.WaitGroup
+		var AvatarWaiter sync.WaitGroup
+		var getAvatarFormat *gg.Context
+		var phidata []byte
+		AvatarWaiter.Add(1)
+		dataWaiter.Add(1)
+		go func() {
+			getFullLink := "https://pgrapi.impart.icu/api/phi/bests?session=" + userData.PhiSession + "&overflow=2"
+			phidata, _ = web.GetData(getFullLink)
+			if phidata == nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Unoffical Phigros API 暂时无法工作 请过一段时候尝试"))
+				return
+			}
+			err := json.Unmarshal(phidata, &phigrosB19)
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生解析错误\n", err))
+				return
+			}
+			if !phigrosB19.Status {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w? 貌似出现了一些问题x"))
+				return
+			}
+		}()
+		go func() {
+			defer AvatarWaiter.Done()
+			avatarByte, err := http.Get("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
+			if err != nil {
+				ctx.SendChain(message.Text("Something wrong while rendering pic? avatar IO err."))
+				return
+			}
+			// avatar
+			avatarByteUni, _, _ := image.Decode(avatarByte.Body)
+			showUserAvatar := imaging.Resize(avatarByteUni, 250, 250, imaging.Lanczos)
+			getAvatarFormat = gg.NewContext(250, 250)
+			getAvatarFormat.DrawRoundedRectangle(0, 0, 248, 248, 20)
+			getAvatarFormat.Clip()
+			getAvatarFormat.DrawImage(showUserAvatar, 0, 0)
+			getAvatarFormat.Fill()
+		}()
+
 		getRawBackground, _ := gg.LoadImage(backgroundRender)
 		getMainBgRender := gg.NewContextForImage(imaging.Resize(getRawBackground, 2750, 5500, imaging.Lanczos))
 		_ = getMainBgRender.LoadFontFace(font, 30)
@@ -111,6 +132,7 @@ func init() {
 		// draw userinfo path
 		renderHeaderText, _ := gg.LoadFontFace(font, 54)
 		getMainBgRender.SetFontFace(renderHeaderText)
+		dataWaiter.Wait()
 		getMainBgRender.DrawString("Player: "+phigrosB19.Content.PlayerID, 1490, 300)
 		getMainBgRender.DrawString("RankingScore: "+strconv.FormatFloat(phigrosB19.Content.RankingScore, 'f', 3, 64), 1490, 380)
 		getMainBgRender.DrawString("ChanllengeMode: ", 1490, 460) // +56
@@ -126,19 +148,7 @@ func init() {
 		getMainBgRender.SetRGB(1, 1, 1)
 		getMainBgRender.DrawStringAnchored(getLink, 2021, 430, 0.4, 0.4)
 		// avatar
-		avatarByte, err := http.Get("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
-		if err != nil {
-			ctx.SendChain(message.Text("Something wrong while rendering pic? avatar IO err."))
-			return
-		}
-		// avatar
-		avatarByteUni, _, _ := image.Decode(avatarByte.Body)
-		showUserAvatar := imaging.Resize(avatarByteUni, 250, 250, imaging.Lanczos)
-		getAvatarFormat := gg.NewContext(250, 250)
-		getAvatarFormat.DrawRoundedRectangle(0, 0, 248, 248, 20)
-		getAvatarFormat.Clip()
-		getAvatarFormat.DrawImage(showUserAvatar, 0, 0)
-		getAvatarFormat.Fill()
+		AvatarWaiter.Wait()
 		getMainBgRender.DrawImage(getAvatarFormat.Image(), 2321, 230)
 		getMainBgRender.Fill()
 		// render
@@ -151,15 +161,26 @@ func init() {
 		_ = getMainBgRender.SavePNG(engine.DataFolder() + "save/" + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("file:///"+file.BOTPATH+"/"+engine.DataFolder()+"save/"+strconv.Itoa(int(ctx.Event.UserID))+".png"))
 	})
+
 	engine.OnRegex(`^[! ！/]pgr\sroll\s(\d+)`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		var wg sync.WaitGroup
+		var avatarWaitGroup sync.WaitGroup
+		var dataWaiter sync.WaitGroup
+		var getMainBgRender *gg.Context
+		var getAvatarFormat *gg.Context
+		var phidata []byte
+		wg.Add(1)
+		avatarWaitGroup.Add(1)
+		dataWaiter.Add(1)
+		// get Session From Database.
 		data := GetUserInfoFromDatabase(ctx.Event.UserID)
 		getDataSession := data.PhiSession
 		if getDataSession == "" {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请前往 https://pgr.impart.icu 获取绑定码进行绑定 "))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("由于Session特殊性，请前往 https://pgr.impart.icu 获取绑定码进行绑定"))
 			return
 		}
+
 		//	GetSessionByPhigrosLibraryProject(getDataSession, ctx)
-		getPhigrosLink := "https://pgrapi.impart.icu"
 		// getPhigrosKey := os.Getenv("puakey")
 		userData := GetUserInfoFromDatabase(ctx.Event.UserID)
 		getRoll := ctx.State["regex_matched"].([]string)[1]
@@ -177,23 +198,48 @@ func init() {
 			getOverFlowNumber = 0
 		}
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("好哦~正在帮你请求，请稍等一下啦w"))
-		getFullLink := getPhigrosLink + "/api/phi/bests?session=" + userData.PhiSession + "&overflow=" + strconv.Itoa(int(getOverFlowNumber))
-		phidata, _ := web.GetData(getFullLink)
-		if phidata == nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Phigros SelfBuild API暂时无法工作 请过一段时候尝试"))
-			return
-		}
-		err = json.Unmarshal(phidata, &phigrosB19)
-		if err != nil {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生解析错误: \n", err))
-			return
-		}
-		if !phigrosB19.Status {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w? 貌似出现了一些问题x\n", phigrosB19.Message))
-			return
-		}
-		getRawBackground, _ := gg.LoadImage(backgroundRender)
-		getMainBgRender := gg.NewContextForImage(imaging.Resize(getRawBackground, 2750, int(5250+getOverFlowNumber*200), imaging.Lanczos))
+		// data handling.
+		go func() {
+			defer dataWaiter.Done()
+			getFullLink := "https://pgrapi.impart.icu/api/phi/bests?session=" + userData.PhiSession + "&overflow=" + strconv.Itoa(int(getOverFlowNumber))
+			phidata, _ = web.GetData(getFullLink)
+			if phidata == nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Unoffical Phigros Library 暂时无法工作 请过一段时候尝试"))
+				return
+			}
+			err = json.Unmarshal(phidata, &phigrosB19)
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生解析错误: \n", err))
+				return
+			}
+			if !phigrosB19.Status {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w? 貌似出现了一些问题x\n", phigrosB19.Message))
+				return
+			}
+		}()
+		go func() {
+			defer wg.Done()
+			getRawBackground, _ := gg.LoadImage(backgroundRender)
+			getMainBgRender = gg.NewContextForImage(imaging.Resize(getRawBackground, 2750, int(5250+getOverFlowNumber*200), imaging.Lanczos))
+		}()
+		go func() {
+			defer avatarWaitGroup.Done()
+			// draw Avatar, avatar from qq.
+			avatarByte, err := http.Get("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
+			if err != nil {
+				ctx.SendChain(message.Text("Something wrong while rendering pic? avatar IO err."))
+				return
+			}
+			// avatar
+			avatarByteUni, _, _ := image.Decode(avatarByte.Body)
+			showUserAvatar := imaging.Resize(avatarByteUni, 250, 250, imaging.Lanczos)
+			getAvatarFormat = gg.NewContext(250, 250)
+			getAvatarFormat.DrawRoundedRectangle(0, 0, 248, 248, 20)
+			getAvatarFormat.Clip()
+			getAvatarFormat.DrawImage(showUserAvatar, 0, 0)
+			getAvatarFormat.Fill()
+		}()
+		wg.Wait()
 		_ = getMainBgRender.LoadFontFace(font, 30)
 		// header background
 		drawTriAngle(getMainBgRender, a, 0, 166, 1324, 410)
@@ -215,9 +261,11 @@ func init() {
 		getMainBgRender.SetFontFace(fontface)
 		getMainBgRender.DrawString("Phigros", 422, 336)
 		getMainBgRender.DrawString("RankingScore查询", 422, 462)
+		dataWaiter.Wait()
 		// draw userinfo path
 		renderHeaderText, _ := gg.LoadFontFace(font, 54)
 		getMainBgRender.SetFontFace(renderHeaderText)
+		// wait data until fine.
 		getMainBgRender.DrawString("Player: "+phigrosB19.Content.PlayerID, 1490, 300)
 		getMainBgRender.DrawString("RankingScore: "+strconv.FormatFloat(phigrosB19.Content.RankingScore, 'f', 3, 64), 1490, 380)
 		getMainBgRender.DrawString("ChanllengeMode: ", 1490, 460) // +56
@@ -232,20 +280,7 @@ func init() {
 		// white glow render
 		getMainBgRender.SetRGB(1, 1, 1)
 		getMainBgRender.DrawStringAnchored(getLink, 2021, 430, 0.4, 0.4)
-		// draw Avatar, avatar from qq.
-		avatarByte, err := http.Get("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
-		if err != nil {
-			ctx.SendChain(message.Text("Something wrong while rendering pic? avatar IO err."))
-			return
-		}
-		// avatar
-		avatarByteUni, _, _ := image.Decode(avatarByte.Body)
-		showUserAvatar := imaging.Resize(avatarByteUni, 250, 250, imaging.Lanczos)
-		getAvatarFormat := gg.NewContext(250, 250)
-		getAvatarFormat.DrawRoundedRectangle(0, 0, 248, 248, 20)
-		getAvatarFormat.Clip()
-		getAvatarFormat.DrawImage(showUserAvatar, 0, 0)
-		getAvatarFormat.Fill()
+		avatarWaitGroup.Wait()
 		getMainBgRender.DrawImage(getAvatarFormat.Image(), 2321, 230)
 		getMainBgRender.Fill()
 		// render

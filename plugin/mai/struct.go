@@ -3,17 +3,6 @@ package mai
 import (
 	"encoding/json"
 	"fmt"
-	"image"
-	"image/color"
-	"image/png"
-	"log"
-	"net/http"
-	"os"
-	"strconv"
-	"strings"
-	"sync"
-	"time"
-
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/gg"
 	"github.com/FloatTech/imgfactory"
@@ -21,6 +10,18 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
+	"image"
+	"image/color"
+	"image/png"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+	"unicode/utf8"
 )
 
 type player struct {
@@ -218,7 +219,6 @@ func FullPageRender(data player, ctx *zero.Ctx) (raw image.Image, stat bool) {
 	// avatar Round Style
 	var getAvatarFormat *gg.Context
 	avatarByte, err := http.Get("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
-	// avatarByte, err := http.Get("https://cdn.sep.cc/avatar/22b242a28bb848f2629f2a636bba9c03?s=600")
 	if err != nil {
 		return nil, false
 	}
@@ -337,8 +337,31 @@ func RenderCard(data playerData, num int) image.Image {
 	drawBackGround.SetColor(color.White)
 	drawBackGround.SetFontFace(titleFont)
 	getSongName := data.Title
-	if len(getSongName) > 24 {
-		getSongName = getSongName[:24] + "..."
+	charCount := 0.0
+	setBreaker := false
+	var truncated string
+	var charFloatNum float64
+	// set rune count
+	for _, runeValue := range getSongName {
+		charWidth := utf8.RuneLen(runeValue)
+		if charWidth == 3 {
+			charFloatNum = 1.5
+		} else {
+			charFloatNum = float64(charWidth)
+		}
+
+		if charCount+charFloatNum > 20 {
+			setBreaker = true
+			break
+		}
+		truncated += string(runeValue)
+		charCount += charFloatNum
+	}
+
+	if setBreaker == true {
+		getSongName = truncated + "..."
+	} else {
+		getSongName = truncated
 	}
 	drawBackGround.DrawStringAnchored(getSongName, 250, 30, 0.5, 0.5)
 	drawBackGround.Fill()
@@ -416,7 +439,12 @@ func GetCover(id string) (image.Image, error) {
 	if err != nil {
 		return LoadPictureWithResize(defaultCoverLink, 90, 90), nil
 	}
-	defer imageFile.Close()
+	defer func(imageFile *os.File) {
+		err := imageFile.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(imageFile)
 	img, _, err := image.Decode(imageFile)
 	if err != nil {
 		return LoadPictureWithResize(defaultCoverLink, 90, 90), nil
@@ -483,7 +511,12 @@ func saveImage(img image.Image, path string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer files.Close()
+	defer func(files *os.File) {
+		err := files.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(files)
 	err = png.Encode(files, img)
 	if err != nil {
 		log.Fatal(err)
@@ -495,7 +528,12 @@ func downloadImage(url string) (image.Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(response.Body)
 	img, _, err := image.Decode(response.Body)
 	if err != nil {
 		return nil, err
