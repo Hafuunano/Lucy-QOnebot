@@ -129,7 +129,7 @@ func init() {
 					charCount += UserFloatNum
 				}
 
-				if setBreaker == true {
+				if setBreaker {
 					getNickName = truncated + "..."
 				} else {
 					getNickName = truncated

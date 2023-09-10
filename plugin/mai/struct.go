@@ -358,7 +358,7 @@ func RenderCard(data playerData, num int) image.Image {
 		charCount += charFloatNum
 	}
 
-	if setBreaker == true {
+	if setBreaker {
 		getSongName = truncated + "..."
 	} else {
 		getSongName = truncated
