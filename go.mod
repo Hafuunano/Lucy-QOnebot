@@ -8,7 +8,7 @@ require (
 	github.com/FloatTech/gg v1.1.1
 	github.com/FloatTech/imgfactory v0.2.1
 	github.com/FloatTech/sqlite v1.5.7
-	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b
+	github.com/FloatTech/ttl v0.0.0-20230307105452-d6f7b2b647d1
 	github.com/FloatTech/zbpctrl v1.5.3-0.20230130095145-714ad318cd52
 	github.com/FloatTech/zbputils v1.6.2-0.20230207084008-8c14cb9fcacb
 	github.com/disintegration/imaging v1.6.2
@@ -18,9 +18,9 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/mroth/weightedrand v1.0.0
 	github.com/shirou/gopsutil/v3 v3.23.1
-	github.com/sirupsen/logrus v1.9.0
-	github.com/tidwall/gjson v1.14.4
-	github.com/wdvxdr1123/ZeroBot v1.6.11
+	github.com/sirupsen/logrus v1.9.3
+	github.com/tidwall/gjson v1.16.0
+	github.com/wdvxdr1123/ZeroBot v1.7.4
 	golang.org/x/image v0.3.0
 )
 
@@ -49,7 +49,7 @@ require (
 	github.com/tklauser/numcpus v0.6.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/crypto v0.4.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.11.0 // indirect
 	modernc.org/libc v1.21.5 // indirect
 	modernc.org/mathutil v1.5.0 // indirect

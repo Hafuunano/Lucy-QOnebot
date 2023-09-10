@@ -91,7 +91,7 @@ func init() {
 				list := reg.FindAllString(picDirName, -1)
 				getNickName := ctx.CardOrNickName(ctx.Event.UserID)
 				// remove emoji
-				emojiRegex := regexp.MustCompile(`[^\x00-\x7F]+`)
+				emojiRegex := regexp.MustCompile(`[\x{1F600}-\x{1F64F}|[\x{1F300}-\x{1F5FF}]|[\x{1F680}-\x{1F6FF}]|[\x{1F700}-\x{1F77F}]|[\x{1F780}-\x{1F7FF}]|[\x{1F800}-\x{1F8FF}]|[\x{1F900}-\x{1F9FF}]|[\x{1FA00}-\x{1FA6F}]|[\x{1FA70}-\x{1FAFF}]|[\x{1FB00}-\x{1FBFF}]|[\x{1FC00}-\x{1FCFF}]|[\x{1F004}-\x{1F0CF}]|[\x{1F170}-\x{1F251}]|[\x{1F300}-\x{1F5FF}]|[\x{1F600}-\x{1F64F}]|[\x{1F680}-\x{1F6FF}]|[\x{1F700}-\x{1F77F}]|[\x{1F780}-\x{1F7FF}]|[\x{1F800}-\x{1F8FF}]|[\x{1F900}-\x{1F9FF}]|[\x{1FA00}-\x{1FA6F}]|[\x{1FA70}-\x{1FAFF}]|[\x{1FB00}-\x{1FBFF}]|[\x{1FC00}-\x{1FCFF}]|[\x{1F004}-\x{1F0CF}]|[\x{1F170}-\x{1F251}]]+`)
 				getNickName = emojiRegex.ReplaceAllString(getNickName, "")
 				// get name and other info.
 				p := rand.Intn(2)
@@ -107,8 +107,32 @@ func init() {
 				randEveryone := fcext.RandSenderPerDayN(ctx.Event.UserID, 40)
 				// use map to store.
 				result[user] = randEveryone + 60
-				if len(getNickName) > 24 {
-					getNickName = getNickName[:24] + "..."
+				// set rune
+				charCount := 0.0
+				setBreaker := false
+				var truncated string
+				var UserFloatNum float64
+				// set rune count
+				for _, runeValue := range getNickName {
+					charWidth := utf8.RuneLen(runeValue)
+					if charWidth == 3 {
+						UserFloatNum = 1.5
+					} else {
+						UserFloatNum = float64(charWidth)
+					}
+
+					if charCount+UserFloatNum > 24 {
+						setBreaker = true
+						break
+					}
+					truncated += string(runeValue)
+					charCount += UserFloatNum
+				}
+
+				if setBreaker == true {
+					getNickName = truncated + "..."
+				} else {
+					getNickName = truncated
 				}
 				// get user avatar
 				go func() {
@@ -165,7 +189,7 @@ func init() {
 				mainContext.DrawString("User Info", 60, float64(mainContextHight-150)+10) // basic ui
 				mainContext.SetRGBA255(155, 121, 147, 255)
 				mainContext.DrawString(getNickName, 180, float64(mainContextHight-150)+50)
-				mainContext.DrawString(fmt.Sprintf("今日人品值: %d", randEveryone+50), 180, float64(mainContextHight-150)+100)
+				mainContext.DrawString(fmt.Sprintf("今日人品值: %d", randEveryone+40), 180, float64(mainContextHight-150)+100)
 				mainContext.Fill()
 				// AOSP time and date
 				setInlineColor := color.NRGBA{R: uint8(getBackGroundMainColorR), G: uint8(getBackGroundMainColorG), B: uint8(getBackGroundMainColorB), A: 255}

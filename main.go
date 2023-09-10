@@ -15,16 +15,15 @@ import (
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/nsfw"    // nsfw
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/tools"   // 工具
 
-	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/atri" // atri
-	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/mai"  // mai
+	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/atri"  // atri
+	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/mai"   // mai
+	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/quote" // quote
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/action" // action For Lucy触发
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/funwork" // 好玩的整合工具
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/score" // 签到
-
-	// _ "github.com/FloatTech/ZeroBot-Plugin/plugin/arc" // arcaea
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/chat" // 回复
 
