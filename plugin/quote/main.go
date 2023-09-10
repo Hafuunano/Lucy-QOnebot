@@ -44,8 +44,7 @@ func init() {
 			ctx.Send(message.Text("找不到Quote，或许是本群没有x"))
 			return
 		}
-		format := fmt.Sprintf("TrackerID: %d\nTrackerUser: %s(%d)\nTime: %s\n%s(%d): \n%s", getRandGeneratedData.TrackID, ctx.CardOrNickName(getRandGeneratedData.HandlerQQ), getRandGeneratedData.HandlerQQ, time.Unix(getRandGeneratedData.Time, 0).Format("2006-01-02 15:04:05"), ctx.CardOrNickName(getRandGeneratedData.QQ), getRandGeneratedData.QQ, getRandGeneratedData.Msg)
-		ctx.Send(format)
+		ctx.Send(fmt.Sprintf("TrackerID: %d\nTrackerUser: %s(%d)\nTime: %s\n%s(%d): \n%s", getRandGeneratedData.TrackID, ctx.CardOrNickName(getRandGeneratedData.HandlerQQ), getRandGeneratedData.HandlerQQ, time.Unix(getRandGeneratedData.Time, 0).Format("2006-01-02 15:04:05"), ctx.CardOrNickName(getRandGeneratedData.QQ), getRandGeneratedData.QQ, getRandGeneratedData.Msg))
 	})
 }
 
