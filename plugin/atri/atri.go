@@ -33,24 +33,6 @@ func init() { // 插件主体
 			"- 没事 | 没关系 | 大丈夫 | 还好 | 不要紧 | 没出大问题 | 没伤到哪\n- 好吗 | 是吗 | 行不行 | 能不能 | 可不可以\n- 啊这\n- 我好了\n- ？ | ? | ¿\n" +
 			"- 离谱\n- 答应我",
 	})
-	zero.OnFullMatch("Lucy醒醒", zero.AdminPermission).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			c, ok := control.Lookup(servicename)
-			if ok && !c.IsEnabledIn(ctx.Event.GroupID) {
-				c.Enable(ctx.Event.GroupID)
-				process.SleepAbout1sTo2s()
-				ctx.SendChain(message.Text("嗯呜呜……Zzz……？"))
-			}
-		})
-	engine.OnFullMatch("Lucy睡吧", zero.AdminPermission).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			c, ok := control.Lookup(servicename)
-			if ok && c.IsEnabledIn(ctx.Event.GroupID) {
-				c.Disable(ctx.Event.GroupID)
-				process.SleepAbout1sTo2s()
-				ctx.SendChain(message.Text("Zzz……Zzz……"))
-			}
-		})
 
 	engine.OnFullMatchGroup([]string{"早安", "早哇", "早上好", "ohayo", "哦哈哟", "お早う", "早好", "早", "早早早"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {

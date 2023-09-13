@@ -35,6 +35,8 @@ import (
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/slash" // slash plugin
 
+	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/simai" // simia plugin
+
 	"github.com/FloatTech/floatbox/process"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/driver"

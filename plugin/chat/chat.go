@@ -24,7 +24,7 @@ import (
 type kimo = map[string]*[]string
 
 var (
-	poke   = rate.NewManager[int64](time.Minute*5, 8)  // 戳一戳
+	poke   = rate.NewManager[int64](time.Minute*10, 8) // 戳一戳
 	limit  = rate.NewManager[int64](time.Minute*3, 28) // 回复限制
 	img    = "file:///root/Lucy_Project/memes/"
 	engine = control.Register("chat", &ctrl.Options[*zero.Ctx]{
@@ -115,7 +115,7 @@ func init() { // 插件主体
 			var nickname = zero.BotConfig.NickName[0]
 			switch {
 			case poke.Load(ctx.Event.GroupID).AcquireN(3):
-				// 5分钟共8块命令牌 一次消耗3块命令牌
+				// 10分钟共8块命令牌 一次消耗3块命令牌
 				time.Sleep(time.Second * 1)
 				ctx.SendChain(message.Text([]string{"请不要戳" + nickname + " >_<", "再戳也不会理你的哦！", "别以为人家会搭理哦！",
 					"呜…别戳了…", "别戳了！", "喵~", "有笨蛋在戳我，我不说是谁", "达咩呦，达咩达咩", "哼!不许戳啦 大笨蛋", "别戳啦！", "有笨蛋~让咱看看是谁"}[rand.Intn(11)]), message.Image([]string{img + "2941750127783.jpg", img + "C(185HMG2G0FY`3~2_[_H)W.gif", img + "file_3491851.jpg", img + "file_3492326.jpg", img + "file_3492330.jpg", img + "load.jpg"}[rand.Intn(6)]))
@@ -174,10 +174,6 @@ func init() { // 插件主体
 				ctx.Event.UserID,
 				0)
 		})
-	engine.OnFullMatch("酱", zero.OnlyToMe).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(RandText("Lucy酱在这边~", "略略略~这边是Lucy(*/ω＼*)", "Lucy在忙哦w 有什么事情嘛"))
-		})
 	engine.OnFullMatch("摸摸", zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(RandText("啾啾~", "呼呼~", "摸摸~"), randImage("8256CAEDA0E96A12875487BF2073256E.gif", "load.jpg", "-33ee3a0711f11810.jpg"))
@@ -216,4 +212,16 @@ func RandText(text ...string) message.MessageSegment {
 
 func randImage(file ...string) message.MessageSegment {
 	return message.Image(img + file[rand.Intn(len(file))])
+}
+
+func GetPokeToken(ctx *zero.Ctx) float64 {
+	return poke.Load(ctx.Event.GroupID).Tokens()
+}
+
+func GetTiredToken(ctx *zero.Ctx) float64 {
+	return limit.Load(ctx.Event.UserID).Tokens()
+}
+
+func GetCostTiredToken(ctx *zero.Ctx) bool {
+	return limit.Load(ctx.Event.UserID).AcquireN(3)
 }
