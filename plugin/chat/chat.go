@@ -2,12 +2,9 @@
 package chat
 
 import (
-	"encoding/json"
 	"fmt"
 	"math/rand"
-	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/FloatTech/floatbox/process"
@@ -21,11 +18,9 @@ import (
 	"github.com/FloatTech/ZeroBot-Plugin/compounds/name"
 )
 
-type kimo = map[string]*[]string
-
 var (
-	poke   = rate.NewManager[int64](time.Minute*10, 8) // 戳一戳
-	limit  = rate.NewManager[int64](time.Minute*3, 28) // 回复限制
+	poke = rate.NewManager[int64](time.Minute*10, 8) // 戳一戳
+
 	img    = "file:///root/Lucy_Project/memes/"
 	engine = control.Register("chat", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault: false,
@@ -34,65 +29,32 @@ var (
 )
 
 func init() { // 插件主体
-	go func() {
-		data, err := os.ReadFile(engine.DataFolder() + "kimoi.json")
-		if err != nil {
-			panic(err)
+	engine.OnRegex(`叫我.*?(.*)`, zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+		texts := ctx.State["regex_matched"].([]string)[1]
+		if name.StringInArray(texts, []string{"Lucy", "笨蛋", "老公", "猪", "夹子", "主人"}) {
+			ctx.Send(message.Text("这些名字可不好哦(敲)"))
+			return
 		}
-		kimomap := make(kimo, 256)
-		err = json.Unmarshal(data, &kimomap)
-		if err != nil {
-			panic(err)
-		}
-		chatList := make([]string, 0, 256)
-		for k := range kimomap {
-			chatList = append(chatList, k)
-		}
-		engine.OnRegex(`叫我.*?(.*)`, zero.OnlyToMe).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
-			texts := ctx.State["regex_matched"].([]string)[1]
-			if name.StringInArray(texts, []string{"Lucy", "笨蛋", "老公", "猪", "夹子", "主人"}) {
-				ctx.Send(message.Text("这些名字可不好哦(敲)"))
-				return
-			}
-			if texts == "" {
-				ctx.Send(message.Text("好哦~ 那~咱该叫你什么呢ww"))
-				nextstep := ctx.FutureEvent("message", ctx.CheckSession())
-				recv, cancel := nextstep.Repeat()
-				for i := range recv {
-					texts := i.MessageString()
-					if texts != "" {
-						cancel()
-					}
+		if texts == "" {
+			ctx.Send(message.Text("好哦~ 那~咱该叫你什么呢ww"))
+			nextstep := ctx.FutureEvent("message", ctx.CheckSession())
+			recv, cancel := nextstep.Repeat()
+			for i := range recv {
+				texts := i.MessageString()
+				if texts != "" {
+					cancel()
 				}
 			}
-			userID := strconv.FormatInt(ctx.Event.UserID, 10)
-			err = name.StoreUserNickname(userID, texts)
-			if err != nil {
-				ctx.Send(message.Text("发生了一些不可预料的问题 请稍后再试, ERR: ", err))
-				return
-			}
-			ctx.Send(message.Text("好哦~ ", texts, " ちゃん~~~"))
-		})
-		engine.OnFullMatchGroup(chatList, zero.OnlyToMe).SetBlock(true).Handle(
-			func(ctx *zero.Ctx) {
-				switch {
-				case limit.Load(ctx.Event.UserID).AcquireN(3):
-					key := ctx.MessageString()
-					val := *kimomap[key]
-					text := val[rand.Intn(len(val))]
-					userID := strconv.FormatInt(ctx.Event.UserID, 10)
-					userNickName := name.LoadUserNickname(userID)
-					result := strings.ReplaceAll(text, "你", userNickName)
-					process.SleepAbout1sTo2s()
-					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(result)) // 来自于 https://github.com/Kyomotoi/AnimeThesaurus 的回复 经过二次修改
-				case limit.Load(ctx.Event.UserID).Acquire():
-					process.SleepAbout1sTo2s()
-					ctx.Send(message.Text("咱不想说话~好累qwq"))
-					return
-				default:
-				}
-			})
-	}()
+		}
+		userID := strconv.FormatInt(ctx.Event.UserID, 10)
+		err := name.StoreUserNickname(userID, texts)
+		if err != nil {
+			ctx.Send(message.Text("发生了一些不可预料的问题 请稍后再试, ERR: ", err))
+			return
+		}
+		ctx.Send(message.Text("好哦~ ", texts, " ちゃん~~~"))
+	})
+
 	// 被喊名字
 	engine.OnFullMatch("", zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
@@ -130,6 +92,7 @@ func init() { // 插件主体
 				// 频繁触发，不回复
 			}
 		})
+
 	// 戳我
 	engine.OnFullMatchGroup([]string{"戳我", "戳戳"}, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
@@ -216,12 +179,4 @@ func randImage(file ...string) message.MessageSegment {
 
 func GetPokeToken(ctx *zero.Ctx) float64 {
 	return poke.Load(ctx.Event.GroupID).Tokens()
-}
-
-func GetTiredToken(ctx *zero.Ctx) float64 {
-	return limit.Load(ctx.Event.UserID).Tokens()
-}
-
-func GetCostTiredToken(ctx *zero.Ctx) bool {
-	return limit.Load(ctx.Event.UserID).AcquireN(3)
 }

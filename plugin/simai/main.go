@@ -3,7 +3,7 @@ package simai
 
 import (
 	"github.com/FloatTech/ZeroBot-Plugin/compounds/name"
-	"github.com/FloatTech/ZeroBot-Plugin/plugin/chat"
+	chans "github.com/FloatTech/ZeroBot-Plugin/plugin/chan"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -40,7 +40,7 @@ func init() {
 		// onload dict.
 		msg := ctx.ExtractPlainText()
 		var getChartReply []string
-		if chat.GetPokeToken(ctx) < 4 {
+		if chans.GetTiredToken(ctx) < 4 {
 			getChartReply = data.Proud[msg]
 			// if no data
 			if getChartReply == nil {
@@ -62,11 +62,11 @@ func init() {
 			}
 		}
 		// Lucy may more pround when poke too much ^^.
-		if chat.GetTiredToken(ctx) < 4 {
+		if chans.GetTiredToken(ctx) < 4 {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("咱不想说话 好累awww"))
 			return
 		} else {
-			chat.GetCostTiredToken(ctx)
+			chans.GetCostTiredToken(ctx)
 		}
 		// show data is existed.
 		getReply := getChartReply[rand.Intn(len(getChartReply))]

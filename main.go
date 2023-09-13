@@ -33,6 +33,7 @@ import (
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/whitelist" // whitelist plugin
 
+	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/chan"  // chan plugin
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/slash" // slash plugin
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/simai" // simia plugin
