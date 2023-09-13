@@ -29,7 +29,7 @@ type sessionKey struct {
 
 var cache = ttl.NewCache[sessionKey, []chatMessage](time.Minute * 15)
 
-var ChatGPTPromptHandlerLimitedTimeManager = rate.NewManager[int64](time.Minute*2, 3)
+var GPTPromptHandlerLimitedTimeManager = rate.NewManager[int64](time.Minute*2, 3)
 
 // chatGPTResponseBody 响应体
 type chatGPTResponseBody struct {
@@ -103,7 +103,7 @@ func init() {
 	// easy and work well with chatgpt? key handler.
 	// trigger for chatgpt.
 	engine.OnRegex(`^/chat\s*(.*)$`, zero.OnlyToMe).SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		if !ChatGPTPromptHandlerLimitedTimeManager.Load(ctx.Event.GroupID).Acquire() {
+		if !GPTPromptHandlerLimitedTimeManager.Load(ctx.Event.GroupID).Acquire() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("Too quick! 慢一点再请求哦！"))
 			return
 		}

@@ -216,19 +216,28 @@ func init() {
 
 // FullPageRender  Render Full Page
 func FullPageRender(data player, ctx *zero.Ctx) (raw image.Image, stat bool) {
-	// avatar Round Style
+
+	// muilt-threading.
+	var avatarHandler sync.WaitGroup
+	avatarHandler.Add(1)
 	var getAvatarFormat *gg.Context
-	avatarByte, err := http.Get("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
-	if err != nil {
-		return nil, false
-	}
-	avatarByteUni, _, _ := image.Decode(avatarByte.Body)
-	avatarFormat := imgfactory.Size(avatarByteUni, 180, 180)
-	getAvatarFormat = gg.NewContext(180, 180)
-	getAvatarFormat.DrawRoundedRectangle(0, 0, 178, 178, 20)
-	getAvatarFormat.Clip()
-	getAvatarFormat.DrawImage(avatarFormat.Image(), 0, 0)
-	getAvatarFormat.Fill()
+	// avatar handler.
+	go func() {
+		// avatar Round Style
+		defer avatarHandler.Done()
+		avatarByte, err := http.Get("https://q4.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(ctx.Event.UserID, 10) + "&s=640")
+		if err != nil {
+			return
+		}
+		avatarByteUni, _, _ := image.Decode(avatarByte.Body)
+		avatarFormat := imgfactory.Size(avatarByteUni, 180, 180)
+		getAvatarFormat = gg.NewContext(180, 180)
+		getAvatarFormat.DrawRoundedRectangle(0, 0, 178, 178, 20)
+		getAvatarFormat.Clip()
+		getAvatarFormat.DrawImage(avatarFormat.Image(), 0, 0)
+		getAvatarFormat.Fill()
+	}()
+	userPlatedCustom := GetUserDefaultinfoFromDatabase(ctx.Event.UserID)
 	// render Header.
 	b50Render := gg.NewContext(2090, 1660)
 	rawPlateData, errs := gg.LoadImage(userPlate + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
@@ -237,9 +246,9 @@ func FullPageRender(data player, ctx *zero.Ctx) (raw image.Image, stat bool) {
 		b50Render.DrawImage(rawPlateData, 595, 30)
 		b50Render.Fill()
 	} else {
-		if GetUserDefaultinfoFromDatabase(ctx.Event.UserID) != "" {
+		if userPlatedCustom != "" {
 			b50bg = b50Custom
-			images, _ := GetDefaultPlate(GetUserDefaultinfoFromDatabase(ctx.Event.UserID))
+			images, _ := GetDefaultPlate(userPlatedCustom)
 			b50Render.DrawImage(images, 595, 30)
 			b50Render.Fill()
 		} else {
@@ -251,6 +260,7 @@ func FullPageRender(data player, ctx *zero.Ctx) (raw image.Image, stat bool) {
 	b50Render.DrawImage(getContent, 0, 0)
 	b50Render.Fill()
 	// render user info
+	avatarHandler.Wait()
 	b50Render.DrawImage(getAvatarFormat.Image(), 610, 50)
 	b50Render.Fill()
 	// render Userinfo
@@ -262,7 +272,7 @@ func FullPageRender(data player, ctx *zero.Ctx) (raw image.Image, stat bool) {
 	setPlateLocalStatus := GetUserInfoFromDatabase(ctx.Event.UserID)
 	var dataPlate bool
 	if setPlateLocalStatus != "" {
-		data.Plate = GetUserInfoFromDatabase(ctx.Event.UserID)
+		data.Plate = setPlateLocalStatus
 		dataPlate = true
 	} else {
 		dataPlate = false
@@ -320,49 +330,60 @@ func FullPageRender(data player, ctx *zero.Ctx) (raw image.Image, stat bool) {
 func RenderCard(data playerData, num int) image.Image {
 	getType := data.Type
 	var CardBackGround string
+	var multiTypeRender sync.WaitGroup
+	var CoverDownloader sync.WaitGroup
+	CoverDownloader.Add(1)
+	multiTypeRender.Add(1)
 	// choose Type.
 	if getType == "SD" {
 		CardBackGround = typeImageSD
 	} else {
 		CardBackGround = typeImageDX
 	}
-	loadSongType, _ := gg.LoadImage(CardBackGround)
-	// draw pic
-	getSongId := fmt.Sprintf("%05d", data.SongId)
-	Image, _ := GetCover(getSongId)
-	drawBackGround := gg.NewContextForImage(GetChartType(data.LevelLabel))
-	// draw song pic
-	drawBackGround.DrawImage(Image, 25, 25)
-	// draw name
-	drawBackGround.SetColor(color.White)
-	drawBackGround.SetFontFace(titleFont)
-	getSongName := data.Title
 	charCount := 0.0
 	setBreaker := false
 	var truncated string
 	var charFloatNum float64
+	getSongName := data.Title
+	getSongId := fmt.Sprintf("%05d", data.SongId)
+	var Image image.Image
+	go func() {
+		defer CoverDownloader.Done()
+		Image, _ = GetCover(getSongId)
+	}()
 	// set rune count
-	for _, runeValue := range getSongName {
-		charWidth := utf8.RuneLen(runeValue)
-		if charWidth == 3 {
-			charFloatNum = 1.5
+	go func() {
+		defer multiTypeRender.Done()
+		for _, runeValue := range getSongName {
+			charWidth := utf8.RuneLen(runeValue)
+			if charWidth == 3 {
+				charFloatNum = 1.5
+			} else {
+				charFloatNum = float64(charWidth)
+			}
+			if charCount+charFloatNum > 20 {
+				setBreaker = true
+				break
+			}
+			truncated += string(runeValue)
+			charCount += charFloatNum
+		}
+		if setBreaker {
+			getSongName = truncated + "..."
 		} else {
-			charFloatNum = float64(charWidth)
+			getSongName = truncated
 		}
-
-		if charCount+charFloatNum > 20 {
-			setBreaker = true
-			break
-		}
-		truncated += string(runeValue)
-		charCount += charFloatNum
-	}
-
-	if setBreaker {
-		getSongName = truncated + "..."
-	} else {
-		getSongName = truncated
-	}
+	}()
+	loadSongType, _ := gg.LoadImage(CardBackGround)
+	// draw pic
+	drawBackGround := gg.NewContextForImage(GetChartType(data.LevelLabel))
+	// draw song pic
+	CoverDownloader.Wait()
+	drawBackGround.DrawImage(Image, 25, 25)
+	// draw name
+	drawBackGround.SetColor(color.White)
+	drawBackGround.SetFontFace(titleFont)
+	multiTypeRender.Wait()
 	drawBackGround.DrawStringAnchored(getSongName, 250, 30, 0.5, 0.5)
 	drawBackGround.Fill()
 	// draw acc

@@ -41,7 +41,6 @@ func init() {
 		var list whitelist
 		_ = json.Unmarshal(reader, &list)
 		list.Or[0].GroupId.In = append(list.Or[0].GroupId.In, int(getNumber))
-		// 将修改后的数据重新编码为JSON
 		modifiedData, err := json.MarshalIndent(list, "", "  ")
 		if err != nil {
 			log.Fatal(err)

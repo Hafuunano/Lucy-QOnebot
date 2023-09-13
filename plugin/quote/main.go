@@ -9,6 +9,7 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 	"hash/crc64"
+	"regexp"
 	"strconv"
 	"time"
 )
@@ -45,6 +46,39 @@ func init() {
 			return
 		}
 		ctx.Send(fmt.Sprintf("TrackerID: %d\nTrackerUser: %s(%d)\nTime: %s\n%s(%d): \n%s", getRandGeneratedData.TrackID, ctx.CardOrNickName(getRandGeneratedData.HandlerQQ), getRandGeneratedData.HandlerQQ, time.Unix(getRandGeneratedData.Time, 0).Format("2006-01-02 15:04:05"), ctx.CardOrNickName(getRandGeneratedData.QQ), getRandGeneratedData.QQ, getRandGeneratedData.Msg))
+	})
+	engine.OnRegex(`^(\[CQ:reply,id=(.*)\])\s/quote\sremove$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		getPatternUserMessageID := ctx.State["regex_matched"].([]string)[2]
+		rsp := ctx.CallAction("get_msg", zero.Params{
+			"message_id": getPatternUserMessageID,
+		}).Data.String()
+		// get msg string.
+		MessageRaw := gjson.Get(rsp, "message").String()
+		formatMessageRaw := message.UnescapeCQCodeText(MessageRaw)
+		// use pattern to get track id.
+		trackerIDPattern, err := regexp.Compile(`^TrackerID:\s(\d*)`)
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("找不到对应quote，可能是该Quote已经被删除("))
+			return
+		}
+		getString := trackerIDPattern.FindStringSubmatch(formatMessageRaw)[1]
+		fmt.Printf(getString)
+		if getString == "" {
+			ctx.Send("请回复对应需要删除的quote来进行此操作")
+			return
+		}
+		// remove string must in person or admin.
+		getInfo := ReferDataCorruption(ctx.Event.GroupID, getString)
+		if ctx.Event.UserID != getInfo.QQ && ctx.Event.UserID != getInfo.HandlerQQ && !zero.AdminPermission(ctx) {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("大概你不是管理员 | quote制作者/生成者 此操作无效"))
+			return
+		}
+		// remove it
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("删除完成~"))
+		err = RemoveIndexData(getString, ctx.Event.GroupID)
+		if err != nil {
+			panic(err)
+		}
 	})
 }
 

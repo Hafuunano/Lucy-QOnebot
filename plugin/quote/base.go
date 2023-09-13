@@ -61,11 +61,23 @@ func IndexOfDataCorruption(id int64) Corruption {
 	return tamper
 }
 
-// RemoveIndexData Index Of
-func RemoveIndexData(trackid int64, id int64) error {
+// ReferDataCorruption Refer A Trackerid
+func ReferDataCorruption(id int64, trackerid string) Corruption {
 	CorruptLocker.Lock()
 	defer CorruptLocker.Unlock()
-	return CorruptionSide.Del("groupquote_"+strconv.Itoa(int(id)), "Where trackid = "+strconv.Itoa(int(trackid))) // tip : int64 to int may cause loss.
+	var tamper Corruption
+	err := CorruptionSide.Find("groupquote_"+strconv.Itoa(int(id)), &tamper, "WHERE trackid is "+trackerid)
+	if err != nil {
+		return Corruption{TrackID: 0}
+	}
+	return tamper
+}
+
+// RemoveIndexData Index Of
+func RemoveIndexData(trackid string, id int64) error {
+	CorruptLocker.Lock()
+	defer CorruptLocker.Unlock()
+	return CorruptionSide.Del("groupquote_"+strconv.Itoa(int(id)), "Where trackid = "+trackid)
 }
 
 func RemoveAllIndexData(id int64) error {
