@@ -3,13 +3,6 @@ package mai
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/FloatTech/floatbox/file"
-	"github.com/FloatTech/gg"
-	"github.com/FloatTech/imgfactory"
-	zero "github.com/wdvxdr1123/ZeroBot"
-	"github.com/wdvxdr1123/ZeroBot/message"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
 	"image"
 	"image/color"
 	"image/png"
@@ -22,6 +15,14 @@ import (
 	"sync"
 	"time"
 	"unicode/utf8"
+
+	"github.com/FloatTech/floatbox/file"
+	"github.com/FloatTech/gg"
+	"github.com/FloatTech/imgfactory"
+	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/message"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 )
 
 type player struct {
@@ -150,15 +151,6 @@ var (
 	}
 )
 
-func init() {
-	if _, err := os.Stat(userPlate); os.IsNotExist(err) {
-		err := os.MkdirAll(userPlate, 0777)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
 func HandleChunDataByUsingText(handleJson []byte) string {
 	var chunData chun
 	_ = json.Unmarshal(handleJson, &chunData)
@@ -199,6 +191,12 @@ func HandleChunDataByUsingText(handleJson []byte) string {
 }
 
 func init() {
+	if _, err := os.Stat(userPlate); os.IsNotExist(err) {
+		err := os.MkdirAll(userPlate, 0777)
+		if err != nil {
+			panic(err)
+		}
+	}
 	nameTypeFont = LoadFontFace(nameFont, 36)
 	titleFont = LoadFontFace(titleFontPath, 20)
 	scoreFont = LoadFontFace(UniFontPath, 32)
