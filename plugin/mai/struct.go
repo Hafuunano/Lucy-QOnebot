@@ -23,6 +23,7 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
+	"golang.org/x/text/width"
 )
 
 type player struct {
@@ -264,7 +265,7 @@ func FullPageRender(data player, ctx *zero.Ctx) (raw image.Image, stat bool) {
 	// render Userinfo
 	b50Render.SetFontFace(nameTypeFont)
 	b50Render.SetColor(color.Black)
-	b50Render.DrawStringAnchored(strings.Join(strings.Split(data.Nickname, ""), " "), 825, 160, 0, 0)
+	b50Render.DrawStringAnchored(width.Widen.String(data.Nickname), 825, 160, 0, 0)
 	b50Render.Fill()
 	b50Render.SetFontFace(titleFont)
 	setPlateLocalStatus := GetUserInfoFromDatabase(ctx.Event.UserID)
@@ -359,7 +360,7 @@ func RenderCard(data playerData, num int) image.Image {
 			} else {
 				charFloatNum = float64(charWidth)
 			}
-			if charCount+charFloatNum > 20 {
+			if charCount+charFloatNum > 19 {
 				setBreaker = true
 				break
 			}
@@ -367,7 +368,7 @@ func RenderCard(data playerData, num int) image.Image {
 			charCount += charFloatNum
 		}
 		if setBreaker {
-			getSongName = truncated + "..."
+			getSongName = truncated + ".."
 		} else {
 			getSongName = truncated
 		}
@@ -382,11 +383,11 @@ func RenderCard(data playerData, num int) image.Image {
 	drawBackGround.SetColor(color.White)
 	drawBackGround.SetFontFace(titleFont)
 	multiTypeRender.Wait()
-	drawBackGround.DrawStringAnchored(getSongName, 250, 30, 0.5, 0.5)
+	drawBackGround.DrawStringAnchored(getSongName, 130, 32.5, 0, 0.5)
 	drawBackGround.Fill()
 	// draw acc
 	drawBackGround.SetFontFace(scoreFont)
-	drawBackGround.DrawStringAnchored(strconv.FormatFloat(data.Achievements, 'f', -1, 64)+"%", 220, 60, 0.5, 0.5)
+	drawBackGround.DrawStringAnchored(strconv.FormatFloat(data.Achievements, 'f', 4, 64)+"%", 129, 62.5, 0, 0.5)
 	// draw rate
 	drawBackGround.DrawImage(GetRateStatusAndRenderToImage(data.Rate), 305, 45)
 	drawBackGround.Fill()
