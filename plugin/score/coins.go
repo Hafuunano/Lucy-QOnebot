@@ -3,13 +3,14 @@ package score
 
 import (
 	"encoding/json"
-	coins "github.com/FloatTech/ZeroBot-Plugin/compounds/coins"
 	"math"
 	"math/rand"
 	"os"
 	"strconv"
 	"sync"
 	"time"
+
+	coins "github.com/FloatTech/ZeroBot-Plugin/compounds/coins"
 
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/zbputils/control"
@@ -56,6 +57,7 @@ func init() {
 		}
 		return true
 	})
+
 	// 借鉴了其他bot的功能 编写而成
 	engine.OnFullMatch("柠檬片总数", zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
 		uid := ctx.Event.UserID

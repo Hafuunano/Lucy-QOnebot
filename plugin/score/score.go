@@ -69,7 +69,7 @@ func init() {
 			_ = coins.UpdateUserTime(sdb, handledTodayNum, getNowUnixFormatElevenThirten)
 
 			mutex.Unlock()
-			time.Sleep(3 * time.Second) // wait three mins
+			time.Sleep(3 * time.Second) // wait three second
 			if time.Now().Hour() > 6 && time.Now().Hour() < 19 {
 				// package for test draw.
 				getTimeReplyMsg := coins.GetHourWord(time.Now()) // get time and msg

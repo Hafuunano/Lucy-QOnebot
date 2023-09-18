@@ -32,6 +32,14 @@ func init() {
 			s := md5.Sum(helper.StringToBytes(fmt.Sprintf("%d%d%d", now.Year(), now.Month(), now.Day())))
 			r := rand.New(rand.NewSource(int64(binary.LittleEndian.Uint64(s[:]))))
 			who := temp[r.Intn(len(temp))]
+			if who.Get("user_id").Int() == 2854196310 {
+				// re rand.
+				who = temp[r.Intn(len(temp))]
+				if who.Get("user_id").Int() == 2854196310 {
+					ctx.SendChain(message.Text("今天没有群RBQ惹 aww"))
+					return
+				}
+			}
 			cutename := who.Get("card").Str
 			cuteid := who.Get("user_id").Int()
 			if cutename == "" {
