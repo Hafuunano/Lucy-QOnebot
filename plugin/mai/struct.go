@@ -344,7 +344,15 @@ func RenderCard(data playerData, num int) image.Image {
 	var truncated string
 	var charFloatNum float64
 	getSongName := data.Title
-	getSongId := fmt.Sprintf("%05d", data.SongId)
+	var getSongId string
+	switch {
+	case data.SongId < 1000:
+		getSongId = fmt.Sprintf("%05d", data.SongId)
+	case data.SongId < 10000:
+		getSongId = fmt.Sprintf("1%d", data.SongId)
+	default:
+		getSongId = strconv.Itoa(data.SongId)
+	}
 	var Image image.Image
 	go func() {
 		defer CoverDownloader.Done()

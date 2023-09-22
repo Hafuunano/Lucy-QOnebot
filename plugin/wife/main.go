@@ -1,6 +1,11 @@
 package wife
 
 import (
+	"math/rand"
+	"strconv"
+	"strings"
+	"time"
+
 	coins "github.com/FloatTech/ZeroBot-Plugin/compounds/coins"
 	"github.com/FloatTech/floatbox/binary"
 	ctrl "github.com/FloatTech/zbpctrl"
@@ -11,10 +16,6 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"github.com/wdvxdr1123/ZeroBot/extension/single"
 	"github.com/wdvxdr1123/ZeroBot/message"
-	"math/rand"
-	"strconv"
-	"strings"
-	"time"
 )
 
 var (
@@ -361,7 +362,7 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(getlostSuccessedMsg))
 		}
 	})
-	engine.OnRegex(`^试着骗(\[CQ:at,qq=(\d+)\]\s?|(\d+))做我的老婆`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^骗(\[CQ:at,qq=(\d+)\]\s?|(\d+))`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		fid := ctx.State["regex_matched"].([]string)
 		fiancee, _ := strconv.ParseInt(fid[2]+fid[3], 10, 64)
 		if fiancee == 0 || ctx.Event.UserID == 0 {
