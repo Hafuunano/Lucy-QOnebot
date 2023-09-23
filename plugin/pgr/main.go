@@ -1,7 +1,6 @@
 package pgr // Package pgr hosted by Phigros-Library
 import (
 	"encoding/json"
-	"github.com/FloatTech/floatbox/web"
 	"image"
 	"image/color"
 	"net/http"
@@ -9,6 +8,8 @@ import (
 	"sync"
 	"time"
 	"unicode/utf8"
+
+	"github.com/FloatTech/floatbox/web"
 
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/gg"
@@ -70,6 +71,7 @@ func init() {
 		var AvatarWaiter sync.WaitGroup
 		var getAvatarFormat *gg.Context
 		var phidata []byte
+		var setGlobalStat = true
 		AvatarWaiter.Add(1)
 		dataWaiter.Add(1)
 		go func() {
@@ -78,6 +80,7 @@ func init() {
 			phidata, _ = web.GetData(getFullLink)
 			if phidata == nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Unoffical Phigros API 暂时无法工作 请过一段时候尝试"))
+				setGlobalStat = false
 				return
 			}
 			err := json.Unmarshal(phidata, &phigrosB19)
@@ -133,6 +136,9 @@ func init() {
 		renderHeaderText, _ := gg.LoadFontFace(font, 54)
 		getMainBgRender.SetFontFace(renderHeaderText)
 		dataWaiter.Wait()
+		if setGlobalStat == false {
+			return
+		}
 		getMainBgRender.DrawString("Player: "+phigrosB19.Content.PlayerID, 1490, 300)
 		getMainBgRender.DrawString("RankingScore: "+strconv.FormatFloat(phigrosB19.Content.RankingScore, 'f', 3, 64), 1490, 380)
 		getMainBgRender.DrawString("ChanllengeMode: ", 1490, 460) // +56
@@ -167,6 +173,7 @@ func init() {
 		var dataWaiter sync.WaitGroup
 		var getMainBgRender *gg.Context
 		var getAvatarFormat *gg.Context
+		var setGlobalStat = false
 		var phidata []byte
 		wg.Add(1)
 		avatarWaitGroup.Add(1)
@@ -204,6 +211,7 @@ func init() {
 			phidata, _ = web.GetData(getFullLink)
 			if phidata == nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Unoffical Phigros Library 暂时无法工作 请过一段时候尝试"))
+				setGlobalStat = false
 				return
 			}
 			err = json.Unmarshal(phidata, &phigrosB19)
@@ -261,6 +269,9 @@ func init() {
 		getMainBgRender.DrawString("Phigros", 422, 336)
 		getMainBgRender.DrawString("RankingScore查询", 422, 462)
 		dataWaiter.Wait()
+		if setGlobalStat == false {
+			return
+		}
 		// draw userinfo path
 		renderHeaderText, _ := gg.LoadFontFace(font, 54)
 		getMainBgRender.SetFontFace(renderHeaderText)
