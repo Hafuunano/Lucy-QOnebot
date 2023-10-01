@@ -76,8 +76,7 @@ func init() {
 	)
 	engine.OnFullMatch("今日人品", getTarot).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
-			user := ctx.Event.UserID
-			userS := strconv.FormatInt(user, 10)
+			userS := strconv.FormatInt(ctx.Event.UserID, 10)
 			now := time.Now().Format("20060102")
 			userPic := strconv.FormatInt(ctx.Event.UserID, 10) + time.Now().Format("20060102") + ".png"
 			var avatarFormat *imgfactory.Factory
@@ -106,7 +105,7 @@ func init() {
 				// modify this possibility to 40-100, don't be to low.
 				randEveryone := fcext.RandSenderPerDayN(ctx.Event.UserID, 40)
 				// use map to store.
-				result[user] = randEveryone + 60
+				result[ctx.Event.UserID] = randEveryone + 60
 				// set rune
 				charCount := 0.0
 				setBreaker := false

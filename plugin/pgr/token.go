@@ -1,8 +1,9 @@
 package pgr
 
 import (
-	"github.com/tidwall/gjson"
 	"strconv"
+
+	"github.com/tidwall/gjson"
 )
 
 func RawJsonParse(raw string) (qq int64, Session string) {

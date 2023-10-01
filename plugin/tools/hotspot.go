@@ -2,8 +2,9 @@
 package tools
 
 import (
-	"github.com/FloatTech/AnimeAPI/bilibili"
 	"strconv"
+
+	"github.com/FloatTech/AnimeAPI/bilibili"
 
 	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/floatbox/web"

@@ -1,4 +1,4 @@
-// Package funwork 使用国内源的iw233 + 新背景实现
+// Package funwork use img moehu api.
 package funwork
 
 import (
@@ -16,12 +16,12 @@ import (
 )
 
 var (
-	limit = rate.NewManager[int64](time.Minute*3, 8)
+	limitForPhoto = rate.NewManager[int64](time.Minute*3, 8)
 )
 
 func init() {
 	engine.OnFullMatch("来份二次元").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
-		if !limit.Load(ctx.Event.UserID).Acquire() {
+		if !limitForPhoto.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
 		realLink, _ := bilibili.GetRealURL("https://img.moehu.org/pic.php?id=img1")
@@ -36,7 +36,7 @@ func init() {
 	})
 
 	engine.OnFullMatch("来份星空").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		if !limit.Load(ctx.Event.UserID).Acquire() {
+		if !limitForPhoto.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
 		realLink, _ := bilibili.GetRealURL("https://img.moehu.org/pic.php?id=xingk")
@@ -49,7 +49,7 @@ func init() {
 	})
 
 	engine.OnFullMatch("来份兽耳").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		if !limit.Load(ctx.Event.UserID).Acquire() {
+		if !limitForPhoto.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
 		realLink, _ := bilibili.GetRealURL("https://img.moehu.org/pic.php?id=kemonomimi")
@@ -64,7 +64,7 @@ func init() {
 	})
 
 	engine.OnFullMatch("来份白毛").SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {
-		if !limit.Load(ctx.Event.UserID).Acquire() {
+		if !limitForPhoto.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
 		realLink, _ := bilibili.GetRealURL("https://img.moehu.org/pic.php?id=yin")
@@ -78,7 +78,7 @@ func init() {
 		ctx.DeleteMessage(messageID)
 	})
 	engine.OnFullMatch("来份猫猫表情包").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
-		if !limit.Load(ctx.Event.UserID).Acquire() {
+		if !limitForPhoto.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
 		data, err := web.GetData("https://img.moehu.org/pic.php?id=miao&return=json")
@@ -90,7 +90,7 @@ func init() {
 		ctx.Send(message.Image(picURL))
 	})
 	engine.OnFullMatch("来份兽耳酱表情包").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
-		if !limit.Load(ctx.Event.UserID).Acquire() {
+		if !limitForPhoto.Load(ctx.Event.UserID).Acquire() {
 			return
 		}
 		data, err := web.GetData("https://img.moehu.org/pic.php?id=kemomimi&return=json")

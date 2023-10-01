@@ -69,7 +69,7 @@ func init() {
 	dict := make(map[string][]string) // this dict is used to reply
 	// dict path.
 	dict["block"] = []string{"嗯哼？貌似没有找到哦w", "再试试哦w，或许有帮助w", "运气不太好哦，想一下办法呢x"}
-	dict["success"] = []string{"Lucky To You~", "恭喜哦ww~ ", "这边来恭喜一下哦w～", "貌似很成功的一次尝试呢w~"}
+	dict["success"] = []string{"Lucky For You~", "恭喜哦ww~ ", "这边来恭喜一下哦w～", "貌似很成功的一次尝试呢w~"}
 	dict["failed"] = []string{"今天的运气有一点背哦~这一次没有成功呢x", "_(:з」∠)_下次还有机会 抱抱w", "没关系哦，虽然失败了但还有机会呢x"}
 	dict["ntr"] = []string{"嗯哼～这位还是成功了呢x", "aaa 好怪 不过还是让你通过了 ^^ "}
 	dict["lost_failed"] = []string{"为什么要分呢? 让咱捏捏w", "太坏了啦！不许！"}

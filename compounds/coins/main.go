@@ -298,7 +298,7 @@ func WagerCoinsInsert(sdb *Scoredb, modifyCoins int, winner int, expected int) (
 }
 
 func CheckUserCoins(coins int) bool { // 参与一次200个柠檬片
-	return coins-200 >= 0
+	return coins-60 >= 0
 }
 
 func GetHourWord(t time.Time) (reply string) {

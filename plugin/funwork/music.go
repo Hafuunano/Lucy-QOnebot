@@ -15,14 +15,17 @@ import (
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
+
+var limitForMusic = rate.NewManager[int64](time.Minute*3, 8)
 
 func init() {
 	engine.OnRegex(`^(.{0,2})点歌\s?(.{1,25})$`).SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {
-			if !limit.Load(ctx.Event.GroupID).Acquire() {
-				ctx.SendChain(message.Text("触发保护机制 请过会使用哦."))
+			if !limitForMusic.Load(ctx.Event.GroupID).Acquire() {
+				ctx.SendChain(message.Text("太快了哦，麻烦慢一点~"))
 				return
 			}
 			// switch 平台

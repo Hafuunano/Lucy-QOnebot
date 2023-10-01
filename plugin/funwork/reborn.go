@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"time"
 
 	"encoding/json"
 
 	wr "github.com/mroth/weightedrand"
 	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
@@ -23,9 +25,10 @@ var (
 		wr.Choice{Item: "雌雄同体", Weight: 1001},
 		wr.Choice{Item: "猫猫!", Weight: 10000},
 		wr.Choice{Item: "狗狗!", Weight: 10000},
-		wr.Choice{Item: "🐉!", Weight: 3000},
+		wr.Choice{Item: "🐉~", Weight: 3000},
 		wr.Choice{Item: "龙猫~", Weight: 3000},
 	)
+	rebornTimerManager = rate.NewManager[int64](time.Minute*2, 8)
 )
 
 type ratego []struct {
@@ -55,7 +58,8 @@ func init() {
 	}()
 	engine.OnFullMatchGroup([]string{"reborn", "我要重生", "我要重开"}).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			if !limit.Load(ctx.Event.GroupID).Acquire() {
+			if !rebornTimerManager.Load(ctx.Event.GroupID).Acquire() {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("太快了哦，麻烦慢一点~"))
 				return
 			}
 			if rand.Int31() > 1<<27 {
