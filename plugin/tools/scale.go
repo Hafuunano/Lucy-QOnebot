@@ -11,21 +11,16 @@ import (
 
 	hf "github.com/FloatTech/AnimeAPI/huggingface"
 	"github.com/FloatTech/floatbox/web"
-	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
-const (
-	realcuganRepo = "shichen1231/Real-CUGAN"
-)
-
 func init() { // 插件主体
 	engine.OnPrefix("waifu2x", zero.MustProvidePicture).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(message.Text("Lucy正在操作w...."))
-			realcuganURL := fmt.Sprintf(hf.HTTPSPredictPath, realcuganRepo)
+			ctx.SendChain(message.Text("Lucy正在尝试哦~"))
+			realcuganURL := "https://moemagicmango-real-cugan.hf.space/api/predict"
 			for _, url := range ctx.State["image_url"].([]string) {
 				imgdata, err := web.GetData(url)
 				if err != nil {
@@ -37,6 +32,7 @@ func init() { // 插件主体
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
+				fmt.Print(2)
 				// 初始化参数
 				var (
 					fashu = ctx.Event.Message.ExtractPlainText()
@@ -82,16 +78,13 @@ func init() { // 插件主体
 					return
 				}
 				data, err := web.PostData(realcuganURL, "application/json", buf)
+				fmt.Print(data)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
 				imgStr := gjson.ParseBytes(data).Get("data.0").String()
-				m := message.Message{ctxext.FakeSenderForwardNode(ctx, message.Text(scale, "倍", con, "分支反馈成功w")),
-					ctxext.FakeSenderForwardNode(ctx, message.Image("base64://"+strings.TrimPrefix(imgStr, "data:image/png;base64,")))}
-				if id := ctx.Send(m).ID(); id == 0 {
-					ctx.SendChain(message.Text("ERROR: 可能被风控或下载图片用时过长，请耐心等待"))
-				}
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("渲染完成~"), message.Image("base64://"+strings.TrimPrefix(imgStr, "data:image/png;base64,")))
 			}
 		})
 }
