@@ -21,7 +21,6 @@ var LeaveTimeManager = rate.NewManager[int64](time.Hour*12, 4)
 
 func init() {
 	timer := time.NewTimer(time.Until(getNextExecutionTime()))
-	// 启动一个 goroutine 监听定时器的到期事件
 	go func() {
 		for range timer.C {
 			ResetToInitalizeMode()

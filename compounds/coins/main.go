@@ -64,25 +64,6 @@ func (WagerTable) TableName() string {
 	return "wagertable"
 }
 
-// TableName ...
-func (Globaltable) TableName() string {
-	return "global"
-}
-
-// TableName ...
-func (Scoretable) TableName() string {
-	return "score"
-}
-
-// TableName ...
-func (Signintable) TableName() string {
-	return "sign_in"
-}
-
-func (WagerUserInputTable) TableName() string {
-	return "wager_user"
-}
-
 // Initialize 初始化ScoreDB数据库
 func Initialize(dbpath string) *Scoredb {
 	var err error
@@ -106,14 +87,6 @@ func Initialize(dbpath string) *Scoredb {
 	gdb.AutoMigrate(&Scoretable{}).AutoMigrate(&Signintable{}).AutoMigrate(&Globaltable{}).AutoMigrate(&WagerTable{}).AutoMigrate(&WagerUserInputTable{}).AutoMigrate(&ProtectModeIndex{})
 	return (*Scoredb)(gdb)
 }
-
-/*
-// Close ...
-func Close(sdb *Scoredb) error {
-	db := (*gorm.DB)(sdb)
-	return db.Close()
-}
-*/
 
 // GetScoreByUID 取得分数
 func GetScoreByUID(sdb *Scoredb, uid int64) (s Scoretable) {

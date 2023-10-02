@@ -3,12 +3,13 @@ package chat
 
 import (
 	"encoding/json"
+	"os"
+	"strings"
+
 	"github.com/FloatTech/zbputils/ctxext"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
-	"os"
-	"strings"
 )
 
 var (
@@ -51,7 +52,7 @@ func init() {
 			Role:    "user",
 			Content: prompts,
 		})
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("msg received, handling..."))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经拿到消息了哦~不过需要等待一会呢w"))
 		resp, err := completions(messages, os.Getenv("gptkey"))
 		if err != nil {
 			ctx.SendChain(message.Text("Some errors occurred when requesting :( : ", err))

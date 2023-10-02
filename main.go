@@ -84,7 +84,8 @@ func init() {
 		CommandPrefix:  *prefix,
 		SuperUsers:     sus,
 		Driver:         []zero.Driver{config.W[0]},
-		MaxProcessTime: time.Minute * 2,
+		MaxProcessTime: time.Minute * 4,
+		RingLen:        0,
 	}
 }
 

@@ -25,8 +25,7 @@ func init() {
 		}
 		ctx.SendChain(message.Text("今日的龙王是~", name, "哦"))
 	})
-
-	// https://github.com/Kittengarten/KittenCore 抄的
+	
 	engine.OnFullMatch("随机本群精华消息").SetBlock(true).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		essenceList := ctx.GetThisGroupEssenceMessageList()
 		essenceCount := len(essenceList.Array())

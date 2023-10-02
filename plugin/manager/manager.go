@@ -2,10 +2,6 @@
 package manager
 
 import (
-	"fmt"
-	"github.com/FloatTech/floatbox/web"
-	"github.com/tidwall/gjson"
-	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 	"math/rand"
 	"net/url"
 	"sort"
@@ -13,8 +9,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/FloatTech/floatbox/web"
+	"github.com/tidwall/gjson"
+	"github.com/wdvxdr1123/ZeroBot/utils/helper"
+
 	ctrl "github.com/FloatTech/zbpctrl"
-	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
@@ -22,8 +21,6 @@ import (
 	sql "github.com/FloatTech/sqlite"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/ctxext"
-
-	"github.com/FloatTech/ZeroBot-Plugin/plugin/manager/timer"
 )
 
 const (
@@ -39,27 +36,14 @@ const (
 		"- 修改头衔@QQ XXX\n" +
 		"- 申请头衔 XXX\n" +
 		"- 踢出群聊@QQ\n" +
-		"- 退出群聊 1234@bot\n" +
-		"- 群聊转发 1234 XXX\n" +
-		"- 私聊转发 0000 XXX\n" +
-		"- 在MM月dd日的hh点mm分时(用https://url)提醒大家XXX\n" +
-		"- 在MM月[每周 | 周几]的hh点mm分时(用https://url)提醒大家XXX\n" +
-		"- 取消在MM月dd日的hh点mm分的提醒\n" +
-		"- 取消在MM月[每周 | 周几]的hh点mm分的提醒\n" +
-		"- 在\"cron\"时(用[url])提醒大家[xxx]\n" +
-		"- 取消在\"cron\"的提醒\n" +
-		"- 列出所有提醒\n" +
-		"- 翻牌\n" +
 		"- 设置欢迎语XXX 可选添加 [{at}] [{nickname}] [{avatar}] [{id}] {at}可在发送时艾特被欢迎者 {nickname}是被欢迎者名字 {avatar}是被欢迎者头像 {id}是被欢迎者QQ号\n" +
 		"- 测试欢迎语\n" +
 		"- 设置告别辞 参数同设置欢迎语\n" +
-		"- 测试告别辞\n" +
-		"- [开启 | 关闭]入群验证"
+		"- 测试告别辞\n"
 )
 
 var (
-	db    = &sql.Sqlite{}
-	clock timer.Clock
+	db = &sql.Sqlite{}
 )
 
 func init() { // 插件主体
@@ -75,7 +59,6 @@ func init() { // 插件主体
 		if err != nil {
 			panic(err)
 		}
-		clock = timer.NewClock(db)
 		err = db.Create("welcome", &welcome{})
 		if err != nil {
 			panic(err)
@@ -297,72 +280,6 @@ func init() { // 插件主体
 			ctx.SendChain(message.Text("a 貌似出现了一些问题哦~ 或许再试一下呢x"))
 		}
 	})
-	// 定时提醒
-	engine.OnRegex(`^在(.{1,2})月(.{1,3}日|每?周.?)的(.{1,3})点(.{1,3})分时(用.+)?提醒大家(.*)`, zero.AdminPermission, zero.OnlyGroup).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			dateStrs := ctx.State["regex_matched"].([]string)
-			ts := timer.GetFilledTimer(dateStrs, ctx.Event.SelfID, ctx.Event.GroupID, false)
-			if ts.En() {
-				go clock.RegisterTimer(ts, true, false)
-				ctx.SendChain(message.Text("记住了~"))
-			} else {
-				ctx.SendChain(message.Text("参数非法:" + ts.Alert))
-			}
-		})
-	// 定时 cron 提醒
-	engine.OnRegex(`^在"(.*)"时(用.+)?提醒大家(.*)`, zero.AdminPermission, zero.OnlyGroup).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			dateStrs := ctx.State["regex_matched"].([]string)
-			var url, alert string
-			switch len(dateStrs) {
-			case 4:
-				url = strings.TrimPrefix(dateStrs[2], "用")
-				alert = dateStrs[3]
-			case 3:
-				alert = dateStrs[2]
-			default:
-				ctx.SendChain(message.Text("参数非法!"))
-				return
-			}
-			logrus.Debugln("[manager] cron:", dateStrs[1])
-			ts := timer.GetFilledCronTimer(dateStrs[1], alert, url, ctx.Event.SelfID, ctx.Event.GroupID)
-			if clock.RegisterTimer(ts, true, false) {
-				ctx.SendChain(message.Text("记住了~"))
-			} else {
-				ctx.SendChain(message.Text("参数非法:" + ts.Alert))
-			}
-		})
-	// 取消定时
-	engine.OnRegex(`^取消在(.{1,2})月(.{1,3}日|每?周.?)的(.{1,3})点(.{1,3})分的提醒`, zero.AdminPermission, zero.OnlyGroup).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			dateStrs := ctx.State["regex_matched"].([]string)
-			ts := timer.GetFilledTimer(dateStrs, ctx.Event.SelfID, ctx.Event.GroupID, true)
-			ti := ts.GetTimerID()
-			ok := clock.CancelTimer(ti)
-			if ok {
-				ctx.SendChain(message.Text("取消成功~"))
-			} else {
-				ctx.SendChain(message.Text("没有这个定时器哦~"))
-			}
-		})
-	// 取消 cron 定时
-	engine.OnRegex(`^取消在"(.*)"的提醒`, zero.AdminPermission, zero.OnlyGroup).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			dateStrs := ctx.State["regex_matched"].([]string)
-			ts := timer.Timer{Cron: dateStrs[1], GrpID: ctx.Event.GroupID}
-			ti := ts.GetTimerID()
-			ok := clock.CancelTimer(ti)
-			if ok {
-				ctx.SendChain(message.Text("取消成功~"))
-			} else {
-				ctx.SendChain(message.Text("没有这个定时器哦~"))
-			}
-		})
-	// 列出本群所有定时
-	engine.OnFullMatch("列出所有提醒", zero.AdminPermission, zero.OnlyGroup).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(message.Text(clock.ListTimers(ctx.Event.GroupID)))
-		})
 	// 随机点名
 	engine.OnFullMatchGroup([]string{"翻牌"}, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {
@@ -406,45 +323,6 @@ func init() { // 插件主体
 					ctx.SendGroupMessage(ctx.Event.GroupID, message.ParseMessageFromString(welcometocq(ctx, w.Msg)))
 				} else {
 					ctx.SendChain(message.Text("欢迎~"))
-				}
-				c, ok := control.Lookup("manager")
-				if ok {
-					enable := c.GetData(ctx.Event.GroupID)&1 == 1
-					if enable {
-						uid := ctx.Event.UserID
-						a := rand.Intn(100)
-						b := rand.Intn(100)
-						r := a + b
-						ctx.SendChain(message.At(uid), message.Text(fmt.Sprintf("考你一道题：%d+%d=?\n如果60秒之内答不上来，%s就要把你踢出去了哦~", a, b, zero.BotConfig.NickName[0])))
-						// 匹配发送者进行验证
-						rule := func(ctx *zero.Ctx) bool {
-							for _, elem := range ctx.Event.Message {
-								if elem.Type == "text" {
-									text := strings.ReplaceAll(elem.Data["text"], " ", "")
-									ans, err := strconv.Atoi(text)
-									if err == nil {
-										if ans != r {
-											ctx.SendChain(message.Text("答案不对哦，再想想吧~"))
-											return false
-										}
-										return true
-									}
-								}
-							}
-							return false
-						}
-						next := zero.NewFutureEvent("message", 999, false, ctx.CheckSession(), rule)
-						recv, cancel := next.Repeat()
-						select {
-						case <-time.After(time.Minute):
-							cancel()
-							ctx.SendChain(message.Text("拜拜啦~"))
-							ctx.SetGroupKick(ctx.Event.GroupID, uid, false)
-						case <-recv:
-							cancel()
-							ctx.SendChain(message.Text("答对啦~"))
-						}
-					}
 				}
 			}
 		})
@@ -513,31 +391,6 @@ func init() { // 插件主体
 				userid := ctx.Event.UserID
 				ctx.SendChain(message.Text(ctx.CardOrNickName(userid), "(", userid, ")", "离开了我们..."))
 			}
-		})
-	// 入群后验证开关
-	engine.OnRegex(`^(.*)入群验证$`, zero.OnlyGroup, zero.AdminPermission).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			option := ctx.State["regex_matched"].([]string)[1]
-			c, ok := control.Lookup("manager")
-			if ok {
-				data := c.GetData(ctx.Event.GroupID)
-				switch option {
-				case "开启", "打开", "启用":
-					data |= 1
-				case "关闭", "关掉", "禁用":
-					data &= 0x7fffffff_fffffffe
-				default:
-					return
-				}
-				err := c.SetData(ctx.Event.GroupID, data)
-				if err == nil {
-					ctx.SendChain(message.Text("已", option))
-					return
-				}
-				ctx.SendChain(message.Text("出错啦: ", err))
-				return
-			}
-			ctx.SendChain(message.Text("找不到服务!"))
 		})
 
 	engine.OnFullMatch("优质睡眠", zero.OnlyToMe, zero.OnlyGroup).SetBlock(true).
