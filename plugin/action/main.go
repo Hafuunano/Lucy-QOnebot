@@ -21,8 +21,8 @@ var (
 
 func init() {
 	engine := control.Register("action", &ctrl.Options[*zero.Ctx]{
-		DisableOnDefault: true,
-		Help:             "Lucy容易被动触发语言 \n- 默认禁用 可以自行打开哦",
+		DisableOnDefault: false,
+		Help:             "Lucy容易被动触发语言\n",
 	})
 	engine.OnFullMatchGroup([]string{"喵", "喵喵", "喵喵喵"}).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {

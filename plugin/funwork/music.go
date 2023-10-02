@@ -24,7 +24,7 @@ func init() {
 				ctx.SendChain(message.Text("太快了哦，麻烦慢一点~"))
 				return
 			}
-			requestURL := "https://nem.lemonkoi.one/search?limit=1&type=1&keywords=" + url.QueryEscape(ctx.State["regex_matched"].([]string)[1])
+			requestURL := "https://nem.lemonkoi.one/search?limit=1&keywords=" + url.QueryEscape(ctx.State["regex_matched"].([]string)[1])
 			data, err := web.GetData(requestURL)
 			var webStatusCode *http.Response
 			if err != nil {
