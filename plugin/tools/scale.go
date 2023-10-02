@@ -32,7 +32,6 @@ func init() { // 插件主体
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				fmt.Print(2)
 				// 初始化参数
 				var (
 					fashu = ctx.Event.Message.ExtractPlainText()
@@ -78,7 +77,6 @@ func init() { // 插件主体
 					return
 				}
 				data, err := web.PostData(realcuganURL, "application/json", buf)
-				fmt.Print(data)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
