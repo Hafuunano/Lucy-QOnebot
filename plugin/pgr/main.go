@@ -169,7 +169,7 @@ func init() {
 		var dataWaiter sync.WaitGroup
 		var getMainBgRender *gg.Context
 		var getAvatarFormat *gg.Context
-		var setGlobalStat = false
+		var setGlobalStat = true
 		var phidata []byte
 		wg.Add(1)
 		avatarWaitGroup.Add(1)
