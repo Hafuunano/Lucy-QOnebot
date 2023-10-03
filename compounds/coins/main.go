@@ -64,6 +64,25 @@ func (WagerTable) TableName() string {
 	return "wagertable"
 }
 
+// TableName ...
+func (Globaltable) TableName() string {
+	return "global"
+}
+
+// TableName ...
+func (Scoretable) TableName() string {
+	return "score"
+}
+
+// TableName ...
+func (Signintable) TableName() string {
+	return "sign_in"
+}
+
+func (WagerUserInputTable) TableName() string {
+	return "wager_user"
+}
+
 // Initialize 初始化ScoreDB数据库
 func Initialize(dbpath string) *Scoredb {
 	var err error
