@@ -1,15 +1,19 @@
 package pgr // Package pgr hosted by Phigros-Library
 import (
 	"encoding/json"
+	"fmt"
 	"image"
 	"image/color"
+	"math/rand"
 	"net/http"
+	"net/url"
 	"strconv"
 	"sync"
 	"time"
 	"unicode/utf8"
 
 	"github.com/FloatTech/floatbox/web"
+	"github.com/tidwall/gjson"
 
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/gg"
@@ -18,11 +22,43 @@ import (
 	"github.com/disintegration/imaging"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
+	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 )
 
 // too lazy,so this way is to use thrift host server (Working on HiMoYo Cloud.) (replace: now use PUA API)
 
 // update: use PhigrosUnlimitedAPI + Phigros Library as Maintainer.
+
+type QuerySongDetailsGenerator struct {
+	Status  bool `json:"status"`
+	Content struct {
+		Songid string `json:"songid"`
+		Info   struct {
+			Songname    string `json:"songname"`
+			Composer    string `json:"composer"`
+			Illustrator string `json:"illustrator"`
+			ChartDetail struct {
+				EZ struct {
+					Rating  float64 `json:"rating"`
+					Charter string  `json:"charter"`
+				} `json:"EZ"`
+				HD struct {
+					Rating  float64 `json:"rating"`
+					Charter string  `json:"charter"`
+				} `json:"HD"`
+				In struct {
+					Rating  float64 `json:"rating"`
+					Charter string  `json:"charter"`
+				} `json:"In"`
+				At struct {
+					Rating  float64 `json:"rating"`
+					Charter string  `json:"charter"`
+				} `json:"At"`
+				LevelList []float64 `json:"level_list"`
+			} `json:"chartDetail"`
+		} `json:"info"`
+	} `json:"content"`
+}
 
 var (
 	engine = control.Register("phigros", &ctrl.Options[*zero.Ctx]{
@@ -30,6 +66,7 @@ var (
 		Help:              "Hi NekoPachi!\n",
 		PrivateDataFolder: "phi",
 	})
+	router = "https://pgrapi.impart.icu"
 )
 
 func init() {
@@ -76,7 +113,7 @@ func init() {
 		dataWaiter.Add(1)
 		go func() {
 			defer dataWaiter.Done()
-			getFullLink := "https://pgrapi.impart.icu/api/phi/bests?session=" + userData.PhiSession + "&overflow=2"
+			getFullLink := router + "/api/phi/bests?session=" + userData.PhiSession + "&overflow=2"
 			phidata, _ = web.GetData(getFullLink)
 			if phidata == nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Unoffical Phigros API 暂时无法工作 请过一段时候尝试"))
@@ -132,7 +169,7 @@ func init() {
 		renderHeaderText, _ := gg.LoadFontFace(font, 54)
 		getMainBgRender.SetFontFace(renderHeaderText)
 		dataWaiter.Wait()
-		if setGlobalStat == false {
+		if !setGlobalStat {
 			return
 		}
 		getMainBgRender.DrawString("Player: "+phigrosB19.Content.PlayerID, 1490, 300)
@@ -181,8 +218,6 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("由于Session特殊性，请前往 https://pgr.impart.icu 获取绑定码进行绑定"))
 			return
 		}
-
-		//	GetSessionByPhigrosLibraryProject(getDataSession, ctx)
 		// getPhigrosKey := os.Getenv("puakey")
 		userData := GetUserInfoFromDatabase(ctx.Event.UserID)
 		getRoll := ctx.State["regex_matched"].([]string)[1]
@@ -203,7 +238,7 @@ func init() {
 		// data handling.
 		go func() {
 			defer dataWaiter.Done()
-			getFullLink := "https://pgrapi.impart.icu/api/phi/bests?session=" + userData.PhiSession + "&overflow=" + strconv.Itoa(int(getOverFlowNumber))
+			getFullLink := router + "/api/phi/bests?session=" + userData.PhiSession + "&overflow=" + strconv.Itoa(int(getOverFlowNumber))
 			phidata, _ = web.GetData(getFullLink)
 			if phidata == nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前 Unoffical Phigros Library 暂时无法工作 请过一段时候尝试"))
@@ -267,7 +302,7 @@ func init() {
 		getMainBgRender.DrawString("Phigros", 422, 336)
 		getMainBgRender.DrawString("RankingScore查询", 422, 462)
 		dataWaiter.Wait()
-		if setGlobalStat == false {
+		if !setGlobalStat {
 			return
 		}
 		// draw userinfo path
@@ -301,4 +336,68 @@ func init() {
 		_ = getMainBgRender.SavePNG(engine.DataFolder() + "save/" + "roll" + strconv.Itoa(int(ctx.Event.UserID)) + ".png")
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("file:///"+file.BOTPATH+"/"+engine.DataFolder()+"save/"+"roll"+strconv.Itoa(int(ctx.Event.UserID))+".png"))
 	})
+	engine.OnRegex(`^[! ！/]pgr\ssearch\s(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		// search a song: router: /api/phi/search
+		getParams := ctx.State["regex_matched"].([]string)[0]
+		queryData, err := web.GetData(url.QueryEscape(router + "/api/phi/search?params=" + getParams))
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			return
+		}
+		toString := helper.BytesToString(queryData)
+		/*
+			{
+			    "status": true,
+			    "content": {
+			        "song_name": "DESTRUCTION 3,2,1",
+			        "song_ratio": 0.45454545454545453,
+			        "song_id": "DESTRUCTION321.Normal1zervsBrokenNerdz"
+			    }
+			}
+		*/
+		if !gjson.Get(toString, "status").Bool() {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("无法查询到目前歌曲"))
+			return
+		}
+		//	getSongName := gjson.Get("content.song_name").Str
+		//	getSongRatio := gjson.Get(toString, "content.song_ratio").Str
+		getSongID := gjson.Get(toString, "song_id").Str
+		// query to /api/phi/song , get song details.
+		querySongDetailsData, err := web.GetData(url.QueryEscape(router + "/api/phi/song?songid=" + getSongID))
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			return
+		}
+		var getSongDetails QuerySongDetailsGenerator
+		err = json.Unmarshal(querySongDetailsData, &getSongDetails)
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			return
+		}
+		var setATStats string
+		if getSongDetails.Content.Info.ChartDetail.At.Charter != "" {
+			setATStats = "AT: " + strconv.FormatFloat(getSongDetails.Content.Info.ChartDetail.At.Rating, 'f', 1, 64) + " - " + getSongDetails.Content.Info.ChartDetail.At.Charter
+		}
+		result := fmt.Sprintf("歌曲名: %s \n 作曲: %s \n 曲绘: %s \n歌曲详细Rating：\nEZ: %s - %s \n HD: %s - %s \nAT: %s - %s \n %s", getSongDetails.Content.Info.Songname, getSongDetails.Content.Info.Composer, getSongDetails.Content.Info.Illustrator, floatToString(getSongDetails.Content.Info.ChartDetail.EZ.Rating), getSongDetails.Content.Info.ChartDetail.EZ.Charter, floatToString(getSongDetails.Content.Info.ChartDetail.HD.Rating), getSongDetails.Content.Info.ChartDetail.HD.Charter, floatToString(getSongDetails.Content.Info.ChartDetail.In.Rating), getSongDetails.Content.Info.ChartDetail.In.Charter, setATStats)
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(result))
+	})
+	engine.OnRegex(`^[! ！/]pgr\srandom`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		data, err := web.GetData(router + "/api/phi/rand")
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			return
+		}
+		dataToSting := helper.BytesToString(data)
+		getSongName := gjson.Get(dataToSting, "content.songname").Str
+		getSongDiff := gjson.Get(dataToSting, "content.level").Str
+		getSongRating := gjson.Get(dataToSting, "content.rating").Str
+		getSongComposer := gjson.Get(dataToSting, "content.composer").Str
+		// cute reply list ^^Meow.
+		randomList := []string{"来看看这个哦~或许可以呢xwx", "今天先试试这个吧^^", "~Have a try qwq"}
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(randomList[rand.Intn(len(randomList))], "\n"+getSongName+" - "+getSongDiff+" "+getSongRating+" by "+getSongComposer))
+	})
+}
+
+func floatToString(floatnum float64) string {
+	return strconv.FormatFloat(floatnum, 'f', 1, 64)
 }

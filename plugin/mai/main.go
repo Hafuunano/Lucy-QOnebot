@@ -3,7 +3,14 @@ package mai
 import (
 	"bytes"
 	"encoding/json"
+	"image"
+	"math/rand"
+	rand2 "math/rand"
+	"os"
+	"strconv"
+
 	"github.com/FloatTech/floatbox/binary"
+	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/gg"
 	ctrl "github.com/FloatTech/zbpctrl"
@@ -11,10 +18,6 @@ import (
 	"github.com/FloatTech/zbputils/img/text"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
-	"image"
-	rand2 "math/rand"
-	"os"
-	"strconv"
 )
 
 var (
@@ -24,6 +27,28 @@ var (
 		PrivateDataFolder: "maidx",
 	})
 )
+
+type MaiSongData []struct {
+	Id     string    `json:"id"`
+	Title  string    `json:"title"`
+	Type   string    `json:"type"`
+	Ds     []float64 `json:"ds"`
+	Level  []string  `json:"level"`
+	Cids   []int     `json:"cids"`
+	Charts []struct {
+		Notes   []int  `json:"notes"`
+		Charter string `json:"charter"`
+	} `json:"charts"`
+	BasicInfo struct {
+		Title       string `json:"title"`
+		Artist      string `json:"artist"`
+		Genre       string `json:"genre"`
+		Bpm         int    `json:"bpm"`
+		ReleaseDate string `json:"release_date"`
+		From        string `json:"from"`
+		IsNew       bool   `json:"is_new"`
+	} `json:"basic_info"`
+}
 
 func init() {
 	engine.OnRegex(`^[！!]chun$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
@@ -138,4 +163,26 @@ func init() {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已经设定好了哦~"))
 
 	})
+	//
+	engine.OnFullMatch("mai什么").SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		// on load
+		// get file first
+		SongData, err := os.ReadFile(engine.DataFolder() + "music_data.json")
+		if err != nil {
+			getSongData, err := web.GetData("https://www.diving-fish.com/api/maimaidxprober/music_data")
+			if err != nil {
+				panic(err)
+			}
+			os.WriteFile(file.BOTPATH+engine.DataFolder()+"music_data.json", getSongData, 0777)
+			SongData, _ = os.ReadFile(engine.DataFolder() + "music_data.json")
+		}
+		var SongDataRandomTools MaiSongData
+		err = json.Unmarshal(SongData, &SongDataRandomTools)
+		if err != nil {
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
+			return
+		}
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("来试试~ "+SongDataRandomTools[rand.Intn(len(SongDataRandomTools))].BasicInfo.Title+" 吧~\n"))
+	})
+	// TODO: 查歌.
 }
