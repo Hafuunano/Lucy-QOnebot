@@ -338,8 +338,8 @@ func init() {
 	})
 	engine.OnRegex(`^[! ！/]pgr\ssearch\s(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		// search a song: router: /api/phi/search
-		getParams := ctx.State["regex_matched"].([]string)[0]
-		queryData, err := web.GetData(url.QueryEscape(router + "/api/phi/search?params=" + getParams))
+		getParams := ctx.State["regex_matched"].([]string)[1]
+		queryData, err := web.GetData((router + "/api/phi/search?params=" + url.QueryEscape(getParams)))
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
 			return
@@ -361,9 +361,9 @@ func init() {
 		}
 		//	getSongName := gjson.Get("content.song_name").Str
 		//	getSongRatio := gjson.Get(toString, "content.song_ratio").Str
-		getSongID := gjson.Get(toString, "song_id").Str
+		getSongID := gjson.Get(toString, "content.song_id").Str
 		// query to /api/phi/song , get song details.
-		querySongDetailsData, err := web.GetData(url.QueryEscape(router + "/api/phi/song?songid=" + getSongID))
+		querySongDetailsData, err := web.GetData(router + "/api/phi/song?songid=" + getSongID)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
 			return
@@ -378,7 +378,7 @@ func init() {
 		if getSongDetails.Content.Info.ChartDetail.At.Charter != "" {
 			setATStats = "AT: " + strconv.FormatFloat(getSongDetails.Content.Info.ChartDetail.At.Rating, 'f', 1, 64) + " - " + getSongDetails.Content.Info.ChartDetail.At.Charter
 		}
-		result := fmt.Sprintf("歌曲名: %s \n 作曲: %s \n 曲绘: %s \n歌曲详细Rating：\nEZ: %s - %s \n HD: %s - %s \nAT: %s - %s \n %s", getSongDetails.Content.Info.Songname, getSongDetails.Content.Info.Composer, getSongDetails.Content.Info.Illustrator, floatToString(getSongDetails.Content.Info.ChartDetail.EZ.Rating), getSongDetails.Content.Info.ChartDetail.EZ.Charter, floatToString(getSongDetails.Content.Info.ChartDetail.HD.Rating), getSongDetails.Content.Info.ChartDetail.HD.Charter, floatToString(getSongDetails.Content.Info.ChartDetail.In.Rating), getSongDetails.Content.Info.ChartDetail.In.Charter, setATStats)
+		result := fmt.Sprintf("歌曲名: %s \n 作曲: %s \n 曲绘: %s \n\n歌曲详细Rating：\nEZ: %s - %s \nHD: %s - %s \nIN: %s - %s \n%s", getSongDetails.Content.Info.Songname, getSongDetails.Content.Info.Composer, getSongDetails.Content.Info.Illustrator, floatToString(getSongDetails.Content.Info.ChartDetail.EZ.Rating), getSongDetails.Content.Info.ChartDetail.EZ.Charter, floatToString(getSongDetails.Content.Info.ChartDetail.HD.Rating), getSongDetails.Content.Info.ChartDetail.HD.Charter, floatToString(getSongDetails.Content.Info.ChartDetail.In.Rating), getSongDetails.Content.Info.ChartDetail.In.Charter, setATStats)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(result))
 	})
 	engine.OnRegex(`^[! ！/]pgr\srandom`).SetBlock(true).Handle(func(ctx *zero.Ctx) {

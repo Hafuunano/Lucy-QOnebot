@@ -10,7 +10,6 @@ import (
 	"strconv"
 
 	"github.com/FloatTech/floatbox/binary"
-	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/gg"
 	ctrl "github.com/FloatTech/zbpctrl"
@@ -167,14 +166,9 @@ func init() {
 	engine.OnFullMatch("mai什么").SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		// on load
 		// get file first
-		SongData, err := os.ReadFile(engine.DataFolder() + "music_data.json")
+		SongData, err := os.ReadFile(engine.DataFolder() + "music_data")
 		if err != nil {
-			getSongData, err := web.GetData("https://www.diving-fish.com/api/maimaidxprober/music_data")
-			if err != nil {
-				panic(err)
-			}
-			os.WriteFile(file.BOTPATH+engine.DataFolder()+"music_data.json", getSongData, 0777)
-			SongData, _ = os.ReadFile(engine.DataFolder() + "music_data.json")
+			panic(err)
 		}
 		var SongDataRandomTools MaiSongData
 		err = json.Unmarshal(SongData, &SongDataRandomTools)
