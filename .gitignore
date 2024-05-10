@@ -1,0 +1,12 @@
+plugins/*.so
+plugins/*.dll
+.idea/
+.DS_Store
+.vscode
+go-zero*
+nohup.out
+zerobot
+.env
+data/*
+plugin/mai/handler.go
+functions/mai/handler.go

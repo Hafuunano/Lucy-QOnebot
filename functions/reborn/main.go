@@ -1,0 +1,94 @@
+package reborn
+
+import (
+	"fmt"
+	ctrl "github.com/FloatTech/zbpctrl"
+	"github.com/FloatTech/zbputils/control"
+	"math/rand"
+	"os"
+	"time"
+
+	"encoding/json"
+
+	wr "github.com/mroth/weightedrand"
+	"github.com/sirupsen/logrus"
+	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/extension/rate"
+
+	"github.com/wdvxdr1123/ZeroBot/message"
+)
+
+var (
+	areac     *wr.Chooser
+	gender, _ = wr.NewChooser(
+		wr.Choice{Item: "男孩子", Weight: 33707},
+		wr.Choice{Item: "女孩子", Weight: 39292},
+		wr.Choice{Item: "雌雄同体", Weight: 1001},
+		wr.Choice{Item: "猫猫!", Weight: 10000},
+		wr.Choice{Item: "狗狗!", Weight: 10000},
+		wr.Choice{Item: "🐉~", Weight: 3000},
+		wr.Choice{Item: "龙猫~", Weight: 3000},
+	)
+	rebornTimerManager = rate.NewManager[int64](time.Minute*2, 8)
+	engine             = control.Register("reborn", &ctrl.Options[*zero.Ctx]{
+		DisableOnDefault:  false,
+		Help:              "reborn - refer to reborn to another nation.",
+		PrivateDataFolder: "reborn",
+	})
+)
+
+type ratego []struct {
+	Name   string  `json:"setname"`
+	Weight float64 `json:"weight"`
+}
+
+func init() {
+	go func() {
+		datapath := engine.DataFolder()
+		jsonfile := datapath + "ratego.json"
+		area := make(ratego, 226)
+		err := load(&area, jsonfile)
+		if err != nil {
+			panic(err)
+		}
+		choices := make([]wr.Choice, len(area))
+		for i, a := range area {
+			choices[i].Item = a.Name
+			choices[i].Weight = uint(a.Weight * 1e9)
+		}
+		areac, err = wr.NewChooser(choices...)
+		if err != nil {
+			panic(err)
+		}
+		logrus.Printf("[Reborn]读取%d个国家/地区", len(area))
+	}()
+	engine.OnFullMatchGroup([]string{"reborn", "我要重生", "我要重开"}).SetBlock(true).
+		Handle(func(ctx *zero.Ctx) {
+			if !rebornTimerManager.Load(ctx.Event.GroupID).Acquire() {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("太快了哦，麻烦慢一点~"))
+				return
+			}
+			if rand.Int31() > 1<<27 {
+				ctx.SendChain(message.At(ctx.Event.UserID), message.Text(fmt.Sprintf("投胎成功！\n您出生在 %s, 是 %s。", randcoun(), randgen())))
+			} else {
+				ctx.SendChain(message.At(ctx.Event.UserID), message.Text("投胎失败！\n您没能活到出生，祝您下次好运！"))
+			}
+		})
+}
+
+// load 加载rate数据
+func load(area *ratego, jsonfile string) error {
+	data, err := os.ReadFile(jsonfile)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(data, area)
+}
+
+func randcoun() string {
+	return areac.Pick().(string)
+}
+
+func randgen() string {
+	return gender.Pick().(string)
+}
