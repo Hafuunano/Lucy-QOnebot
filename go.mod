@@ -3,13 +3,13 @@ module github.com/MoYoez/Lucy-QOnebot
 go 1.21
 
 require (
-	github.com/FloatTech/AnimeAPI v1.6.1-0.20230207081411-573533b18194
+	github.com/FloatTech/AnimeAPI v1.7.0
 	github.com/FloatTech/floatbox v0.0.0-20240505082030-226ec6713e14
 	github.com/FloatTech/gg v1.1.2
 	github.com/FloatTech/imgfactory v0.2.2-0.20230315152233-49741fc994f9
 	github.com/FloatTech/sqlite v1.6.3
 	github.com/FloatTech/zbpctrl v1.6.1
-	github.com/FloatTech/zbputils v1.6.2-0.20230207084008-8c14cb9fcacb
+	github.com/FloatTech/zbputils v1.7.1
 	github.com/chenjiandongx/pinger v0.2.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/jinzhu/gorm v1.9.16
@@ -22,9 +22,6 @@ require (
 	golang.org/x/image v0.10.0
 	golang.org/x/text v0.15.0
 	gopkg.in/yaml.v3 v3.0.1
-)
-
-require (
 	github.com/FloatTech/ttl v0.0.0-20230307105452-d6f7b2b647d1 // indirect
 	github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7 // indirect
 	github.com/RomiChan/websocket v1.4.3-0.20220227141055-9b2c6168c9c5 // indirect
@@ -48,7 +45,7 @@ require (
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
-	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
+	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
@@ -59,9 +56,9 @@ require (
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	modernc.org/libc v1.21.5 // indirect
-	modernc.org/mathutil v1.5.0 // indirect
+	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.4.0 // indirect
-	modernc.org/sqlite v1.20.0 // indirect
+	modernc.org/sqlite v1.29.9 // indirect
 )
 
 replace modernc.org/sqlite => github.com/fumiama/sqlite3 v1.20.0-with-win386

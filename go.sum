@@ -1,5 +1,5 @@
-github.com/FloatTech/AnimeAPI v1.6.1-0.20230207081411-573533b18194 h1:+p85V0fdZNt3UoKreBeI6S3IOPvNmU5/Fnn39ipSkVk=
-github.com/FloatTech/AnimeAPI v1.6.1-0.20230207081411-573533b18194/go.mod h1:LCiKZivPVazRRCnnADQfIBFZiIPHHCFqaCpwZWsFehI=
+github.com/FloatTech/AnimeAPI v1.7.0 h1:CX1bTjHbVZTYlvppzrWFyLzIFzRVrIDxJmtbWo/Ew6Y=
+github.com/FloatTech/AnimeAPI v1.7.0/go.mod h1:6vYu7bW5gPQsBnXB+I6yk+eJQaaAwusoQ/I/wQMwOAI=
 github.com/FloatTech/floatbox v0.0.0-20240505082030-226ec6713e14 h1:8O0Iq9MnKsKowltY9txhOqcJdmGTjxHPQ4gEYzbJc9A=
 github.com/FloatTech/floatbox v0.0.0-20240505082030-226ec6713e14/go.mod h1:OzGLhvmtz1TKIdGaJDd8pQumvD36UqK+dWsiCISmzQQ=
 github.com/FloatTech/gg v1.1.2 h1:YolgOYg3uDHc1+g0bLtt6QuRA/pvLn+b9IBCIhOOX88=
@@ -220,5 +220,7 @@ modernc.org/libc v1.21.5 h1:xBkU9fnHV+hvZuPSRszN0AXDG4M7nwPLwTWwkYcvLCI=
 modernc.org/libc v1.21.5/go.mod h1:przBsL5RDOZajTVslkugzLBj1evTue36jEomFQOoYuI=
 modernc.org/mathutil v1.5.0 h1:rV0Ko/6SfM+8G+yKiyI830l3Wuz1zRutdslNoQ0kfiQ=
 modernc.org/mathutil v1.5.0/go.mod h1:mZW8CKdRPY1v87qxC/wUdX5O1qDzXMP5TH3wjfpga6E=
+modernc.org/mathutil v1.6.0 h1:fRe9+AmYlaej+64JsEEhoWuAYBkOtQiMEU7n/XgfYi4=
+modernc.org/mathutil v1.6.0/go.mod h1:Ui5Q9q1TR2gFm0AQRqQUaBWFLAhQpCwNcuhBOSedWPo=
 modernc.org/memory v1.4.0 h1:crykUfNSnMAXaOJnnxcSzbUGMqkLWjklJKkBK2nwZwk=
 modernc.org/memory v1.4.0/go.mod h1:PkUhL0Mugw21sHPeskwZW4D6VscE/GQJOnIpCnW6pSU=

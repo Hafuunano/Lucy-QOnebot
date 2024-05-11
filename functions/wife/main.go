@@ -271,9 +271,7 @@ func init() {
 				return
 			}
 		}
-
 		// Luck Path end.
-
 		if !CheckTheTargetUserStatusAndDoRepeat(ctx, ChooseAPerson) {
 			return
 		}
@@ -291,7 +289,6 @@ func init() {
 			return
 		}
 		// go next. do something colorful, pls cost something.
-
 		getExistedToken := GlobalCDModelCostLeastReply(ctx)
 		if getExistedToken == 0 {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天的机会已经使用完了哦～12小时后再来试试吧"))
