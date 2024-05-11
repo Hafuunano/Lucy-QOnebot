@@ -17,7 +17,7 @@ func init() { // 插件主体
 	engine.OnFullMatchGroup([]string{"检查身体", "自检", "启动自检", "系统状态"}, zero.SuperUserPermission).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(message.Text(
-				"* Hosted On Azure JP Cloud.\n",
+				"* Hosted On MossVps (For HafuuNano).\n",
 				"* CPU Usage: ", cpuPercent(), "%\n",
 				"* RAM Usage: ", memPercent(), "%\n",
 				"* DiskInfo Usage Check: ", diskPercent(), "\n",

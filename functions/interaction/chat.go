@@ -34,7 +34,6 @@ func init() {
 			ctx.Send(message.Text("这些名字可不好哦(敲)"))
 			return
 		}
-
 		if onRegexMessage == "" {
 			ctx.Send(message.Text("好哦~ 那~咱该叫你什么呢ww"))
 			nextStep := event.WaitForNextMessage(ctx)
