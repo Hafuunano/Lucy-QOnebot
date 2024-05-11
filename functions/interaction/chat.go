@@ -6,6 +6,7 @@ import (
 	"github.com/FloatTech/floatbox/process"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
+	"github.com/MoYoez/Lucy-QOnebot/box/event"
 	"github.com/MoYoez/Lucy-QOnebot/box/setname"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
@@ -36,10 +37,12 @@ func init() {
 
 		if onRegexMessage == "" {
 			ctx.Send(message.Text("好哦~ 那~咱该叫你什么呢ww"))
-			nextstep := ctx.FutureEvent("message", ctx.CheckSession())
-			recv, _ := nextstep.Repeat()
-			for i := range recv {
-				onRegexMessage = i.MessageString()
+			nextStep := event.WaitForNextMessage(ctx)
+			if nextStep.String() == "" {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("aw咱不知道你要叫什么（ 溜了x"))
+				return
+			} else {
+				onRegexMessage = nextStep.String()
 			}
 		}
 		if strings.Contains(onRegexMessage, "[CQ") {
