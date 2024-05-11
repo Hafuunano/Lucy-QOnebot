@@ -69,8 +69,8 @@ func Average(numbers []int) float64 {
 	return math.Round(sum / float64(len(numbers)))
 }
 
-// DrawBorderString GG Package Not support The string render, so I write this (^^)
-func DrawBorderString(page *gg.Context, s string, size int, x float64, y float64, ax float64, ay float64, inlineRGB color.Color, outlineRGB color.Color) {
+// FunctionDrawBorderString GG Package Not support The string render, so I write this (^^)
+func FunctionDrawBorderString(page *gg.Context, s string, size int, x float64, y float64, ax float64, ay float64, inlineRGB color.Color, outlineRGB color.Color) {
 	page.SetColor(outlineRGB)
 	n := size
 	for dy := -n; dy <= n; dy++ {

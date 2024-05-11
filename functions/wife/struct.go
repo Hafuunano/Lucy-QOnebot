@@ -118,7 +118,7 @@ func GetSomeRanDomChoiceProps(ctx *zero.Ctx) int64 {
 }
 
 // ReplyMeantMode format the reply and clear.
-func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, ctx *zero.Ctx) message.MessageID {
+func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, ctx *zero.Ctx) {
 	msg := header
 	var replyTarget string
 	if statusCodeToPerson == 1 {
@@ -129,7 +129,7 @@ func ReplyMeantMode(header string, referTarget int64, statusCodeToPerson int64, 
 	aheader := msg + "\n今天你的群" + replyTarget + "是\n"
 	formatAvatar := GenerateUserImageLink(referTarget)
 	formatReply := "[ " + ctx.CardOrNickName(referTarget) + " ] " + "( " + strconv.FormatInt(referTarget, 10) + " ) 哦w～"
-	return ctx.SendChain(message.Text(aheader), message.Image(formatAvatar), message.Text(formatReply))
+	ctx.SendChain(message.Text(aheader), message.Image(formatAvatar), message.Text(formatReply))
 }
 
 // GenerateMD5 Generate MD5
@@ -148,10 +148,10 @@ func CheckTheUserStatusAndDoRepeat(ctx *zero.Ctx) bool {
 	switch {
 	case getStatusCode == 0:
 		// case target mode (0)
-		ctx.Send(ReplyMeantMode("貌似你今天已经有了哦～", getOtherUserData, 0, ctx))
+		ReplyMeantMode("貌似你今天已经有了哦～", getOtherUserData, 0, ctx)
 		return false
 	case getStatusCode == 1:
-		ctx.Send(ReplyMeantMode("貌似你今天已经有了哦～", getOtherUserData, 1, ctx))
+		ReplyMeantMode("貌似你今天已经有了哦～", getOtherUserData, 1, ctx)
 		// case user mode (1)
 		return false
 	case getStatusCode == 10:
@@ -191,7 +191,7 @@ func ResuitTheReferUserAndMakeIt(ctx *zero.Ctx, dict map[string][]string, EventU
 		GlobalCDModelCost(ctx)
 		getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
 		// normal mode. nothing happened.
-		ctx.Send(ReplyMeantMode(getSuccessMsg, TargetUser, 1, ctx))
+		ReplyMeantMode(getSuccessMsg, TargetUser, 1, ctx)
 		generatePairKey := GenerateMD5(EventUser, TargetUser, ctx.Event.GroupID)
 		err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, EventUser, TargetUser, 1, generatePairKey)
 		if err != nil {
@@ -200,7 +200,7 @@ func ResuitTheReferUserAndMakeIt(ctx *zero.Ctx, dict map[string][]string, EventU
 		}
 	case returnNumber == 2:
 		GlobalCDModelCost(ctx)
-		ctx.Send(ReplyMeantMode("貌似很奇怪哦～因为某种奇怪的原因～1变成了0,0变成了1", TargetUser, 0, ctx))
+		ReplyMeantMode("貌似很奇怪哦～因为某种奇怪的原因～1变成了0,0变成了1", TargetUser, 0, ctx)
 		generatePairKey := GenerateMD5(TargetUser, EventUser, ctx.Event.GroupID)
 		err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, TargetUser, EventUser, 2, generatePairKey)
 		if err != nil {
@@ -213,7 +213,7 @@ func ResuitTheReferUserAndMakeIt(ctx *zero.Ctx, dict map[string][]string, EventU
 		// status 3 turns to be case 1 ,for it cannot check it again. (With 2 same person, so it can be panic.)
 		getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
 		// normal mode. nothing happened.
-		ctx.Send(ReplyMeantMode(getSuccessMsg, TargetUser, 1, ctx))
+		ReplyMeantMode(getSuccessMsg, TargetUser, 1, ctx)
 		generatePairKey := GenerateMD5(EventUser, TargetUser, ctx.Event.GroupID)
 		err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, EventUser, TargetUser, 1, generatePairKey)
 		if err != nil {

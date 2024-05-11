@@ -76,7 +76,7 @@ func init() {
 		}
 		getLucyName := []string{"Lucy", "Lucy酱"}[rand.Intn(2)]
 		getReply = strings.ReplaceAll(getReply, "{segment}", " ")
-		getReply = strings.ReplaceAll(getReply, "{setname}", getName)
+		getReply = strings.ReplaceAll(getReply, "{name}", getName)
 		getReply = strings.ReplaceAll(getReply, "{me}", getLucyName)
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(getReply))
 	})

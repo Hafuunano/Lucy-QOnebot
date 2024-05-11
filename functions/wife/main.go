@@ -157,7 +157,7 @@ func init() {
 			switch rand.Intn(5) {
 			case 1:
 				GlobalCDModelCost(ctx)
-				ctx.Send(ReplyMeantMode("貌似Lucy故意添加了 --force 的命令，成功了(笑 ", ctx.Event.UserID, 1, ctx))
+				ReplyMeantMode("貌似Lucy故意添加了 --force 的命令，成功了(笑 ", ctx.Event.UserID, 1, ctx)
 				generatePairKey := GenerateMD5(ctx.Event.UserID, ctx.Event.UserID, ctx.Event.GroupID)
 				err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 3, generatePairKey)
 				if err != nil {
@@ -181,7 +181,7 @@ func init() {
 				GlobalCDModelCost(ctx)
 				getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
 				// normal mode. nothing happened.
-				ctx.Send(ReplyMeantMode(getSuccessMsg, fiancee, 1, ctx))
+				ReplyMeantMode(getSuccessMsg, fiancee, 1, ctx)
 				generatePairKey := GenerateMD5(ctx.Event.UserID, fiancee, ctx.Event.GroupID)
 				_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, fiancee, 1, generatePairKey)
 				return
@@ -256,7 +256,7 @@ func init() {
 				GlobalCDModelCost(ctx)
 				getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
 				// normal mode. nothing happened.
-				ctx.Send(ReplyMeantMode("许愿池生效～\n"+getSuccessMsg, getLuckyPeople, 1, ctx))
+				ReplyMeantMode("许愿池生效～\n"+getSuccessMsg, getLuckyPeople, 1, ctx)
 				generatePairKey := GenerateMD5(ctx.Event.UserID, getLuckyPeople, ctx.Event.GroupID)
 				_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, getLuckyPeople, 1, generatePairKey)
 				_ = RemoveOrderToList(marryList, ctx.Event.UserID, gid)
@@ -299,7 +299,7 @@ func init() {
 			// status code 3
 			GlobalCDModelCost(ctx)
 			// drop target pls.
-			ctx.Send(ReplyMeantMode("嗯哼哼～抽到了自己，然而 Lucy 还是将双方写成一个人哦w （笑w ", ctx.Event.UserID, 1, ctx))
+			ReplyMeantMode("嗯哼哼～抽到了自己，然而 Lucy 还是将双方写成一个人哦w （笑w ", ctx.Event.UserID, 1, ctx)
 			generatePairKey := GenerateMD5(ctx.Event.UserID, ctx.Event.UserID, ctx.Event.GroupID)
 			_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 3, generatePairKey)
 
@@ -310,19 +310,19 @@ func init() {
 			GlobalCDModelCost(ctx)
 			getSuccessMsg := dict["success"][rand.Intn(len(dict["success"]))]
 			// normal mode. nothing happened.
-			ctx.Send(ReplyMeantMode(getSuccessMsg, ChooseAPerson, 1, ctx))
+			ReplyMeantMode(getSuccessMsg, ChooseAPerson, 1, ctx)
 			generatePairKey := GenerateMD5(ctx.Event.UserID, ChooseAPerson, ctx.Event.GroupID)
 			_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ChooseAPerson, 1, generatePairKey)
 		case returnNumber == 2:
 			GlobalCDModelCost(ctx)
-			ctx.Send(ReplyMeantMode("貌似很奇怪哦～因为某种奇怪的原因～1变成了0,0变成了1", ChooseAPerson, 0, ctx))
+			ReplyMeantMode("貌似很奇怪哦～因为某种奇怪的原因～1变成了0,0变成了1", ChooseAPerson, 0, ctx)
 			generatePairKey := GenerateMD5(ChooseAPerson, ctx.Event.UserID, ctx.Event.GroupID)
 			_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ChooseAPerson, ctx.Event.UserID, 2, generatePairKey)
 		// reverse Target Mode
 		case returnNumber == 3:
 			GlobalCDModelCost(ctx)
 			// drop target pls.
-			ctx.Send(ReplyMeantMode("嗯哼哼～发生了一些错误～本来应当抽到别人的变成了自己～所以", ctx.Event.UserID, 1, ctx))
+			ReplyMeantMode("嗯哼哼～发生了一些错误～本来应当抽到别人的变成了自己～所以", ctx.Event.UserID, 1, ctx)
 			generatePairKey := GenerateMD5(ctx.Event.UserID, ctx.Event.UserID, ctx.Event.GroupID)
 			_ = InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.UserID, 3, generatePairKey)
 		// you became your own target
@@ -399,7 +399,7 @@ func init() {
 		if rand.Intn(100) < 30 {
 			// win this goal
 			getNTRMsg := dict["ntr"][rand.Intn(len(dict["ntr"]))]
-			ctx.Send(ReplyMeantMode(getNTRMsg, fiancee, 5, ctx))
+			ReplyMeantMode(getNTRMsg, fiancee, 5, ctx)
 			CustomRemoveUserGlobalMarryList(marryList, CheckThePairKey(marryList, fiancee, ctx.Event.GroupID), ctx.Event.GroupID, 7)
 			pairKey := GenerateMD5(ctx.Event.UserID, fiancee, ctx.Event.GroupID)
 			err := InsertUserGlobalMarryList(marryList, ctx.Event.GroupID, ctx.Event.UserID, fiancee, 5, pairKey)

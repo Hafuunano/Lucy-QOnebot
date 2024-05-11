@@ -154,7 +154,7 @@ func CustomRemoveUserGlobalMarryList(db *sql.Sqlite, pairKey string, groupID int
 	_ = db.Del("grouplist_"+strconv.FormatInt(groupID, 10), "where pairkey is '"+getThisKey+"'")
 	// store? || persist this key and check the next Time.
 	_ = db.Insert("pairkey_"+strconv.FormatInt(groupID, 10), FormatPairKey(pairKey, statusID))
-	return err == nil
+	return true
 }
 
 /*

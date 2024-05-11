@@ -156,15 +156,15 @@ func init() {
 				formatTimeWeek := time.Now().Weekday().String()
 				mainContext.SetFontFace(draw.LoadFontFace(loadNotoSans, 35))
 				setOutlineColor := color.White
-				draw.DrawBorderString(mainContext, formatTimeCurrent, 5, float64(mainContextWidth-80), 50, 1, 0.5, setInlineColor, setOutlineColor)
-				draw.DrawBorderString(mainContext, formatTimeDate, 5, float64(mainContextWidth-80), 100, 1, 0.5, setInlineColor, setOutlineColor)
-				draw.DrawBorderString(mainContext, formatTimeWeek, 5, float64(mainContextWidth-80), 150, 1, 0.5, setInlineColor, setOutlineColor)
+				draw.FunctionDrawBorderString(mainContext, formatTimeCurrent, 5, float64(mainContextWidth-80), 50, 1, 0.5, setInlineColor, setOutlineColor)
+				draw.FunctionDrawBorderString(mainContext, formatTimeDate, 5, float64(mainContextWidth-80), 100, 1, 0.5, setInlineColor, setOutlineColor)
+				draw.FunctionDrawBorderString(mainContext, formatTimeWeek, 5, float64(mainContextWidth-80), 150, 1, 0.5, setInlineColor, setOutlineColor)
 				mainContext.FillPreserve()
 				if err != nil {
 					return
 				}
 				mainContext.SetFontFace(draw.LoadFontFace(loadNotoSans, 140))
-				draw.DrawBorderString(mainContext, "|", 5, float64(mainContextWidth-30), 65, 1, 0.5, setInlineColor, setOutlineColor)
+				draw.FunctionDrawBorderString(mainContext, "|", 5, float64(mainContextWidth-30), 65, 1, 0.5, setInlineColor, setOutlineColor)
 				// throw tarot card
 				mainContext.SetFontFace(draw.LoadFontFace(loadNotoSans, 20))
 				mainContext.SetRGBA255(91, 57, 83, 255)
