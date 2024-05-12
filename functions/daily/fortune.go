@@ -28,7 +28,7 @@ import (
 )
 
 type card struct {
-	Name string `json:"setname"`
+	Name string `json:"name"`
 	Info struct {
 		Description        string `json:"description"`
 		ReverseDescription string `json:"reverseDescription"`

@@ -26,12 +26,12 @@ type LxnsMaimaiRequestFromQQ struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 	Data    struct {
-		Name       string `json:"setname"`
+		Name       string `json:"name"`
 		Rating     int    `json:"rating"`
 		FriendCode int64  `json:"friend_code"`
 		Trophy     struct {
 			Id    int    `json:"id"`
-			Name  string `json:"setname"`
+			Name  string `json:"name"`
 			Color string `json:"color"`
 		} `json:"trophy"`
 		CourseRank int    `json:"course_rank"`
@@ -40,11 +40,11 @@ type LxnsMaimaiRequestFromQQ struct {
 		IconUrl    string `json:"icon_url"`
 		NamePlate  struct {
 			Id   int    `json:"id"`
-			Name string `json:"setname"`
+			Name string `json:"name"`
 		} `json:"name_plate"`
 		Frame struct {
 			Id   int    `json:"id"`
-			Name string `json:"setname"`
+			Name string `json:"name"`
 		} `json:"frame"`
 		UploadTime time.Time `json:"upload_time"`
 	} `json:"data"`
@@ -150,7 +150,7 @@ type LxnsMaimaiRequestUserReferBestSongIndex struct {
 	    "success": true,
 	    "code": 200,
 	    "data": {
-	        "setname": "StarKooi",
+	        "name": "StarKooi",
 	        "rating": 11616,
 	        "friend_code": 00000000000,
 	        "trophy": {

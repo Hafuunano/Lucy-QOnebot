@@ -46,7 +46,7 @@ func QueryReferSong(Alias string, isLxnet bool) (status bool, id []int, needAcc 
 		} else {
 			return true, onloadList[0], false, nil
 		}
-	// query length is 2,it means this maybe same setname but diff id ==> (E.G: Oshama Scramble!)
+	// query length is 2,it means this maybe same name but diff id ==> (E.G: Oshama Scramble!)
 	case len(onloadList) == 2:
 		for _, listHere := range onloadList[0] {
 			for _, listAliasTwo := range onloadList[1] {
