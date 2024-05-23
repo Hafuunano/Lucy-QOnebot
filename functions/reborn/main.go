@@ -38,7 +38,7 @@ var (
 )
 
 type ratego []struct {
-	Name   string  `json:"setname"`
+	Name   string  `json:"name"`
 	Weight float64 `json:"weight"`
 }
 

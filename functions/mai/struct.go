@@ -1,7 +1,6 @@
 package mai
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"image"
@@ -9,7 +8,6 @@ import (
 	"image/png"
 	"io"
 	"log"
-	"math"
 	"net/http"
 	"os"
 	"strconv"
@@ -22,32 +20,12 @@ import (
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/gg"
 	"github.com/FloatTech/imgfactory"
-	"github.com/tidwall/gjson"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
-	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 	"golang.org/x/text/width"
 )
-
-type ZlibErrorStatus struct {
-	Full struct {
-		Field1 int `json:"10"`
-		Field2 int `json:"30"`
-		Field3 int `json:"60"`
-	} `json:"full"`
-	FullError struct {
-		Field1 int `json:"10"`
-		Field2 int `json:"30"`
-		Field3 int `json:"60"`
-	} `json:"full_Error"`
-	ZlibError struct {
-		Field1 int `json:"10"`
-		Field2 int `json:"30"`
-		Field3 int `json:"60"`
-	} `json:"zlib_Error"`
-}
 
 type player struct {
 	AdditionalRating int `json:"additional_rating"`
@@ -643,93 +621,6 @@ func PictureHandler(ctx *zero.Ctx) bool {
 	}
 }
 
-func CheckTheTicketIsValid(ticket string) string {
-	getData, _ := web.GetData("https://www.diving-fish.com/api/maimaidxprober/token_available?token=" + ticket)
-	result := gjson.Get(helper.BytesToString(getData), "message").String()
-	return result
-}
-
-func convert(listStruct UserMusicListStruct) []InnerStructChanger {
-	dir, _ := os.Getwd()
-	getRequest, err := os.ReadFile(dir + "/data/maidx/music_data")
-	if err != nil {
-		panic(err)
-	}
-	var divingfishMusicData []DivingFishMusicDataStruct
-	err = json.Unmarshal(getRequest, &divingfishMusicData)
-	if err != nil {
-		panic(err)
-	}
-	mdMap := make(map[string]DivingFishMusicDataStruct)
-	for _, m := range divingfishMusicData {
-		mdMap[m.Id] = m
-	}
-	var dest []InnerStructChanger
-	for _, musicList := range listStruct.UserMusicList {
-		for _, musicDetailedList := range musicList.UserMusicDetailList {
-			level := musicDetailedList.Level
-			achievement := math.Min(1010000, float64(musicDetailedList.Achievement))
-			fc := []string{"", "fc", "fcp", "ap", "app"}[musicDetailedList.ComboStatus]
-			fs := []string{"", "fs", "fsp", "fsd", "fsdp"}[musicDetailedList.SyncStatus]
-			dxScore := musicDetailedList.DeluxscoreMax
-			dest = append(dest, InnerStructChanger{
-				Title:        mdMap[strconv.Itoa(musicDetailedList.MusicId)].Title,
-				Type:         mdMap[strconv.Itoa(musicDetailedList.MusicId)].Type,
-				LevelIndex:   level,
-				Achievements: (achievement) / 10000,
-				Fc:           fc,
-				Fs:           fs,
-				DxScore:      dxScore,
-			})
-		}
-	}
-	return dest
-}
-
-// MixedRegionWriter Some Mixed Magic, looking for your region information.
-func MixedRegionWriter(regionID int, playCount int, createdDate string) string {
-	getCountryID := returnCountryID(regionID)
-	return fmt.Sprintf(" - 在 regionID 为 %d (%s) 的省/直辖市 游玩过 %d 次, 第一次游玩时间于 %s", regionID+1, getCountryID, playCount, createdDate)
-}
-
-// ReturnZlibError Return Zlib ERROR
-func ReturnZlibError() ZlibErrorStatus {
-	url := "https://maihook.lemonkoi.one/api/zlib"
-	method := "GET"
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, nil)
-
-	if err != nil {
-		fmt.Println(err)
-		return ZlibErrorStatus{}
-	}
-	req.Header.Add("Accept", "*/*")
-	req.Header.Add("Host", "maihook.lemonkoi.one")
-	req.Header.Add("Connection", "keep-alive")
-	res, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		return ZlibErrorStatus{}
-	}
-	defer res.Body.Close()
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		return ZlibErrorStatus{}
-	}
-	var returnData ZlibErrorStatus
-	json.Unmarshal(body, &returnData)
-	return returnData
-}
-
-func ConvertZlib(value, total int) string {
-	if total == 0 {
-		return "0.000%"
-	}
-	percentage := float64(value) / float64(total) * 100
-	return fmt.Sprintf("%.3f%%", percentage)
-}
-
 func RequestReferSong(friendID int64, songID int64, isSD bool) LxnsMaimaiRequestUserReferBestSong {
 	var getReferType string
 	if isSD {
@@ -785,36 +676,4 @@ func simpleNumHandler(num int, upper bool) int {
 		return toint
 	}
 	return num
-}
-
-// UpdateHandler Update handler
-func UpdateHandler(userMusicList UserMusicListStruct, getTokenId string) int {
-	getFullDataStruct := convert(userMusicList)
-	jsonDumper := getFullDataStruct
-	jsonDumperFull, err := json.Marshal(jsonDumper)
-	if err != nil {
-		panic(err)
-	}
-	// upload to diving fish api
-	req, err := http.NewRequest("POST", "https://www.diving-fish.com/api/maimaidxprober/player/update_records", bytes.NewBuffer(jsonDumperFull))
-	if err != nil {
-		// Handle error
-		panic(err)
-	}
-	req.Header.Set("Import-Token", getTokenId)
-	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	return resp.StatusCode
-}
-
-func UpdaterSongData() {
-	getData, err := web.GetData("https://www.diving-fish.com/api/maimaidxprober/music_data")
-	if err != nil {
-		return
-	}
-	os.WriteFile(engine.DataFolder()+"music_data", getData, 0777)
 }

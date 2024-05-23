@@ -24,7 +24,7 @@ var (
 func init() {
 	engine.OnRegex(`^/(.*)$`).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		getPatternInfo := ctx.State["regex_matched"].([]string)[1]
-		re := regexp.MustCompile(`\[CQ:image.*?\]`)
+		re := regexp.MustCompile(`\[CQ:image.*?]`)
 		getPatternInfo = re.ReplaceAllString(getPatternInfo, "")
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ctx.CardOrNickName(ctx.Event.UserID)+getPatternInfo+"了他自己~"))
 	})
@@ -49,7 +49,7 @@ func init() {
 		// split info
 		modifyInfo := strings.ReplaceAll(getMatchedInfo, "/", "")
 		splitInfo := strings.Split(modifyInfo, " ")
-		re := regexp.MustCompile(`\[CQ:image.*?\]`)
+		re := regexp.MustCompile(`\[CQ:image.*?]`)
 		if len(splitInfo) == 2 {
 			splitInfo[0] = re.ReplaceAllString(splitInfo[0], "")
 			splitInfo[1] = re.ReplaceAllString(splitInfo[1], "")
@@ -68,17 +68,17 @@ func init() {
 			"message_id": getPatternUserMessageID,
 		}).Data.String()
 		sender := gjson.Get(rsp, "sender.user_id").Int()
-		re := regexp.MustCompile(`\[CQ:image.*?\]`)
-		modifiedReplyHeader := regexp.MustCompile(`\[CQ:reply.*?\]`)
+		re := regexp.MustCompile(`\[CQ:image.*?]`)
+		modifiedReplyHeader := regexp.MustCompile(`\[CQ:reply.*?]`)
 		if len(getSplit) == 2 {
 			getSplit[0] = re.ReplaceAllString(getSplit[0], "")
-			getSplit[0] = modifiedReplyHeader.ReplaceAllString(getSplit[0],"")
+			getSplit[0] = modifiedReplyHeader.ReplaceAllString(getSplit[0], "")
 			getSplit[1] = re.ReplaceAllString(getSplit[1], "")
-			getSplit[1] = modifiedReplyHeader.ReplaceAllString(getSplit[1],"")
+			getSplit[1] = modifiedReplyHeader.ReplaceAllString(getSplit[1], "")
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ctx.CardOrNickName(ctx.Event.UserID)+" "+getSplit[0]+"了 "+ctx.CardOrNickName(sender)+" "+getSplit[1]))
 		} else {
 			getSplit[0] = re.ReplaceAllString(getSplit[0], "")
-			getSplit[0] = modifiedReplyHeader.ReplaceAllString(getSplit[0],"")
+			getSplit[0] = modifiedReplyHeader.ReplaceAllString(getSplit[0], "")
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(ctx.CardOrNickName(ctx.Event.UserID)+" "+getPatternInfo+"了 "+ctx.CardOrNickName(sender)))
 		}
 	})

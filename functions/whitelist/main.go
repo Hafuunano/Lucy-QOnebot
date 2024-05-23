@@ -29,7 +29,7 @@ var (
 )
 
 func init() {
-	engine.OnRegex(`^/whitelist\s(.*)`, zero.SuperUserPermission).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	engine.OnRegex(`^!whitelist\s(.*)`, zero.SuperUserPermission).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		getNumber, err := strconv.ParseInt(ctx.State["regex_matched"].([]string)[1], 10, 64)
 		if err != nil {
 			panic(err)

@@ -8,5 +8,3 @@ nohup.out
 zerobot
 .env
 data/*
-plugin/mai/handler.go
-functions/mai/handler.go

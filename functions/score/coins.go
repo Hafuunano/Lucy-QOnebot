@@ -23,23 +23,24 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
+type PartyGameOutsider map[string]partygame
+
 type partygame struct {
-	Name  string `json:"setname"`
+	Name  string `json:"name"`
 	Desc  string `json:"desc"`
 	Coins string `json:"coins"`
 }
 
 var (
-	pgs            = make(pg, 256)
-	RobTimeManager = rate.NewManager[int64](time.Minute*70, 163)
-	checkLimit     = rate.NewManager[int64](time.Minute*1, 5) // time setup
-	catchLimit     = rate.NewManager[int64](time.Hour*1, 9)   // time setup
-	processLimit   = rate.NewManager[int64](time.Hour*1, 5)   // time setup
-	payLimit       = rate.NewManager[int64](time.Hour*1, 10)  // time setup
-	wagerData      map[string]int
+	RobTimeManager      = rate.NewManager[int64](time.Minute*70, 163)
+	checkLimit          = rate.NewManager[int64](time.Minute*1, 5) // time setup
+	catchLimit          = rate.NewManager[int64](time.Hour*1, 9)   // time setup
+	processLimit        = rate.NewManager[int64](time.Hour*1, 5)   // time setup
+	payLimit            = rate.NewManager[int64](time.Hour*1, 10)  // time setup
+	wagerData           map[string]int
+	newPartyGame        PartyGameOutsider
+	partyGameRollLength int
 )
-
-type pg = map[string]partygame
 
 func init() {
 	wagerData = make(map[string]int)
@@ -51,10 +52,11 @@ func init() {
 			ctx.SendChain(message.Text("ERROR:", err))
 			return false
 		}
-		err = json.Unmarshal(data, &pgs)
+		err = json.Unmarshal(data, &newPartyGame)
 		if err != nil {
 			panic(err)
 		}
+		partyGameRollLength = len(newPartyGame)
 		return true
 	})
 
@@ -95,19 +97,16 @@ func init() {
 			ctx.SendChain(message.Reply(uid), message.Text("本次参与的柠檬片不够哦~请多多打卡w"))
 			return
 		}
-		all := rand.Intn(39) // 一共39种可能性
-		referpg := pgs[(strconv.Itoa(all))]
+		referpg := newPartyGame[strconv.Itoa(rand.Intn(partyGameRollLength))]
 		getName := referpg.Name
 		getCoinsStr := referpg.Coins
-		getCoinsInt, _ := strconv.Atoi(getCoinsStr)
 		getDesc := referpg.Desc
+		getCoinsInt, _ := strconv.Atoi(getCoinsStr)
 		addNewCoins := si.Coins + getCoinsInt - 60
-		_ = coins.InsertUserCoins(sdb, uid, addNewCoins)
-		msgid := ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(" 嗯哼~来玩抽奖了哦w 看看能抽到什么呢w"))
-		time.Sleep(time.Second * 3)
-		ctx.SendChain(message.Reply(msgid), message.Text("呼呼~让咱看看你抽到了什么东西ww\n"),
-			message.Text("你抽到的是~ ", getName, "\n", "获得了柠檬片 ", getCoinsInt, "\n", getDesc, "\n目前的柠檬片总数为：", addNewCoins))
-		mutex.Unlock()
+		coins.InsertUserCoins(sdb, uid, addNewCoins)
+		msgid := ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("嗯哼~来玩抽奖了哦w 看看能抽到什么呢w"))
+		ctx.SendChain(message.Reply(msgid), message.Text("呼呼~让咱看看你抽到了什么东西ww\n"), message.Text("你抽到的是~ ", getName, "\n", "获得了柠檬片 ", getCoinsInt, "\n", getDesc, "\n目前的柠檬片总数为：", addNewCoins))
+		defer mutex.Unlock()
 	})
 	// 一次最多骗 400 柠檬片,失败概率较大,失败会被反吞柠檬片
 	engine.OnRegex(`^抢(\[CQ:at,qq=(\d+)\]\s?|(\d+))的柠檬片`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByUser).Handle(func(ctx *zero.Ctx) {

@@ -1,6 +1,6 @@
 ## Lucy_ZeroBot
 
-Lucy | Ver.2.0
+Lucy | Ver.2.0 BETAAAAAAAAA 2
 
 基于 [Zerobot-Plugin](https://github.com/FloatTech/ZeroBot-Plugin) 的 三方 Bot 计划 Lucy
 
