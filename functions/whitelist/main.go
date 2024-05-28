@@ -2,14 +2,16 @@ package whitelist
 
 import (
 	"encoding/json"
-	"github.com/FloatTech/floatbox/file"
-	ctrl "github.com/FloatTech/zbpctrl"
-	"github.com/FloatTech/zbputils/control"
-	zero "github.com/wdvxdr1123/ZeroBot"
-	"github.com/wdvxdr1123/ZeroBot/message"
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/FloatTech/floatbox/file"
+	ctrl "github.com/FloatTech/zbpctrl"
+	"github.com/FloatTech/zbputils/control"
+	"github.com/bytedance/sonic"
+	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
 type whitelist struct {
@@ -39,7 +41,7 @@ func init() {
 			panic(err)
 		}
 		var list whitelist
-		_ = json.Unmarshal(reader, &list)
+		_ = sonic.Unmarshal(reader, &list)
 		list.Or[0].GroupId.In = append(list.Or[0].GroupId.In, int(getNumber))
 		modifiedData, err := json.MarshalIndent(list, "", "  ")
 		if err != nil {

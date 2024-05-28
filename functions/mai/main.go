@@ -2,14 +2,15 @@ package mai
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
-	Stringbreaker "github.com/MoYoez/Lucy-QOnebot/box/break"
 	"image"
 	rand2 "math/rand"
 	"os"
 	"strconv"
 	"strings"
+
+	Stringbreaker "github.com/MoYoez/Lucy-QOnebot/box/break"
+	"github.com/bytedance/sonic"
 
 	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/floatbox/web"
@@ -91,7 +92,7 @@ func init() {
 				return
 			}
 			var data player
-			_ = json.Unmarshal(dataPlayer, &data)
+			_ = sonic.Unmarshal(dataPlayer, &data)
 			renderImg, plateStat := FullPageRender(data, ctx)
 			tipPlate := ""
 			getRand := rand2.Intn(10)
@@ -113,7 +114,7 @@ func init() {
 			return
 		}
 		var data player
-		_ = json.Unmarshal(dataPlayer, &data)
+		_ = sonic.Unmarshal(dataPlayer, &data)
 		renderImg, plateStat := FullPageRender(data, ctx)
 		tipPlate := ""
 		getRand := rand2.Intn(10)
@@ -598,7 +599,7 @@ func init() {
 			return
 		}
 		var data player
-		_ = json.Unmarshal(dataPlayer, &data)
+		_ = sonic.Unmarshal(dataPlayer, &data)
 		renderImg, plateStat := FullPageRender(data, ctx)
 		tipPlate := ""
 		if !plateStat {

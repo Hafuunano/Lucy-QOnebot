@@ -2,17 +2,19 @@
 package simai
 
 import (
+	"math/rand"
+	"os"
+	"regexp"
+	"strconv"
+	"strings"
+
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
+	breaker "github.com/MoYoez/Lucy-QOnebot/box/break"
 	"github.com/MoYoez/Lucy-QOnebot/box/setname"
-	"github.com/MoYoez/Lucy-QOnebot/box/ticket"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"gopkg.in/yaml.v3"
-	"math/rand"
-	"os"
-	"strconv"
-	"strings"
 )
 
 // SimPackData simia Data
@@ -35,39 +37,46 @@ func init() {
 	}
 	var data SimPackData
 	_ = yaml.Unmarshal(dictLoader, &data)
-
+	onMakeRegex, err := regexp.Compile("[?？!！]")
+	if err != nil {
+		panic(err)
+	}
 	engine.OnMessage(zero.OnlyToMe).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		// onload dict.
 		msg := ctx.ExtractPlainText()
 		var getChartReply []string
-		if ticket.GetTiredToken(ctx) < 4 {
-			getChartReply = data.Proud[msg]
-			// if no data
-			if getChartReply == nil {
-				getChartReply = data.Kawaii[msg]
-				if getChartReply == nil {
-					// no reply
-					return
-				}
-			}
-		} else {
-			getChartReply = data.Kawaii[msg]
-			// if no data
-			if getChartReply == nil {
-				getChartReply = data.Proud[msg]
-				if getChartReply == nil {
-					// no reply
-					return
-				}
-			}
-		}
-		// Lucy may more pround when poke too much ^^.
-		if ticket.GetTiredToken(ctx) < 4 {
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("咱不想说话 好累awww"))
+		if breaker.GetStringLength(msg) > 50 {
 			return
-		} else {
-			ticket.GetCostTiredToken(ctx)
 		}
+		getList := onMakeRegex.FindAllString(msg, -1)
+
+		if len(getList) >= 1 {
+			for _, data := range getList {
+				msg = strings.ReplaceAll(msg, data, "")
+			}
+		} // on ticket saver.
+
+		for data, inner := range data.Proud {
+			if strings.Contains(msg, data) {
+				getChartReply = inner
+				break
+			}
+		}
+		if getChartReply == nil {
+			for data, inner := range data.Kawaii {
+				if strings.Contains(msg, data) {
+					getChartReply = inner
+					break
+				}
+			}
+		}
+
+		// if no data
+		if getChartReply == nil {
+			// no reply
+			return
+		}
+
 		// show data is existed.
 		getReply := getChartReply[rand.Intn(len(getChartReply))]
 		getName := setname.LoadUserNickname(strconv.FormatInt(ctx.Event.UserID, 10))

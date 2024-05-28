@@ -1,7 +1,6 @@
 package mai
 
 import (
-	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
@@ -20,6 +19,7 @@ import (
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/gg"
 	"github.com/FloatTech/imgfactory"
+	"github.com/bytedance/sonic"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"golang.org/x/image/font"
@@ -155,7 +155,7 @@ var (
 
 func HandleChunDataByUsingText(handleJson []byte) string {
 	var chunData chun
-	_ = json.Unmarshal(handleJson, &chunData)
+	_ = sonic.Unmarshal(handleJson, &chunData)
 
 	/*
 					Chun | Player: MoYoez (MoeMagicMango) | Rating: 10.442
@@ -636,7 +636,7 @@ func RequestReferSong(friendID int64, songID int64, isSD bool) LxnsMaimaiRequest
 		return LxnsMaimaiRequestUserReferBestSong{Success: false}
 	}
 	var handlerData LxnsMaimaiRequestUserReferBestSong
-	json.Unmarshal(getData, &handlerData)
+	sonic.Unmarshal(getData, &handlerData)
 	return handlerData
 }
 
@@ -655,7 +655,7 @@ func RequestReferSongIndex(friendID int64, songID int64, diff int64, isSD bool) 
 		return LxnsMaimaiRequestUserReferBestSongIndex{Success: false}
 	}
 	var handlerData LxnsMaimaiRequestUserReferBestSongIndex
-	json.Unmarshal(getData, &handlerData)
+	sonic.Unmarshal(getData, &handlerData)
 	return handlerData
 }
 

@@ -2,7 +2,6 @@ package mai
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
@@ -17,6 +16,7 @@ import (
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/gg"
 	"github.com/FloatTech/imgfactory"
+	"github.com/bytedance/sonic"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"golang.org/x/text/width"
 )
@@ -184,7 +184,7 @@ func RequestBasicDataFromLxns(qq int64) LxnsMaimaiRequestFromQQ {
 		return LxnsMaimaiRequestFromQQ{}
 	}
 	var handlerData LxnsMaimaiRequestFromQQ
-	json.Unmarshal(getData, &handlerData)
+	sonic.Unmarshal(getData, &handlerData)
 	return handlerData
 }
 
@@ -197,7 +197,7 @@ func RequestB50DataByFriendCode(friendCode int64) LxnsMaimaiRequestB50 {
 		return LxnsMaimaiRequestB50{}
 	}
 	var handlerData LxnsMaimaiRequestB50
-	json.Unmarshal(getData, &handlerData)
+	sonic.Unmarshal(getData, &handlerData)
 
 	return handlerData
 }

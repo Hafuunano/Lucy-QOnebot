@@ -1,6 +1,5 @@
 package pgr // Package pgr hosted by Phigros-Library
 import (
-	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
@@ -14,6 +13,7 @@ import (
 
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/zbputils/ctxext"
+	"github.com/bytedance/sonic"
 	"github.com/tidwall/gjson"
 
 	"github.com/FloatTech/floatbox/file"
@@ -121,7 +121,7 @@ func init() {
 				setGlobalStat = false
 				return
 			}
-			err := json.Unmarshal(phidata, &phigrosB19)
+			err := sonic.Unmarshal(phidata, &phigrosB19)
 			if !phigrosB19.Status || err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("w? 貌似出现了一些问题x, Return MSG: ", phigrosB19.Message+"| 歌曲信息缺失，请更新"))
 				setGlobalStat = false
@@ -246,7 +246,7 @@ func init() {
 				setGlobalStat = false
 				return
 			}
-			err = json.Unmarshal(phidata, &phigrosB19)
+			err = sonic.Unmarshal(phidata, &phigrosB19)
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生解析错误: \n", err))
 				setGlobalStat = false
@@ -370,7 +370,7 @@ func init() {
 			return
 		}
 		var getSongDetails QuerySongDetailsGenerator
-		err = json.Unmarshal(querySongDetailsData, &getSongDetails)
+		err = sonic.Unmarshal(querySongDetailsData, &getSongDetails)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ERR: ", err))
 			return

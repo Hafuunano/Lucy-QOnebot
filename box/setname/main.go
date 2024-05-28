@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/FloatTech/floatbox/file"
+	"github.com/bytedance/sonic"
 )
 
 // StringInArray 检查列表是否有关键词 https://github.com/Kyomotoi/go-ATRI
@@ -30,7 +31,7 @@ func StoreUserNickname(userID string, nickname string) error {
 			return err
 		}
 	}
-	_ = json.Unmarshal(data, &userNicknameData)
+	_ = sonic.Unmarshal(data, &userNicknameData)
 	userNicknameData[userID] = nickname // setdata.
 	newData, err := json.Marshal(userNicknameData)
 	if err != nil {
@@ -49,7 +50,7 @@ func LoadUserNickname(userID string) string {
 	if err != nil {
 		return "你"
 	}
-	err = json.Unmarshal(data, &d)
+	err = sonic.Unmarshal(data, &d)
 	if err != nil {
 		return "你"
 	}

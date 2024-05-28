@@ -33,6 +33,23 @@ func BreakWords(breakWords string, LimitedLength float64) string {
 	}
 }
 
+// GetStringLength
+func GetStringLength(words string) float64 {
+	var charCount = 0.0
+	var truncated string
+	for _, runeValue := range words {
+		charWidth := utf8.RuneLen(runeValue)
+		if charWidth != 3 {
+			UserFloatNum = 1.5
+		} else {
+			UserFloatNum = float64(charWidth)
+		}
+		truncated += string(runeValue)
+		charCount += UserFloatNum
+	}
+	return charCount
+}
+
 // SplitCommandTo Split Command and Adjust To.
 func SplitCommandTo(raw string, setCommandStopper int) (splitCommandLen int, splitInfo []string) {
 	rawSplit := strings.SplitN(raw, " ", setCommandStopper)

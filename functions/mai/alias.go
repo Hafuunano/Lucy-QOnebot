@@ -1,9 +1,10 @@
 package mai
 
 import (
-	"encoding/json"
-	"github.com/FloatTech/floatbox/web"
 	"os"
+
+	"github.com/FloatTech/floatbox/web"
+	"github.com/bytedance/sonic"
 )
 
 type AliasesReturnValue struct {
@@ -25,7 +26,7 @@ func QueryReferSong(Alias string, isLxnet bool) (status bool, id []int, needAcc 
 		panic(err)
 	}
 	var DataHandler AliasesReturnValue
-	json.Unmarshal(getData, &DataHandler)
+	sonic.Unmarshal(getData, &DataHandler)
 	var onloadList [][]int
 	for _, dataSearcher := range DataHandler.Aliases {
 		for _, aliasSearcher := range dataSearcher.Aliases {

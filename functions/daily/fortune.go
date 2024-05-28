@@ -1,12 +1,7 @@
 package daily
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/FloatTech/zbputils/ctxext"
-	Stringbreaker "github.com/MoYoez/Lucy-QOnebot/box/break"
-	"github.com/MoYoez/Lucy-QOnebot/box/draw"
-	"github.com/MoYoez/Lucy-QOnebot/box/emoji"
 	"image"
 	"image/color"
 	"net/http"
@@ -15,6 +10,12 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/FloatTech/zbputils/ctxext"
+	Stringbreaker "github.com/MoYoez/Lucy-QOnebot/box/break"
+	"github.com/MoYoez/Lucy-QOnebot/box/draw"
+	"github.com/MoYoez/Lucy-QOnebot/box/emoji"
+	"github.com/bytedance/sonic"
 
 	"math/rand"
 
@@ -57,7 +58,7 @@ func init() {
 	reg := regexp.MustCompile(`[^.]+`)
 	loadNotoSans := engine.DataFolder() + "NotoSansCJKsc-Regular.otf"
 	data, err := os.ReadFile(engine.DataFolder() + "tarots.json")
-	err = json.Unmarshal(data, &cardMap)
+	err = sonic.Unmarshal(data, &cardMap)
 
 	engine.OnFullMatch("今日人品").SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {

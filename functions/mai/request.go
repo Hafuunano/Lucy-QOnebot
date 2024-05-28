@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/FloatTech/floatbox/web"
+	"github.com/bytedance/sonic"
 )
 
 type DivingFishB50 struct {
@@ -146,6 +147,6 @@ func QueryDevDataFromDivingFish(qq string) DivingFishDevFullDataRecords {
 		return DivingFishDevFullDataRecords{}
 	}
 	var handlerData DivingFishDevFullDataRecords
-	json.Unmarshal(getData, &handlerData)
+	sonic.Unmarshal(getData, &handlerData)
 	return handlerData
 }

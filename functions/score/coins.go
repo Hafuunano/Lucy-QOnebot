@@ -2,7 +2,6 @@
 package score
 
 import (
-	"encoding/json"
 	"math"
 	"math/rand"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	coins "github.com/MoYoez/Lucy-QOnebot/box/coins"
+	"github.com/bytedance/sonic"
 
 	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/zbputils/control"
@@ -52,7 +52,7 @@ func init() {
 			ctx.SendChain(message.Text("ERROR:", err))
 			return false
 		}
-		err = json.Unmarshal(data, &newPartyGame)
+		err = sonic.Unmarshal(data, &newPartyGame)
 		if err != nil {
 			panic(err)
 		}

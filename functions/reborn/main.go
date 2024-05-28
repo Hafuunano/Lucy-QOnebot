@@ -2,13 +2,13 @@ package reborn
 
 import (
 	"fmt"
-	ctrl "github.com/FloatTech/zbpctrl"
-	"github.com/FloatTech/zbputils/control"
 	"math/rand"
 	"os"
 	"time"
 
-	"encoding/json"
+	ctrl "github.com/FloatTech/zbpctrl"
+	"github.com/FloatTech/zbputils/control"
+	"github.com/bytedance/sonic"
 
 	wr "github.com/mroth/weightedrand"
 	"github.com/sirupsen/logrus"
@@ -82,7 +82,7 @@ func load(area *ratego, jsonfile string) error {
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(data, area)
+	return sonic.Unmarshal(data, area)
 }
 
 func randcoun() string {

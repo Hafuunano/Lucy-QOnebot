@@ -1,12 +1,13 @@
 package pgr
 
 import (
-	"encoding/json"
-	"github.com/FloatTech/gg"
 	"image"
 	"image/color"
 	"math"
 	"strconv"
+
+	"github.com/FloatTech/gg"
+	"github.com/bytedance/sonic"
 )
 
 var (
@@ -69,7 +70,7 @@ func CardRender(canvas *gg.Context, dataOrigin []byte) *gg.Context {
 	var isRight = false
 	var i, renderPath int
 	// background render path.
-	_ = json.Unmarshal(dataOrigin, &phigrosB19)
+	_ = sonic.Unmarshal(dataOrigin, &phigrosB19)
 	i = 0
 	renderPath = 0
 	isPhi := phigrosB19.Content.Phi
