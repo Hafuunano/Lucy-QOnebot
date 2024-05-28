@@ -55,16 +55,23 @@ func init() {
 				msg = strings.ReplaceAll(msg, data, "")
 			}
 		} // on ticket saver.
-
-		for data, inner := range data.Proud {
-			if strings.Contains(msg, data) {
+		for dataReply, inner := range data.Proud {
+			if msg == dataReply {
+				getChartReply = inner
+				break
+			}
+			if strings.Contains(msg, dataReply) && breaker.GetStringLength(dataReply)/breaker.GetStringLength(msg) > 0.45 {
 				getChartReply = inner
 				break
 			}
 		}
 		if getChartReply == nil {
-			for data, inner := range data.Kawaii {
-				if strings.Contains(msg, data) {
+			for dataReply, inner := range data.Kawaii {
+				if msg == dataReply {
+					getChartReply = inner
+					break
+				}
+				if strings.Contains(msg, dataReply) && breaker.GetStringLength(dataReply)/breaker.GetStringLength(msg) > 0.45 {
 					getChartReply = inner
 					break
 				}

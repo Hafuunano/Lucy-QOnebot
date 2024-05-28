@@ -51,6 +51,7 @@ func init() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		
 		ctx.CallAction("reload_event_filter", zero.Params{"file": "filter.json"})
 		ctx.SendChain(message.Text("执行完毕~"))
 	})

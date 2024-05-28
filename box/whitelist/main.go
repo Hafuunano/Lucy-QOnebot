@@ -6,6 +6,12 @@ import (
 	"github.com/bytedance/sonic"
 )
 
+var WhiteListMap []int64
+
+func init() {
+	WhiteListMap = make([]int64, 0)
+}
+
 type Whitelist struct {
 	Or []struct {
 		GroupId struct {
@@ -24,4 +30,8 @@ func WhiteListHandler() []int64 {
 	var data Whitelist
 	sonic.Unmarshal(loader, &data)
 	return data.Or[0].GroupId.In
+}
+
+func WhiteListUpdater() {
+	WhiteListMap = WhiteListHandler()
 }

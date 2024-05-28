@@ -3,6 +3,7 @@ package main
 
 import (
 	"github.com/MoYoez/Lucy-QOnebot/box/whitelist"
+	"strconv"
 	"time"
 
 	"github.com/MoYoez/Lucy-QOnebot/box/notify"
@@ -34,25 +35,23 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
-var WhiteListMap []int64
-
 func init() {
 	// 解析命令行参数
 	err := godotenv.Load()
 	if err != nil {
 		panic(err)
 	}
-	WhiteListMap = make([]int64, 0)
-	WhiteListMap = whitelist.WhiteListHandler()
+	whitelist.WhiteListMap = whitelist.WhiteListHandler()
 }
 
 func main() {
 	zero.OnMessage().SetBlock(false).Handle(func(ctx *zero.Ctx) {
 		var newGroup int64
 		newGroup = 0
-		for _, data := range WhiteListMap {
+		for _, data := range whitelist.WhiteListMap {
 			if data == ctx.Event.GroupID {
 				newGroup = data
+				break
 			}
 		}
 		if newGroup == 0 {
@@ -63,6 +62,15 @@ func main() {
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(message.Text(notify.Banner))
 		})
+	// test key
+	zero.OnFullMatch("testkey", zero.SuperUserPermission, zero.OnlyToMe).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		var newText string
+		for _, groups := range whitelist.WhiteListMap {
+			newText += strconv.FormatInt(groups, 10) + "\n"
+		}
+		ctx.SendChain(message.Text("test key is ok:\nGroups: " + newText))
+	})
+
 	zero.RunAndBlock(&zero.Config{
 		NickName:       append([]string{"Lucy"}),
 		CommandPrefix:  "/",
