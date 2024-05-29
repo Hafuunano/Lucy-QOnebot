@@ -47,7 +47,6 @@ func init() {
 func main() {
 	zero.OnMessage().SetBlock(false).Handle(func(ctx *zero.Ctx) {
 		var newGroup int64
-		newGroup = 0
 		for _, data := range whitelist.WhiteListMap {
 			if data == ctx.Event.GroupID {
 				newGroup = data
@@ -57,6 +56,7 @@ func main() {
 		if newGroup == 0 {
 			ctx.Block()
 		}
+		newGroup = 0
 	})
 	zero.OnFullMatchGroup([]string{".help", "/help"}).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {

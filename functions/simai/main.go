@@ -65,7 +65,8 @@ func init() {
 				break
 			}
 		}
-		if getChartReply == nil {
+
+		if len(getChartReply) == 0 {
 			for dataReply, inner := range data.Kawaii {
 				if msg == dataReply {
 					getChartReply = inner
@@ -77,9 +78,8 @@ func init() {
 				}
 			}
 		}
-
 		// if no data
-		if getChartReply == nil {
+		if len(getChartReply) == 0 {
 			// no reply
 			return
 		}
