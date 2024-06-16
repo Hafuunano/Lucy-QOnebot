@@ -228,7 +228,10 @@ func FullPageRender(data player, ctx *zero.Ctx) (raw image.Image, stat bool) {
 		if err != nil {
 			return
 		}
-		avatarByteUni, _, _ := image.Decode(avatarByte.Body)
+		avatarByteUni, _, err := image.Decode(avatarByte.Body)
+		if err != nil {
+			return
+		}
 		avatarFormat := imgfactory.Size(avatarByteUni, 180, 180)
 		getAvatarFormat = gg.NewContext(180, 180)
 		getAvatarFormat.DrawRoundedRectangle(0, 0, 178, 178, 20)
@@ -460,7 +463,21 @@ func GetCover(id string) (image.Image, error) {
 		downloadURL := "https://www.diving-fish.com/covers/" + fileName
 		cover, err := downloadImage(downloadURL)
 		if err != nil {
-			return LoadPictureWithResize(defaultCoverLink, 90, 90), nil
+			// try with lxns service
+			getConvert, _ := strconv.Atoi(id)
+			switch {
+			case getConvert >= 11000:
+				id = id[1:]
+			}
+			if getConvert > 10000 && getConvert < 11000 {
+				id = id[2:]
+			}
+			downloadFromLxns := "https://lx-rec-reproxy.lemonkoi.one/maimai/jacket/" + id + ".png"
+			coverNewer, err := downloadImage(downloadFromLxns)
+			if err != nil {
+				return LoadPictureWithResize(defaultCoverLink, 90, 90), nil
+			}
+			cover = coverNewer
 		}
 		saveImage(cover, filePath)
 	}
@@ -471,7 +488,7 @@ func GetCover(id string) (image.Image, error) {
 	defer func(imageFile *os.File) {
 		err := imageFile.Close()
 		if err != nil {
-			panic(err)
+			return
 		}
 	}(imageFile)
 	img, _, err := image.Decode(imageFile)
@@ -515,7 +532,12 @@ func LoadComboImage(imageName string) image.Image {
 
 // LoadSyncImage Load sync images
 func LoadSyncImage(imageName string) image.Image {
-	link := loadMaiPic + "sync_" + imageName + ".png"
+	var link string
+	if imageName == "sync" {
+		link = loadMaiPic + "sync_fs.png"
+	} else {
+		link = loadMaiPic + "sync_" + imageName + ".png"
+	}
 	return LoadPictureWithResize(link, 60, 40)
 }
 

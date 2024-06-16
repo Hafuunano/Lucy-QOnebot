@@ -48,8 +48,8 @@ func init() {
 		if breaker.GetStringLength(msg) > 50 {
 			return
 		}
+		msg = strings.ReplaceAll(msg, " ", "")
 		getList := onMakeRegex.FindAllString(msg, -1)
-
 		if len(getList) >= 1 {
 			for _, data := range getList {
 				msg = strings.ReplaceAll(msg, data, "")
@@ -60,7 +60,7 @@ func init() {
 				getChartReply = inner
 				break
 			}
-			if strings.Contains(msg, dataReply) && breaker.GetStringLength(dataReply)/breaker.GetStringLength(msg) > 0.45 {
+			if strings.Contains(msg, dataReply) && breaker.GetStringLength(dataReply)/breaker.GetStringLength(msg) > 0.5 {
 				getChartReply = inner
 				break
 			}
@@ -72,7 +72,7 @@ func init() {
 					getChartReply = inner
 					break
 				}
-				if strings.Contains(msg, dataReply) && breaker.GetStringLength(dataReply)/breaker.GetStringLength(msg) > 0.45 {
+				if strings.Contains(msg, dataReply) && breaker.GetStringLength(dataReply)/breaker.GetStringLength(msg) > 0.5 {
 					getChartReply = inner
 					break
 				}

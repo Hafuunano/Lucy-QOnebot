@@ -101,7 +101,11 @@ func init() {
 						ctx.SendChain(message.Text("获取不到头像( "))
 						return
 					}
-					avatarByteUni, _, _ := image.Decode(avatarByte.Body)
+					avatarByteUni, _, err := image.Decode(avatarByte.Body)
+					if err != nil {
+						ctx.SendChain(message.Text("头像获取错误，/ 请重新尝试w"))
+						return
+					}
 					avatarFormat = imgfactory.Size(avatarByteUni, 100, 100)
 				}()
 				var getBackGroundMainColorR, getBackGroundMainColorG, getBackGroundMainColorB, mainContextWidth, mainContextHight int
