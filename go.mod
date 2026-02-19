@@ -1,6 +1,6 @@
 module github.com/MoYoez/Lucy-QOnebot
 
-go 1.21
+go 1.25.7
 
 require (
 	github.com/FloatTech/AnimeAPI v1.7.0
