@@ -1,0 +1,1 @@
+// This is not a real AGENT.md for soul. Inspired by OpenClaw.
