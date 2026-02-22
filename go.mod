@@ -4,7 +4,7 @@ go 1.25.7
 
 require (
 	github.com/Hafuunano/Core-SkillAction v0.0.0-20260222211453-7343afa8b9ea
-	github.com/Hafuunano/Plugin-Collections v0.0.0-20260222211532-18f0992e2618
+	github.com/Hafuunano/Plugin-Collections v0.0.0-20260222212215-7fb0e582de2b
 	github.com/Hafuunano/Protocol-ConvertTool v0.0.0-20260222204501-a2f66c9ce18c
 	github.com/joho/godotenv v1.5.1
 	github.com/wdvxdr1123/ZeroBot v1.8.2

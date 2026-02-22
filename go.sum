@@ -4,6 +4,8 @@ github.com/Hafuunano/Core-SkillAction v0.0.0-20260222211453-7343afa8b9ea h1:3Ofz
 github.com/Hafuunano/Core-SkillAction v0.0.0-20260222211453-7343afa8b9ea/go.mod h1:uPTfERPFcDCGuOCzMbL7KRq7hrM1Lc40+0gWtwYC5I0=
 github.com/Hafuunano/Plugin-Collections v0.0.0-20260222211532-18f0992e2618 h1:mCdaBXh4J6SyrFsE1ou68rh3gRCaRw5IF5ahOH8k49w=
 github.com/Hafuunano/Plugin-Collections v0.0.0-20260222211532-18f0992e2618/go.mod h1:jSk+R6H6UhhNrhZJQbmpnNoIFF02WII/wsaXq1HkoMk=
+github.com/Hafuunano/Plugin-Collections v0.0.0-20260222212215-7fb0e582de2b h1:frvM4xYDe+BiM8EvT8t+guvyoVMoAIGOOY6SXTcrMdQ=
+github.com/Hafuunano/Plugin-Collections v0.0.0-20260222212215-7fb0e582de2b/go.mod h1:jSk+R6H6UhhNrhZJQbmpnNoIFF02WII/wsaXq1HkoMk=
 github.com/Hafuunano/Protocol-ConvertTool v0.0.0-20260222204501-a2f66c9ce18c h1:/es8BzWezCYNJb6XJn5Tg/iXkVuQ5gUp+vjtSr4FudE=
 github.com/Hafuunano/Protocol-ConvertTool v0.0.0-20260222204501-a2f66c9ce18c/go.mod h1:VcFUUhqlZmR+zcpzBtqMxNpOoSTMWtp32oc+rFEbzDM=
 github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7 h1:S/ferNiehVjNaBMNNBxUjLtVmP/YWD6Yh79RfPv4ehU=
