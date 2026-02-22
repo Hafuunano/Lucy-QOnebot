@@ -3,14 +3,21 @@ module github.com/HafuuNano/Lucy-QOnebot
 go 1.25.7
 
 require (
-	github.com/Hafuunano/Plugin-Collections v0.0.0-20260222192730-f929bb407b2e
-	github.com/Hafuunano/Protocol-ConvertTool v0.0.0-20260222192558-f0c62f1bac96
+	github.com/Hafuunano/Core-SkillAction v0.0.0-20260222205839-60d11283c52b
+	github.com/Hafuunano/Plugin-Collections v0.0.0-20260222210031-22e2c8c1541c
+	github.com/Hafuunano/Protocol-ConvertTool v0.0.0-20260222204501-a2f66c9ce18c
+	github.com/joho/godotenv v1.5.1
 	github.com/wdvxdr1123/ZeroBot v1.8.2
 )
 
+// replace (
+// 	github.com/Hafuunano/Core-SkillAction => ../Core-SkillAction
+// 	github.com/Hafuunano/Plugin-Collections => ../Plugin-Collections
+// 	github.com/Hafuunano/Protocol-ConvertTool => ../Protocol-ConvertTool
+// )
+
 require (
 	github.com/FloatTech/ttl v0.0.0-20250224045156-012b1463287d // indirect
-	github.com/Hafuunano/Core-SkillAction v0.0.0-20260222192517-76b7787fe50a // indirect
 	github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7 // indirect
 	github.com/RomiChan/websocket v1.4.3-0.20251002072000-d3eb41798438 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
