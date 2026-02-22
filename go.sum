@@ -2,6 +2,11 @@ github.com/FloatTech/ttl v0.0.0-20250224045156-012b1463287d h1:mUQ/c3wXKsUGa4Sg9
 github.com/FloatTech/ttl v0.0.0-20250224045156-012b1463287d/go.mod h1:fHZFWGquNXuHttu9dUYoKuNbm3dzLETnIOnm1muSfDs=
 github.com/Hafuunano/Core-SkillAction v0.0.0-20260222154012-68dd52018668 h1:0bUIP720jGqcb808ZQfE0IgaMWzrtQZn3mLYgiW9JbI=
 github.com/Hafuunano/Core-SkillAction v0.0.0-20260222154012-68dd52018668/go.mod h1:uPTfERPFcDCGuOCzMbL7KRq7hrM1Lc40+0gWtwYC5I0=
+github.com/Hafuunano/Plugin-Collections v0.0.0-20260222161915-b94ad3ec5135/go.mod h1:hTdolx0+hovB7+0FB/YH0568kcEyIM18xZgp80tG180=
+github.com/Hafuunano/Plugin-Collections v0.0.0-20260222181605-acb3742621f2 h1:v2pWOYT3Dm0anmG9N+PD4u95eoxXaQ+qnTA8CW9aNn0=
+github.com/Hafuunano/Plugin-Collections v0.0.0-20260222181605-acb3742621f2/go.mod h1:OzZz9FNfRCLHY4+lL9nzR+l0qOxYo6Ml5iFhc6Sy6Sk=
+github.com/Hafuunano/Protocol-ConvertTool v0.0.0-20260222175731-969ec87059d1 h1:6xrUBryHXGToaKtPUPVEtYg6IchosxlvC2/FNkSZ8FQ=
+github.com/Hafuunano/Protocol-ConvertTool v0.0.0-20260222175731-969ec87059d1/go.mod h1:RopqMcv3u/o+ZUxhrGEMar1eKP61Pyz35PsaxU6lvXw=
 github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7 h1:S/ferNiehVjNaBMNNBxUjLtVmP/YWD6Yh79RfPv4ehU=
 github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7/go.mod h1:vD7Ra3Q9onRtojoY5sMCLQ7JBgjUsrXDnDKyFxqpf9w=
 github.com/RomiChan/websocket v1.4.3-0.20251002072000-d3eb41798438 h1:I0bdwHZ+2DY45b39xPoTD2u+Z8zhvBuu9aZfjMZeiZM=

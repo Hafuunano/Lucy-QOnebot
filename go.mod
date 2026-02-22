@@ -3,8 +3,8 @@ module github.com/HafuuNano/Lucy-QOnebot
 go 1.25.7
 
 require (
-	github.com/Hafuunano/Plugin-Collections v0.0.0-20260222161915-b94ad3ec5135
-	github.com/Hafuunano/Protocol-ConvertTool v0.0.0-20260222170558-d968a518d9aa
+	github.com/Hafuunano/Plugin-Collections v0.0.0-20260222181605-acb3742621f2
+	github.com/Hafuunano/Protocol-ConvertTool v0.0.0-20260222175731-969ec87059d1
 	github.com/wdvxdr1123/ZeroBot v1.8.2
 )
 
@@ -22,7 +22,6 @@ require (
 	golang.org/x/sys v0.22.0 // indirect
 )
 
-// Use local Protocol-ConvertTool during development (registry.go).
-replace github.com/Hafuunano/Protocol-ConvertTool => ../Protocol-ConvertTool
 
 replace github.com/Hafuunano/Plugin-Collections => ../Plugin-Collections
+replace github.com/Hafuunano/Protocol-ConvertTool => ../Protocol-ConvertTool
