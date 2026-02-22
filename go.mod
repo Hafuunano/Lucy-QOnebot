@@ -3,14 +3,14 @@ module github.com/HafuuNano/Lucy-QOnebot
 go 1.25.7
 
 require (
-	github.com/Hafuunano/Plugin-Collections v0.0.0-20260222181605-acb3742621f2
-	github.com/Hafuunano/Protocol-ConvertTool v0.0.0-20260222175731-969ec87059d1
+	github.com/Hafuunano/Plugin-Collections v0.0.0-20260222192730-f929bb407b2e
+	github.com/Hafuunano/Protocol-ConvertTool v0.0.0-20260222192558-f0c62f1bac96
 	github.com/wdvxdr1123/ZeroBot v1.8.2
 )
 
 require (
 	github.com/FloatTech/ttl v0.0.0-20250224045156-012b1463287d // indirect
-	github.com/Hafuunano/Core-SkillAction v0.0.0-20260222154012-68dd52018668 // indirect
+	github.com/Hafuunano/Core-SkillAction v0.0.0-20260222192517-76b7787fe50a // indirect
 	github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7 // indirect
 	github.com/RomiChan/websocket v1.4.3-0.20251002072000-d3eb41798438 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -36,4 +36,3 @@ require (
 	modernc.org/memory v1.8.0 // indirect
 	modernc.org/sqlite v1.23.1 // indirect
 )
-
