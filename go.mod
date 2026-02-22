@@ -4,7 +4,7 @@ go 1.25.7
 
 require (
 	github.com/Hafuunano/Plugin-Collections v0.0.0-20260222161915-b94ad3ec5135
-	github.com/Hafuunano/Protocol-ConvertTool v0.0.0-20260222152445-7f82a9880185
+	github.com/Hafuunano/Protocol-ConvertTool v0.0.0-20260222170558-d968a518d9aa
 	github.com/wdvxdr1123/ZeroBot v1.8.2
 )
 
@@ -24,3 +24,5 @@ require (
 
 // Use local Protocol-ConvertTool during development (registry.go).
 replace github.com/Hafuunano/Protocol-ConvertTool => ../Protocol-ConvertTool
+
+replace github.com/Hafuunano/Plugin-Collections => ../Plugin-Collections
