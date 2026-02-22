@@ -9,3 +9,5 @@ nohup.out
 zerobot
 .env
 data/*
+
+PERSONA.md

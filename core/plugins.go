@@ -2,6 +2,7 @@
 package core
 
 import (
+	_ "github.com/Hafuunano/Plugin-Collections/plugins/plugin-agent"
 	_ "github.com/Hafuunano/Plugin-Collections/plugins/plugin-order-card"
 	_ "github.com/Hafuunano/Plugin-Collections/plugins/plugin-poke"
 )
